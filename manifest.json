@@ -1,0 +1,23 @@
+[
+  {
+    "name": "Drift for Spotify",
+    "description": "An endless personal wave that learns from your likes, skips and dislikes and almost never repeats a song.",
+    "preview": "preview.png",
+    "main": "drift.js",
+    "readme": "README.md",
+    "version": "1.0",
+    "authors": [
+      {
+        "name": "mayl0o",
+        "url": "https://github.com/mayl0o"
+      }
+    ],
+    "tags": [
+      "radio",
+      "discovery",
+      "recommendations",
+      "queue",
+      "autoplay"
+    ]
+  }
+]

@@ -82,4 +82,4 @@ Spotify обновился и Drift пропал — выполни `spicetify b
 Инструкция со скриншотами: [Telegraph](https://telegra.ph/Kak-ustanovit-Drift-for-Spotify-11-02) · [Условия и конфиденциальность](https://telegra.ph/Drift-for-Spotify--usloviya-i-konfidencialnost-11-02)
 
 ---
-Spotify is a trademark of Spotify AB. Drift is not affiliated with Spotify. © 2026 bayok — see [LICENSE](LICENSE).
+Spotify is a trademark of Spotify AB. Drift is not affiliated with Spotify. © 2026 Afrikashki tut — see [LICENSE](LICENSE).

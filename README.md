@@ -18,20 +18,6 @@ A [Spicetify](https://spicetify.app) extension. Press one button — Drift keeps
 - **Three characters:** *Favorites* (what you already love), *Discover* (new artists close to your taste), *Popular*.
 - **Doesn't fight Spotify.** Drift adds one track at a time to the regular queue — Back, Like and your own "Add to queue" all work as usual.
 
-### Free vs Pro
-
-| | Free | Pro |
-|---|:---:|:---:|
-| Endless wave, three characters | ✅ | ✅ |
-| Learns from likes and skips | ✅ | ✅ |
-| Remembers what it played | ~200 songs | ~2000 songs |
-| Mood, language, activity, genre filters | — | ✅ |
-| Instant reaction to a like (similar tracks right next) | — | ✅ |
-| Remembers dislikes and repeatedly skipped artists | — | ✅ |
-| Drift from any artist or playlist | — | ✅ |
-| Saved waves | — | ✅ |
-| Monthly recap | — | ✅ |
-
 **Try Pro free for 7 days:** [@Spotify_drift_bot](https://t.me/Spotify_drift_bot?start=trial) · Subscription: [Boosty](https://boosty.to/meenbeens)
 
 ### Install

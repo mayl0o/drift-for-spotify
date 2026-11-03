@@ -53,6 +53,7 @@ Just want to say thanks? [☕ Support the author](https://boosty.to/meenbeens)
 ### Privacy
 Free Drift has no server and no account. Besides Spotify itself it only downloads two public files from GitHub: a list of AI-generated artists to skip ([soul-over-ai](https://github.com/xoundbyte/soul-over-ai)) and, once a day, this repository's `manifest.json` to see if there's a new version. Nothing about you is sent.
 Everything it learns (likes, skips, history) stays in your Spotify on your computer.
+The code is readable — open [`drift.js`](drift.js) and see how the wave works. You can read and install it freely; please don't redistribute modified copies ([LICENSE](LICENSE)).
 
 ### Help
 Something wrong or have an idea — write to [@Spotify_drift_bot](https://t.me/Spotify_drift_bot) or open an issue.
@@ -104,6 +105,7 @@ Spotify обновился и Drift пропал — выполни `spicetify b
 ### Приватность
 У бесплатного Drift нет сервера и аккаунта. Кроме самого Spotify он скачивает только два открытых файла с GitHub: список ИИ-артистов, которых волна пропускает ([soul-over-ai](https://github.com/xoundbyte/soul-over-ai)), и раз в сутки `manifest.json` этого репозитория — проверить новую версию. О тебе ничего не отправляется.
 Всё, что он узнаёт (лайки, скипы, история), остаётся в твоём Spotify на твоём компьютере.
+Код открыт для чтения — загляни в [`drift.js`](drift.js) и посмотри, как устроена волна. Читать и ставить можно свободно; распространять изменённые копии — нет ([LICENSE](LICENSE)).
 
 ### Помощь
 Что-то не так или есть идея — пиши в [@Spotify_drift_bot](https://t.me/Spotify_drift_bot) или открой issue.

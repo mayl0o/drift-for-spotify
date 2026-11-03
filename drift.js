@@ -1,2 +1,3428 @@
-// Drift for Spotify 1.0 (Free) — © bayok. Pro: https://t.me/Spotify_drift_bot
-!function t(){"use strict";const e="1.0",n="[Волна]",r="",i="",a="free",o="https://boosty.to/meenbeens",s="https://t.me/Spotify_drift_bot?start=trial",c="https://raw.githubusercontent.com/mayl0o/drift-for-spotify/main/manifest.json",l="https://github.com/mayl0o/drift-for-spotify",u=[];function f(t,e){const r=`${(new Date).toLocaleTimeString()}  ${t}`+(void 0!==e?`  ${function(t){try{return"string"==typeof t?t:JSON.stringify(t)}catch{return String(t)}}(e)}`:"");u.push(r),u.length>400&&u.shift(),console.log(n,t,e??"")}if(!(window.Spicetify&&Spicetify.Platform&&Spicetify.Platform.PlayerAPI&&Spicetify.Player&&Spicetify.Menu&&Spicetify.PopupModal&&Spicetify.showNotification&&Spicetify.LocalStorage&&Spicetify.GraphQL&&Spicetify.GraphQL.Definitions))return(t.tries=(t.tries||0)+1)>300?void console.error(n,"Spicetify не инициализировался"):void setTimeout(t,200);const d={settings:"volna:settings:v3",oldSettings:"volna:settings:v2",profile:"volna:profile:v6",banned:"volna:bannedTracks:v2",affinity:"volna:affinity:v2",aiList:"volna:aiArtists:v1",aiTs:"volna:aiArtistsTs:v1",tagPrefix:"volna:tag:v5:",artistHist:"volna:artistHist:v1",artistLast:"volna:artistLast:v1",trackHist:"volna:trackHist:v1",playNo:"volna:playNo:v1",artists:"volna:artists:v1",lyrics:"volna:lyrics:v1",lastPool:"volna:lastPool:v1",remoteCfg:"volna:remoteCfg:v1",waveLikes:"volna:waveLikes:v1",skipHist:"volna:skipHist:v1",quickSkips:"volna:quickSkips:v1",dislikes:"volna:dislikes:v1",dislikeNear:"volna:dislikeNear:v1",installId:"volna:installId:v1",stats:"volna:stats:v1",discovered:"volna:discovered:v1",presets:"volna:presets:v1",proWas:"volna:proWas:v1",trialRemind:"volna:trialRemind:v1",recapSeen:"volna:recapSeen:v1",recapHide:"volna:recapHide:v1",updateSeen:"volna:updateSeen:v1",updateAt:"volna:updateAt:v1"};function p(t){try{return Spicetify.LocalStorage.get(t)}catch{return null}}function h(t,e){for(let n=0;n<3;n++)try{return Spicetify.LocalStorage.set(t,e),!0}catch(e){if(n<2&&/quota/i.test(String(e))){k(n+1,t);continue}return f("Не сохранилось "+t,String(e)),!1}return!1}const g=9e5;function m(){try{return Object.keys(localStorage).filter((t=>t.startsWith("volna:")))}catch{return[]}}function y(){const t=new Set(Object.values(d));let e=0;for(const n of m())if(!t.has(n)&&!n.startsWith(d.tagPrefix))try{e+=(localStorage.getItem(n)||"").length,localStorage.removeItem(n)}catch{}w(g),e&&f("Память: удалены старые данные",{КБ:Math.round(e/1024)})}function w(t,e){const n=m().filter((t=>t.startsWith(d.tagPrefix))).map((t=>{const e=localStorage.getItem(t)||"",n=/"ts":(\d+)/.exec(e.slice(0,40));return{k:t,n:e.length,ts:n?+n[1]:0}})).sort(((t,e)=>t.ts-e.ts));let r=n.reduce(((t,e)=>t+e.n),0);for(const i of n){if(r<=t)break;if(!e||!e.has(i.k))try{localStorage.removeItem(i.k),r-=i.n}catch{}}}function k(t,e){try{y();const n=new Set(Q().map((t=>d.tagPrefix+t)));if(w(t>=2?0:g/3,t>=2?null:n),t>=2)for(const t of[d.lastPool,d.lyrics,d.artists])if(t!==e)try{localStorage.removeItem(t)}catch{}f("Память: освобождено место",{шаг:t,для:e})}catch{}}function v(){let t=0,e=0;try{for(const n of Object.keys(localStorage)){const r=n.length+(localStorage.getItem(n)||"").length;t+=r,n.startsWith("volna:")&&(e+=r)}}catch{}return{всегоКБ:Math.round(t/1024),волнаКБ:Math.round(e/1024),лимитКБ:5120}}const b=new Map;let S=0;function x(t,e){b.set(t,e),S||(S=setTimeout(P,5e3))}function P(){S=0;for(const t of b.values())try{t()}catch{}b.clear()}const N=(()=>{try{return/^ru/i.test(Spicetify.Locale?.getLocale?.()||navigator.language||"")}catch{return!0}})(),M=(t,e)=>N?t:e,A=[["favorite",M("Любимое","Favorites")],["unfamiliar",M("Незнакомое","Discover")],["popular",M("Популярное","Popular")]],E=[["energetic",M("Бодрое","Energetic")],["happy",M("Весёлое","Happy")],["calm",M("Спокойное","Calm")],["sad",M("Грустное","Sad")]],D=[["ru",M("Русский","Russian")],["foreign",M("Иностранный","Non-Russian")],["instrumental",M("Без слов","Instrumental")]],U=[["wakeup",M("Просыпаюсь","Waking up")],["work",M("Работаю","Working")],["workout",M("Тренируюсь","Workout")],["road",M("В дороге","On the road")],["sleep",M("Засыпаю","Falling asleep")]],O=[["rap",M("Рэп","Rap")],["phonk",M("Фонк","Phonk")],["rock",M("Рок","Rock")],["pop",M("Поп","Pop")],["electronic",M("Электроника","Electronic")],["lofi","Lo-fi"],["indie",M("Инди","Indie")],["metal",M("Метал","Metal")]],C={character:"",mood:"",language:"",activity:"",genre:"",blockAI:!0,explicitFilter:!1,dislikeBanMin:180};const L=["mood","language","activity","genre"];let T=null;function I(){h(d.settings,JSON.stringify(T?{...B,...T}:B))}const j=[[["language","instrumental"],["genre","rap"]],[["language","instrumental"],["genre","pop"]],[["mood","energetic"],["activity","sleep"]],[["mood","calm"],["activity","workout"]]];function z(t,e){for(const[n,r]of j){if(n[0]===t&&n[1]===e&&B[r[0]]===r[1])return r;if(r[0]===t&&r[1]===e&&B[n[0]]===n[1])return n}return null}function q(){for(const[t,e]of j)B[t[0]]===t[1]&&B[e[0]]===e[1]&&(B[t[0]]="");N||"ru"!==B.language&&"foreign"!==B.language||(B.language="")}let B=function(){try{const t=p(d.settings);if(t)return{...C,...JSON.parse(t)}}catch{}const t={...C};try{const e=JSON.parse(p(d.oldSettings)||"null");e&&(t.character={familiar:"favorite",discover:"unfamiliar"}[e.character]||"",t.language={ru:"ru",en:"foreign",nonru:"foreign"}[e.language]||"",t.blockAI=!1!==e.blockAI,t.explicitFilter=!!e.explicitFilter)}catch{}return t}();q();const R={},J={},H={},$={},W=(t,e)=>(t||[]).map((t=>t.replace(/\{(\w)\}/g,((t,n)=>e[n]||""))));function _(){const t=[],e=[];B.genre&&t.push("genre:"+B.genre),"instrumental"===B.language&&t.push("lang:instrumental"),B.mood&&e.push("mood:"+B.mood),B.activity&&e.push("act:"+B.activity);const n=[];return B.genre&&n.push(...e.map((t=>"combo:"+t+"|"+B.genre))),"instrumental"===B.language&&n.push(...e.map((t=>"combo:"+t+"|instrumental"))),t.length?B.genre?{hard:t,soft:e,combo:n}:{hard:[...t,...e],soft:[],combo:n}:{hard:e,soft:[],combo:n}}function Q(){const t=_();return[...t.hard,...t.soft,...t.combo]}function G(t,e){const n=t.find((t=>t[0]===e));return n?n[1]:e}function F(t){const e=[];B.activity&&e.push(G(U,B.activity)),B.character&&e.push(G(A,B.character)),B.mood&&e.push(G(E,B.mood)),B.language&&e.push(G(D,B.language)),B.genre&&e.push(G(O,B.genre));return"Drift for Spotify"+(Y&&!t?M(` по «${Y.name||"…"}»`,` from “${Y.name||"…"}”`):"")+(e.length?" · "+e.join(" · "):"")}let Y=null;const K=t=>(t||"").split(":").pop(),V=t=>/[Ѐ-ӿ]/.test(t||""),X=new Map;function Z(t){if(!t||!t.artistUri)return;const e=X.get(t.artistUri)||{cyr:0,total:0};e.total++,(V(t.name)||V(t.artistName))&&e.cyr++,X.set(t.artistUri,e)}const tt=new Set;function et(t){if(V(t.name)||V(t.artistName))return!0;return(t.artistUris&&t.artistUris.length?t.artistUris:t.artistUri?[t.artistUri]:[]).some((t=>(X.get(t)?.cyr||0)>0))}function nt(t,e){if(!t||!t.length||e<=0)return[];const n=t.slice();for(let t=n.length-1;t>0;t--){const e=Math.random()*(t+1)|0;[n[t],n[e]]=[n[e],n[t]]}return n.slice(0,e)}function rt(t,e,n){const r=t.map((t=>({x:t,w:Math.max(.05,n(t))}))),i=[];for(;i.length<e&&r.length;){const t=r.reduce(((t,e)=>t+e.w),0);let e=Math.random()*t,n=0;for(;n<r.length-1&&(e-=r[n].w,!(e<=0));n++);i.push(r[n].x),r.splice(n,1)}return i}function it(t,e,n){if(n=n||new Set,!t)return n;if("string"==typeof t)return t.startsWith(`spotify:${e}:`)&&n.add(t),n;if(Array.isArray(t)){for(const r of t)it(r,e,n);return n}if("object"==typeof t)for(const r in t)it(t[r],e,n);return n}const at={queryArtistRelated:"3d031d6cb22a2aa7c8d203d49b49df731f58b1e2799cc38d9876d58771aa66f3",internalLinkRecommenderTrack:"c77098ee9d6ee8ad3eb844938722db60570d040b49f41f5ec6e7be9160a7c86b",searchTracks:"b02683192a98dde7966b5e6655a79eeb62713eab703eda9902c932818dd52751",searchPlaylists:"d520014e748f9ea44f7707d8df1819867ac1205e8b7f3e28f22fe5fc858921b1",queryArtistOverview:"9f8134ef565e78621f1e1793555bd6633c5ac144ae0f89604ed3ae3f80b3c8e6",userTopContent:"61b7353d3625780022dbc63d459eb64cd609e7e5e2a820f9160d65030efe2e15"},ot={ok:!1,at:0,reason:"",until:0,trial:!1,triedAt:0,top:null},st=new Set;function ct(t){if(!t||"object"!=typeof t)return;if(t.hashes)for(const[e,n]of Object.entries(t.hashes))"string"==typeof n&&/^[0-9a-f]{64}$/.test(n)&&at[e]!==n&&(at[e]=n,st.has(e)&&(delete Spicetify.GraphQL.Definitions[e],st.delete(e)));if(t.tagQueries)for(const[e,n]of Object.entries(t.tagQueries))Array.isArray(n)&&n.length&&(R[e]=n.map(String));t.latest&&"string"==typeof t.latest.version&&Ei(t.latest.version,t.latest.note);const e=t=>Array.isArray(t)&&t.length&&t.every((t=>Array.isArray(t)&&2===t.length));for(const[n,r]of[["moodWords",J],["genreWords",H]])if(t[n])for(const[i,a]of Object.entries(t[n]))e(a)&&(r[i]=a.map((([t,e])=>[String(t),String(e)])));if(t.queryTemplates&&"object"==typeof t.queryTemplates)for(const[e,n]of Object.entries(t.queryTemplates))Array.isArray(n)&&n.length&&($[e]=n.map(String))}function lt(){return!1}let ut="";async function ft(){if(ut)return ut;try{const t=await Spicetify.Platform.UserAPI.getUser();if(!t||!t.username)return"";const e=await crypto.subtle.digest("SHA-256",(new TextEncoder).encode("spotify-drift:"+t.username));ut=[...new Uint8Array(e)].map((t=>t.toString(16).padStart(2,"0"))).join("")}catch{}return ut}function dt(){let t=p(d.installId);return t||(t=Math.random().toString(36).slice(2,10)+Date.now().toString(36),h(d.installId,t)),t}let pt=!1,ht=!1;async function gt(t){try{await async function(t){return void 0;if(!t&&Date.now()-ot.triedAt<9e5)return;ot.triedAt=Date.now();try{const t=await fetch("?v="+encodeURIComponent(e),{method:"GET",headers:{"X-Drift-Key":r||"","X-Drift-Install":dt(),"X-Drift-Acct":await ft(),"X-Drift-Stats":Ye()}}),n=await t.json().catch((()=>null));if(n&&n.ok&&n.cfg)ct(n.cfg),ot.ok=!0,ot.at=Date.now(),ot.reason="",ot.until=Date.parse(n.expiresAt||"")||0,ot.trial=!!n.trial,ot.top=n.top&&"object"==typeof n.top?n.top:null,h(d.remoteCfg,JSON.stringify({at:ot.at,cfg:n.cfg,until:n.expiresAt||null,trial:ot.trial,top:ot.top})),f("Настройки с сервера получены",{до:n.expiresAt||"—"});else{if(ot.reason=n&&n.reason||"HTTP "+t.status,n&&"boolean"==typeof n.trial&&(ot.trial=n.trial),["revoked","unknown-key","trial-used","trial-device"].includes(ot.reason)){ot.until=0;try{const t=JSON.parse(p(d.remoteCfg)||"null");t&&(t.until=null,h(d.remoteCfg,JSON.stringify(t)))}catch{}}f("Сервер настроек отказал",ot.reason)}}catch(t){ot.reason=String(t),f("Сервер настроек недоступен — работаю на сохранённых",String(t)),ot.ok||setTimeout((()=>gt(!0).catch((()=>{}))),3e5)}Ui()}(t)}finally{pt=!0,ht&&(ht=!1,Ni())}}const mt=8,yt=[[],[]];let wt=0;function kt(t,e){return new Promise(((n,r)=>{yt[e??function(){try{return Bn.starting||Bn.urgentPick?0:1}catch{return 0}}()].push({fn:t,resolve:n,reject:r}),vt()}))}function vt(){for(;wt<mt;){const t=yt[0].shift()||yt[1].shift();if(!t)return;wt++,Promise.resolve().then(t.fn).then(t.resolve,t.reject).finally((()=>{wt--,vt()}))}}const bt={};async function St(t,e,n){const r=function(t){const e=Spicetify.GraphQL.Definitions;if(e[t])return e[t];const n=at[t];if(!n)return null;const r=Object.values(e).find((t=>t&&"object"==typeof t&&t.constructor&&t.constructor!==Object));try{if(r){const i=new r.constructor(t,"query",n,null);return e[t]=i,st.add(t),i}}catch(e){f("getDef: конструктор не сработал для "+t,String(e))}const i={name:t,operationName:t,operation:"query",sha256Hash:n,value:null};return e[t]=i,st.add(t),i}(t);if(!r)throw new Error("нет GraphQL-операции "+t);const i=bt[t]||(bt[t]={ok:0,err:0});try{const a=await kt((()=>Spicetify.GraphQL.Request(r,e)),n);return a&&a.errors&&a.errors.length?(i.err++,i.err<=2&&f(t+": ошибки GraphQL",a.errors.slice(0,2))):i.ok++,a&&void 0!==a.data?a.data:a}catch(t){throw i.err++,t}}const xt=new Map;function Pt(t){if(!t||t.__typename&&"Track"!==t.__typename||"string"!=typeof t.uri||!t.uri.startsWith("spotify:track:"))return null;const e=t.artists?.items?.[0],n=parseInt(t.playcount||"0",10)||0;return n&&xt.set(t.uri,n),{uri:t.uri,name:t.name,artistUri:e?.uri,artistName:e?.profile?.name,artistUris:(t.artists?.items||[]).map((t=>t?.uri)).filter(Boolean),explicit:"EXPLICIT"===t.contentRating?.label,playcount:parseInt(t.playcount||"0",10)||0}}const Nt=new Map;function Mt(t,e){if(Nt.has(t))return Nt.get(t);const n=(async()=>{try{const n=await St("internalLinkRecommenderTrack",{uri:t,limit:20},e);return(n?.seoRecommendedTrack?.items||[]).map((t=>Pt(t?.data))).filter(Boolean)}catch(t){return f("рекомендатель: ошибка",String(t)),[]}})();return Nt.set(t,n),n}const At=new Map;function Et(t){if(At.has(t))return At.get(t);const e=Tt[K(t)];if(e&&e.r&&Date.now()-e.rt<Lt){const n=Promise.resolve(e.r.map(It));return At.set(t,n),n}const n=(async()=>{try{const e=await St("queryArtistRelated",{uri:t});let n=(e?.artistUnion?.relatedContent?.relatedArtists?.items||[]).map((t=>t?.uri)).filter((t=>"string"==typeof t&&t.startsWith("spotify:artist:")));if(n.length||(n=[...it(e,"artist")]),n=n.filter((e=>e!==t)),n.length){const e=Tt[K(t)]||(Tt[K(t)]={});e.r=n.map(K),e.rt=Date.now(),x("artists",zt)}return n}catch(t){return f("похожие артисты: ошибка",String(t)),[]}})();return At.set(t,n),n}const Dt=new Map,Ut=new Map,Ot=700,Ct=432e6,Lt=12096e5;let Tt={};const It=t=>"spotify:artist:"+t,jt=t=>"spotify:track:"+t;function zt(){let t=Object.entries(Tt);const e=t=>Math.max(t.t||0,t.rt||0);t.length>Ot&&(t=t.sort(((t,n)=>e(n[1])-e(t[1]))).slice(0,Ot),Tt=Object.fromEntries(t)),h(d.artists,JSON.stringify(Tt))||(t=t.sort(((t,n)=>e(n[1])-e(t[1]))).slice(0,t.length>>1),Tt=Object.fromEntries(t),h(d.artists,JSON.stringify(Tt)))}function qt(t,e){e.l&&Dt.set(t,e.l);const n=[];for(const[r,i,a,o,s,c]of e.tr||[]){const l=s?s.split(",").map(It):[t],u={uri:jt(r),name:i,artistUri:l[0],artistName:c||e.n,artistUris:l,explicit:!!o,playcount:a||0,listeners:e.l||0};a&&xt.set(u.uri,a),Z({...u,artistUri:t,artistName:e.n}),n.push(u)}return V(e.n)&&Z({uri:"",name:e.n,artistUri:t,artistName:e.n}),tt.add(t),n}function Bt(t){if(Ut.has(t))return Ut.get(t);const e=Tt[K(t)];if(e&&e.tr&&Date.now()-e.t<Ct){const n=Promise.resolve(qt(t,e));return Ut.set(t,n),n}const n=(async()=>{try{const e=await St("queryArtistOverview",{uri:t,locale:"",includePrerelease:!1}),n=e?.artistUnion;if(!n)return[];const r=n.profile?.name||"",i={t:Date.now(),n:r,l:parseInt(n.stats?.monthlyListeners||"0",10)||0,tr:[]};for(const t of n.discography?.topTracks?.items||[]){const e=Pt(t?.track||t?.data);e&&i.tr.push([K(e.uri),e.name||"",e.playcount||0,e.explicit?1:0,(e.artistUris||[]).map(K).join(","),e.artistName&&e.artistName!==r?e.artistName:0])}if(!i.tr.length&&!i.l)return[];const a=Tt[K(t)]||(Tt[K(t)]={});return Object.assign(a,i),x("artists",zt),qt(t,a)}catch(t){return f("треки артиста: ошибка",String(t)),[]}})();return Ut.set(t,n),n}async function Rt(t,e,n,r,i){const a=i=>({includeTopArtists:!0,topArtistsInput:{offset:0,limit:i,sortBy:e,timeRange:t},includeTopTracks:!0,topTracksInput:{offset:0,limit:i,sortBy:r,timeRange:n}});for(const t of[i||50,20])try{const e=await St("userTopContent",a(t)),n=e?.me?.profile;if(!n)continue;const r=(n.topArtists?.items||[]).map((t=>t?.data)).filter((t=>t&&"string"==typeof t.uri)).map((t=>({uri:t.uri,name:t.profile?.name||""})));return{artists:r,tracks:(n.topTracks?.items||[]).map((t=>Pt(t?.data))).filter(Boolean),ok:!0}}catch(t){f("история Spotify: ошибка",String(t))}return{artists:[],tracks:[],ok:!1}}let Jt=0;async function Ht(t){if(!(!we||!t&&Date.now()-Jt<6e5)){Jt=Date.now();try{const t=await Spicetify.Platform.LibraryAPI.getTracks({limit:50,offset:0,sort:{field:"ADDED_AT",order:"DESC"}}),e=[];for(const n of(t&&(t.items||t.tracks)||[]).slice(0,50)){const t=n.uri||n.link;if(!t||ke.likedTracks.has(t))continue;const r=n.artists&&n.artists[0],i={uri:t,name:n.name,artistUri:r?.uri,artistName:r?.name,artistUris:(n.artists||[]).map((t=>t?.uri)).filter(Boolean),at:Date.parse(n.addedAt||"")||Date.now()};ke.likedTracks.add(t),ke.heard.add(t),ke.likeAt.set(t,i.at),i.artistUri&&ke.familiarIds.add(K(i.artistUri)),i.artistName&&ke.familiarNames.add(i.artistName.toLowerCase()),Z(i),(et(i)?ke.byLang.ru:ke.byLang.foreign).unshift(t),e.push(i)}if(!e.length)return;ke.likedItems=[...e,...ke.likedItems].slice(0,2e3),Object.assign(we,{likedTracks:[...ke.likedTracks],likedItems:ke.likedItems,heard:[...ke.heard],familiarIds:[...ke.familiarIds],familiarNames:[...ke.familiarNames],byLang:ke.byLang}),x("profile",(()=>h(d.profile,JSON.stringify(we))));for(const t of e.slice(0,10))t.artistUri&&Ae(t.artistUri).catch((()=>{}));f("Новые лайки из библиотеки",e.length)}catch(t){f("свежие лайки: ошибка",String(t))}}}const $t=new Map,Wt=new Map,_t=6e3;let Qt={};function Gt(){const t=Object.keys(Qt);if(t.length>_t)for(const e of t.slice(0,t.length-_t))delete Qt[e];h(d.lyrics,JSON.stringify(Qt))}let Ft=0,Yt=10;function Kt(t,e){if($t.has(t))return Promise.resolve($t.get(t));if(Date.now()<Ft)return Promise.resolve(null);if(Wt.has(t))return Wt.get(t);const n=(async()=>{let n=null;try{const r=await kt((()=>Spicetify.CosmosAsync.get(`https://spclient.wg.spotify.com/color-lyrics/v2/track/${K(t)}?format=json&vocalRemoval=false&market=from_token`)),e);if(r&&429===r.code)return Ft=Date.now()+6e4*Yt,f("Тексты: Spotify просит паузу (429)",{минут:Yt}),Yt=Math.min(60,2*Yt),Wt.delete(t),null;r&&404===r.code&&(n=!1);const i=r?.lyrics?.lines;Array.isArray(i)&&(n=i.length>0,Yt=10)}catch(t){/404|not found/i.test(String(t&&(t.status||t.message||t)))&&(n=!1)}return null!==n&&($t.set(t,n),Qt[K(t)]=n?1:0,x("lyrics",Gt)),n})();return Wt.set(t,n),n}let Vt=!1;async function Xt(t){try{const e=await Spicetify.Platform.LibraryAPI.contains(t);return Array.isArray(e)?!!e[0]:!!e}catch{return!1}}async function Zt(t){try{const e=await St("searchPlaylists",{searchTerm:t,offset:0,limit:10,numberOfTopResults:5,includeAudiobooks:!1,includePreReleases:!1,includeAlbumPreReleases:!1,includeAuthors:!1,includeEpisodeContentRatingsV2:!1});let n=(e?.searchV2?.playlists?.items||[]).map((t=>(t?.data||t)?.uri)).filter((t=>"string"==typeof t&&t.startsWith("spotify:playlist:")));return n.length||(n=[...it(e,"playlist")]),n}catch(t){return f("поиск плейлистов: ошибка",String(t)),[]}}async function te(t,e){try{const n=await kt((()=>Spicetify.Platform.PlaylistAPI.getContents(t,{limit:e||100})));return(n?.items||[]).filter(Boolean).map((t=>{if("string"!=typeof t.uri||!t.uri.startsWith("spotify:track:"))return null;const e=t.artists&&t.artists[0];return{uri:t.uri,name:t.name,artistUri:e?.uri,artistName:e?.name,explicit:!(!t.isExplicit&&!t.explicit),artistUris:(t.artists||[]).map((t=>t?.uri)).filter(Boolean)}})).filter(Boolean)}catch(t){return f("плейлист не загрузился",String(t)),[]}}const ee=new Map;function ne(t,e,n,r){const i=new Set,a=new Set,o=new Set,s=new Map;for(const t of e){Z(t),i.add(t.uri);for(const e of Rn(t))a.add(K(e)),s.has(e)||s.set(e,e===t.artistUri?t.artistName:"");t.artistName&&o.add(t.artistName.toLowerCase())}const c=new Set(a);for(const t of r||[])a.add(K(t)),s.has(t)||s.set(t,"");return{key:t,tracks:e,uris:i,ids:a,coreIds:c,names:o,playlists:n,extraCount:(r||[]).length,artists:[...s.entries()].map((([t,e])=>({uri:t,name:e,core:c.has(K(t))})))}}function re(t,e){return t.uris.has(e.uri)?2:Rn(e).some((e=>t.coreIds&&t.coreIds.has(K(e))))||e.artistName&&t.names.has(e.artistName.toLowerCase())||e.genreChain&&e.genreChain.has(t.key)?1:0}function ie(t,e){return!!t.uris.has(e.uri)||(!!Rn(e).some((e=>t.ids.has(K(e))))||!(!e.artistName||!t.names.has(e.artistName.toLowerCase())))}async function ae(t){if(ee.has(t))return ee.get(t);try{const e=JSON.parse(p(d.tagPrefix+t)||"null");if(e&&Date.now()-e.ts<2592e5&&e.tracks&&e.tracks.length){const n=e.tracks.map((([t,e,n,r,i])=>{const a=n?n.split(",").map(It):[];return{uri:jt(t),name:e,artistUri:a[0],artistName:r,artistUris:a,explicit:!!i}})),r=ne(t,n,e.playlists,(e.extra||[]).map(It));return ee.set(t,r),r}}catch{}const e=t.startsWith("mood:")||t.startsWith("act:")||t.startsWith("combo:"),n=e?3:2,r=e?14:10,i=e?1200:800,a=await Promise.all(function(t){if(R[t])return R[t];if(t.startsWith("combo:")){const[e,n]=t.slice(6).split("|"),r=H[n]||[[n,"en"],[n,"ru"]],i=[];for(const[t,n]of J[e]||[])for(const[e,a]of r)n===a&&i.push(...W("en"===n?$.comboEn:$.comboRu,{m:t,g:e}));return i}return t.startsWith("genre:")?W($.genre,{g:t.slice(6)}):[]}(t).map(Zt)),o=[];for(const t of a){const e=t.filter((t=>K(t).startsWith("37i9dQZF1")));for(const r of(e.length?e:t).slice(0,n))o.includes(r)||o.push(r)}const s=await Promise.all(o.slice(0,r).map(te)),c=new Set,l=[];for(const t of s)for(const e of t)c.has(e.uri)||(c.add(e.uri),l.push(e));const u=l.slice(0,i);u.forEach(Z);const m=e=>{u.length&&(h(d.tagPrefix+t,JSON.stringify({ts:Date.now(),playlists:o.length,extra:e.map(K),tracks:u.map((t=>[K(t.uri),t.name||"",Rn(t).map(K).join(","),t.artistName||"",t.explicit?1:0]))})),w(g,new Set([d.tagPrefix+t])))};m([]);const y=ne(t,u,o.length,[]);return ee.set(t,y),f("Разметка «"+t+"»",{плейлистов:o.length,треков:u.length,артистов:y.artists.length}),u.length&&t.startsWith("genre:")&&async function(t,e){if(!t.startsWith("genre:"))return[];const n=new Map;for(const t of e)t.artistUri&&n.set(t.artistUri,(n.get(t.artistUri)||0)+1);const r=[...n.entries()].sort(((t,e)=>e[1]-t[1])).map((([t])=>t)),i=r.filter((t=>(X.get(t)?.cyr||0)>0)).slice(0,25),a=r.filter((t=>!((X.get(t)?.cyr||0)>0))).slice(0,25),o=await Promise.all([...i,...a].map(Et)),s=new Map;o.forEach((t=>t.forEach((t=>s.set(t,(s.get(t)||0)+1)))));const c=t.startsWith("genre:")?1:2;return[...s.entries()].filter((([t,e])=>e>=c&&!n.has(t))).map((([t])=>t))}(t,u).then((e=>{e.length&&ee.get(t)===y&&(ee.set(t,ne(t,u,o.length,e)),m(e),f("Разметка «"+t+"» расширена похожими",e.length))})).catch((()=>{})),y}function oe(){return Q().map((t=>ee.get(t))).filter((t=>t&&t.tracks.length))}function se(){return _().hard.map((t=>ee.get(t))).filter((t=>t&&t.tracks.length))}function ce(){return _().combo.map((t=>ee.get(t))).filter((t=>t&&t.tracks.length))}const le={"mood:calm":["mood:energetic","act:workout"],"mood:energetic":["mood:calm","act:sleep"],"mood:happy":["mood:sad"],"mood:sad":["mood:happy"],"act:sleep":["mood:energetic","act:workout"],"act:workout":["mood:calm","act:sleep"],"act:work":["act:workout"],"act:wakeup":["act:sleep"],"act:road":[]};function ue(){const t=[];return B.mood&&t.push("mood:"+B.mood),B.activity&&t.push("act:"+B.activity),t}function fe(){const t=ue(),e=new Set;for(const n of t)for(const r of le[n]||[])t.includes(r)||e.add(r);return[...e]}const de=()=>_().hard.some((t=>t.startsWith("mood:")||t.startsWith("act:")));function pe(t,e){for(const n of ce())if(n.key.startsWith("combo:"+e+"|")&&n.uris.has(t))return!0;return!1}function he(t,e){const n=ee.get(e);return!(!n||!n.uris.has(t))||pe(t,e)}function ge(t,e){const n=ee.get(e);return n&&n.tracks.length?he(t.uri,e)?2:t.moodChain&&t.moodChain.has(e)?1:0:2}function me(t){const e=ue();return e.length?Math.min(...e.map((e=>ge(t,e)))):2}function ye(t){return ue().some((e=>{const n=ee.get(e);return n&&ie(n,t)}))}let we=null;const ke={likedTracks:new Set,likedItems:[],likeAt:new Map,familiarIds:new Set,familiarNames:new Set,heard:new Set,byLang:{ru:[],foreign:[]},topArtists:[],topTracks:[],taste:new Map};function ve(t){we=t,ke.likedTracks=new Set(t.likedTracks||[]),ke.likedItems=t.likedItems||[],ke.likeAt=new Map(ke.likedItems.filter((t=>t.at)).map((t=>[t.uri,t.at])));for(const t of vn)t[4]&&!ke.likeAt.has(jt(t[0]))&&ke.likeAt.set(jt(t[0]),t[4]);ke.familiarIds=new Set(t.familiarIds||[]),ke.familiarNames=new Set(t.familiarNames||[]),ke.heard=new Set(t.heard||[]),ke.topArtists=t.topArtists||[],ke.topTracks=t.topTracks||[],ke.taste=new Map(t.taste||[]);for(const[t,e]of vn)ke.likedTracks.add(jt(t)),ke.heard.add(jt(t)),e&&ke.familiarIds.add(e);for(const t of ke.topTracks)Z(t);for(const t of ke.likedItems)Z(t);ke.byLang={ru:[],foreign:[]};for(const t of ke.likedItems)(et(t)?ke.byLang.ru:ke.byLang.foreign).push(t.uri)}function be(t){return!(!t.artistUri||!ke.familiarIds.has(K(t.artistUri)))||!(!t.artistName||!ke.familiarNames.has(t.artistName.toLowerCase()))}let Se=null;async function xe(t,e){if(!t){if(!we)try{const t=JSON.parse(p(d.profile)||"null");t&&ve(t)}catch{}if((t=>t&&Date.now()-t.builtAt<432e5&&!(t.likedItems&&t.likedItems.length&&!t.likedItems[0].at))(we))return we;if(we)return Se||(Se=xe(!0,!0).then((()=>Pe())).catch((t=>f("профиль в фоне: ошибка",String(t)))).finally((()=>{Se=null}))),we}const n=await async function(){const t=[],e=Spicetify.Platform.LibraryAPI;if(e&&"function"==typeof e.getTracks)try{let n=0;const r=200;for(;t.length<2e3;){const i=await e.getTracks({limit:r,offset:n,sort:{field:"ADDED_AT",order:"DESC"}}),a=i&&(i.items||i.tracks)||[];if(!a.length)break;for(const e of a){const n=e.uri||e.link,r=e.artists&&e.artists[0];n&&t.push({uri:n,name:e.name,artistUri:r?.uri,artistName:r?.name,artistUris:(e.artists||[]).map((t=>t?.uri)).filter(Boolean),at:Date.parse(e.addedAt||"")||0})}if(n+=a.length,a.length<r)break}}catch(t){f("Любимые: ошибка LibraryAPI",String(t))}return t}(),r=await Promise.all([Rt("LONG_TERM","PLAY_COUNT","LONG_TERM","PLAY_COUNT"),Rt("MID_TERM","PLAY_COUNT","MID_TERM","PLAY_COUNT"),Rt("SHORT_TERM","PLAY_COUNT","SHORT_TERM","PLAY_COUNT")]),i=new Map,a=new Map,o=new Set,s=new Set;for(const t of n)t.artistName&&s.add(t.artistName.toLowerCase()),t.artistUri&&(o.add(K(t.artistUri)),t.artistName&&i.set(t.artistUri,t.artistName),a.set(t.artistUri,(a.get(t.artistUri)||0)+Mn(t.at)));const c=[.8,1,1.2];r.forEach(((t,e)=>t.artists.forEach(((t,n)=>{o.add(K(t.uri)),t.name&&(s.add(t.name.toLowerCase()),i.set(t.uri,t.name)),a.set(t.uri,(a.get(t.uri)||0)+Math.max(1,(50-n)/8)*c[e])}))));const l=[...a.entries()].sort(((t,e)=>e[1]-t[1])).slice(0,80).map((([t,e])=>({uri:t,name:i.get(t)||"",weight:e}))),u=new Set(n.map((t=>t.uri)));r.forEach((t=>t.tracks.forEach((t=>u.add(t.uri)))));const g={ru:[],foreign:[]};for(const t of n)(V(t.name)||V(t.artistName)?g.ru:g.foreign).push(t.uri);const m=new Set,y=[];for(const t of[r[2],r[1],r[0]])for(const e of t.tracks)m.has(e.uri)||(m.add(e.uri),y.push(e));const w={builtAt:Date.now(),likedTracks:n.map((t=>t.uri)),likedItems:n.slice(0,2e3),familiarIds:[...o],familiarNames:[...s],heard:[...u],byLang:g,topArtists:l,topTracks:y.slice(0,150),taste:we&&Array.isArray(we.taste)?we.taste:[],tasteAt:0,historyOk:r.some((t=>t.ok))};ve(w),h(d.profile,JSON.stringify(w));for(const t of l)Ue[t.uri]=Math.max(Ue[t.uri]||0,Math.min(t.weight/3,6));return Oe(),f("Профиль собран",{лайков:n.length,знакомыхАртистов:o.size,услышанныхТреков:u.size,историяSpotify:w.historyOk}),we}async function Pe(){if(!ke.topArtists.length)return;if(ke.taste.size&&5===we?.tasteV&&(we?.tasteAt||0)>=(we?.builtAt||0))return;const t=ke.topArtists.slice(0,30),e=Math.max(...t.map((t=>t.weight)),1),n=await Promise.all(t.map((t=>Et(t.uri)))),r=new Map;n.forEach(((n,i)=>{const a=.5+t[i].weight/e;n.forEach((t=>r.set(t,(r.get(t)||0)+a)))}));for(const e of t)r.set(e.uri,(r.get(e.uri)||0)+1);const i=Dn(100).filter((t=>t.artistUri)),a=new Map;for(const t of i)a.set(t.artistUri,Math.max(a.get(t.artistUri)||0,An(t)));const o=[...a.keys()],s=await Promise.all(o.map((t=>Et(t))));o.forEach(((t,e)=>{const n=a.get(t);r.set(t,(r.get(t)||0)+1.5*n),s[e].forEach((t=>r.set(t,(r.get(t)||0)+.7*n)))})),ke.taste=r,Ne(!0),f("Окрестность вкуса",{артистов:r.size})}function Ne(t){we&&(t&&(we.tasteAt=Date.now(),we.tasteV=5),we.taste=[...ke.taste.entries()].sort(((t,e)=>e[1]-t[1])).slice(0,2e3),h(d.profile,JSON.stringify(we)))}function Me(t){let e=0;const n=Y?Y.taste:ke.taste;for(const r of Rn(t))e=Math.max(e,n.get(r)||0);return Math.min(e,4)}async function Ae(t){if(!t)return;ke.taste.set(t,(ke.taste.get(t)||0)+1.5);(await Et(t)).forEach((t=>ke.taste.set(t,(ke.taste.get(t)||0)+.7))),Ne()}function Ee(){const t=B.language,e=Y?Y.tracks:ke.topTracks,n=e.filter((e=>"ru"===t?et(e):"foreign"!==t||!et(e)));return n.length>=3?n:e}function De(){return"ru"===B.language&&ke.byLang.ru.length?ke.byLang.ru:"foreign"===B.language&&ke.byLang.foreign.length?ke.byLang.foreign:[...ke.likedTracks]}let Ue={};function Oe(){h(d.affinity,JSON.stringify(Ue))}function Ce(t,e){t&&(Ue[t]=Math.max(-12,Math.min(20,(Ue[t]||0)+e)))}let Le=new Set;function Te(){h(d.banned,JSON.stringify([...Le]))}const Ie=()=>[...Le].filter((t=>t.startsWith("spotify:"))).length,je=864e5;let ze={},qe={};function Be(){h(d.dislikes,JSON.stringify(ze)),h(d.dislikeNear,JSON.stringify(qe))}function Re(t){if(!t||!t.artistUri)return;const e=K(t.artistUri),n=Date.now();ze[e]=[...ze[e]||[],n].slice(-5),x("dislikes",Be),Et(t.artistUri).then((t=>{for(const r of(t||[]).slice(0,20)){const t=K(r);if(t===e)continue;const i=qe[t],a=i?i[0]*Math.exp(-(n-i[1])/(60*je)):0;qe[t]=[Math.min(a+1,3),n]}const r=Object.entries(qe);r.length>1500&&(qe=Object.fromEntries(r.sort(((t,e)=>e[1][1]-t[1][1])).slice(0,1500))),x("dislikes",Be)})).catch((()=>{}))}let Je={out:[],months:{}},He={};const $e=t=>{const e=new Date(t||Date.now());return e.getFullYear()+"-"+String(e.getMonth()+1).padStart(2,"0")};function We(){h(d.stats,JSON.stringify(Je)),h(d.discovered,JSON.stringify(He))}const _e=()=>{const t=new Date;return t.setDate(1),t.setMonth(t.getMonth()-1),$e(t.getTime())};function Qe(t){const e=Je.months[t]||(Je.months[t]={plays:0,good:0,likes:0,skips:0,dislikes:0,newA:{},names:{}});return null==e.ms&&Object.assign(e,{ms:0,hours:Array(24).fill(0),days:{},arts:{},chars:{}}),e}const Ge={finished:1,like:1,partial:.5,skip:0,dislike:0};function Fe(){const t=Spicetify.Platform&&Spicetify.Platform.version||(/Spotify\/([\d.]+)/.exec(navigator.userAgent)||[])[1]||"";return String(t).slice(0,24)}function Ye(){try{const{acc:t,delta:e}=function(){const t=t=>t.reduce(((t,e)=>t+e[1]),0)/t.length*100,e=Je.out.slice(-50),n=Date.now(),r=6048e5,i=Je.out.filter((t=>n-t[0]<r)),a=Je.out.filter((t=>n-t[0]>=r&&n-t[0]<2*r));return{acc:e.length>=15?Math.round(t(e)):null,need:Math.max(0,15-e.length),delta:i.length>=10&&a.length>=10?Math.round(t(i)-t(a)):null}}(),n=Date.now()-6048e5;return JSON.stringify({a:Object.keys(on).length,d:Object.keys(ze).length,l:vn.length,acc:t,dw:e,nw:Object.values(He).filter((t=>t>n)).length,p7:Je.out.filter((t=>t[0]>n)).length,mk:$e(),mn:Object.keys(Je.months[$e()]?.newA||{}).length,pk:_e(),pn:Object.keys(Je.months[_e()]?.newA||{}).length,sv:Fe(),xv:String(Spicetify.Config&&Spicetify.Config.version||"").slice(0,16)})}catch{return"{}"}}const Ke=t=>Number(t||0).toLocaleString(N?"ru-RU":"en-US");let Ve=[];const Xe=["character","mood","language","activity","genre"];function Ze(){h(d.presets,JSON.stringify(Ve.slice(0,6)))}const tn=new Map;function en(t){const e=tn.get(t);return!!e&&(!(Date.now()>e)||(tn.delete(t),!1))}let nn=new Set;const rn=t=>!!t&&nn.has(K(t)),an=250;let on={};function sn(){h(d.artistLast,JSON.stringify(on))}function cn(t,e,n){if(!t)return;const r=K(t),i=on[r];on[r]=[Math.max(e,i?i[0]:0),(i?i[1]:0)+(n?1:0)]}function ln(t){const e=on[K(t||"")];return e?Math.max(0,dn-e[0]):1/0}function un(t){return!!Y&&(Y.artistSet||(Y.artistSet=new Set(Y.topArtists.map((t=>t.uri)))),Y.artistSet.has(t))}let fn={},dn=0;const pn=()=>200;function hn(){h(d.trackHist,JSON.stringify(fn)),h(d.playNo,String(dn))}function gn(t){const e=String(t.name||"").toLowerCase().replace(/\([^)]*\)|\[[^\]]*\]/g," ").split(" - ")[0].replace(/\b(sped up|speed up|slowed|reverb|remaster(ed)?|radio edit|extended)\b/g,"").replace(/[^a-zа-яё0-9]/gi,"");return e&&t.artistUri?"k:"+K(t.artistUri)+"|"+e:""}const mn=t=>gn(t)||"t:"+K(t.uri);function yn(t,e,n){const r=mn(t),i=fn[r];null==n&&(n=++dn),fn[r]=[e||Date.now(),(i?i[1]:0)+1,n],fn["t:"+K(t.uri)]&&r!=="t:"+K(t.uri)&&delete fn["t:"+K(t.uri)],x("trackHist",hn)}function wn(t){const e=gn(t)?fn[gn(t)]:null,n=fn["t:"+K(t.uri)];return e?n?e[0]>=n[0]?e:n:e:n||null}function kn(t){const e=wn(t);return e?dn-(e[2]??dn):1/0}let vn=[];async function bn(){if(vn.length)try{const t=await Spicetify.Platform.LibraryAPI.contains(...vn.map((t=>jt(t[0]))));if(!Array.isArray(t))return;const e=vn.filter(((e,n)=>t[n]));if(e.length===vn.length)return;const n=vn.filter(((e,n)=>!t[n])).map((t=>jt(t[0])));vn=e,h(d.waveLikes,JSON.stringify(vn));for(const t of n)ke.likedTracks.delete(t);we&&(we.tasteAt=0),f("Снятые лайки убраны из волны",n.length)}catch(t){f("сверка лайков: ошибка",String(t))}}let Sn=0;async function xn(t){if(t||!(Date.now()-Sn<6e5)){Sn=Date.now();try{const t=Spicetify.Platform.PlayHistoryAPI;let e=[];if(t&&t.getContents){const n=await t.getContents({limit:500,offset:0});e=n&&(n.items||n.contents)||[]}const n=Date.now(),r=[];e.forEach(((t,e)=>{if(!t||"string"!=typeof t.uri||!t.uri.startsWith("spotify:track:"))return;const n=t.artists&&t.artists[0],i={uri:t.uri,name:t.name,artistUri:n?.uri,artistName:n?.name};wn(i)||r.some((t=>mn(t.t)===mn(i)))||r.push({t:i,i:e})})),dn+=r.length,r.forEach((({t,i:e},r)=>{fn[mn(t)]=[n-3*e*6e4,1,dn-r]}));const i=new Set(r.map((t=>t.i)));e.forEach(((t,e)=>{for(const n of t&&t.artists||[])n&&n.uri&&cn(n.uri,dn-e,i.has(e))})),x("artistLast",sn);const a=r.length;a&&(x("trackHist",hn),f("Из истории Spotify отмечено прослушанных",a))}catch(t){f("история Spotify: ошибка",String(t))}}}const Pn=120,Nn=.15;function Mn(t){if(!t)return.4;const e=Math.max(0,(Date.now()-t)/864e5);return Nn+(1-Nn)*Math.pow(.5,e/Pn)}const An=t=>Mn(t&&t.at||ke.likeAt.get("string"==typeof t?t:t&&t.uri)||0);function En(t,e,n){const r=rt(t.filter(n),e,An);return r.length>=e?r:r.concat(rt(t.filter((t=>!n(t))),e-r.length,An))}function Dn(t){const e=[],n=new Set,r=t=>{t.uri&&!n.has(t.uri)&&(n.add(t.uri),e.push(t))};return vn.forEach((([t,e,n,i,a])=>r({uri:jt(t),artistUri:e?It(e):void 0,artistName:i,name:n,artistUris:e?[It(e)]:[],at:a||0}))),ke.likedItems.slice(0,t).forEach(r),e.slice(0,t)}let Un={};function On(){h(d.skipHist,JSON.stringify(Un))}function Cn(t){if(!t)return;const e=K(t);(Un[e]=Un[e]||[]).push(Date.now()),Un[e]=Un[e].slice(-6),x("skipHist",On)}function Ln(t,e){const n=K(t||""),r=Un[n];r&&r.length&&(e?delete Un[n]:(r.shift(),r.length||delete Un[n]),x("skipHist",On))}function Tn(t){Un[K(t||"")];return 0}let In={};const jn=t=>{const e=wn(t);return e?(Date.now()-e[0])/36e5:1/0};const zn=[1,.8,.65,.5,.4],qn=new Map,Bn={active:!1,starting:!1,restartPending:!1,ctx:[],head:-1,navBack:!1,rebuildUntil:0,history:[],played:new Set,recentArtists:[],recentSet:new Set,picksFamiliar:[],pool:new Map,coldSeeds:[],skipArtist:new Map,seedPenalty:new Map,progress:new Map,duration:new Map,poolBusy:!1,poolDirty:!1,lastOutcome:"",lastRefresh:{},lastPicks:[],artistPlays:new Map,sessionStart:Date.now(),recentHits:[],hearted:new Set,heartTicks:new Map,sinceRefresh:0,playedKeys:new Set,queued:new Map,headGen:0,inSpotifyQueue:new Set,tierUse:{},feedMode:!0,queueMiss:0,skipNear:new Map,skipStreak:0,courseAt:0,soundAvoid:new Map};function Rn(t){return t.artistUris&&t.artistUris.length?t.artistUris:t.artistUri?[t.artistUri]:[]}function Jn(t){if(t&&t.length){for(Bn.recentArtists.push(t);Bn.recentArtists.length>25;)Bn.recentArtists.shift();Bn.recentSet=new Set(Bn.recentArtists.flat())}}const Hn=t=>Rn(t).some((t=>Bn.recentSet.has(t)));function $n(t){let e=2.5*(Bn.artistPlays.get(t)||0);const n=on[K(t)];if(n&&!Bn.artistPlays.has(t)&&!un(t)){const t=Math.max(0,dn-n[0]);e+=1.5*Math.exp(-t/250)+.25*Math.min(Math.max(n[1]-1,0),4)*Math.exp(-t/800)}return e}function Wn(){const t=[];for(let e=Bn.history.length-1;e>=0&&t.length<5;e--){const n=Bn.history[e];if(Bn.courseAt&&(n.at||0)<Bn.courseAt)break;"skip"!==n.outcome&&"dislike"!==n.outcome&&t.push(n)}t.sort(((t,e)=>("like"===e.outcome)-("like"===t.outcome)));const e=t.map((t=>t.uri));Bn.likeSeed&&!e.includes(Bn.likeSeed)&&e.unshift(Bn.likeSeed),e.length=Math.min(e.length,5);for(const t of Bn.coldSeeds){if(e.length>=5)break;e.includes(t)||e.push(t)}return e}function _n(t,e,n,r){if(!t||!t.uri)return!1;if(Z(t),Bn.played.has(t.uri))return!1;let i=Bn.pool.get(t.uri);const a=!i;return i||(i={...t,sources:new Set,recency:0,seed:null,addedAt:Date.now()},Bn.pool.set(t.uri,i)),i.sources.add(e),r>i.recency&&(i.recency=r,i.seed=n),n&&function(t,e){for(const n of ue())he(e,n)&&(t.moodChain||(t.moodChain=new Set)).add(n);for(const n of se())n.key.startsWith("genre:")&&n.uris.has(e)&&(t.genreChain||(t.genreChain=new Set)).add(n.key)}(i,n),i.playcount||(i.playcount=t.playcount||xt.get(t.uri)||0),!i.listeners&&t.listeners&&(i.listeners=t.listeners),!i.artistUri&&t.artistUri&&(i.artistUri=t.artistUri,i.artistName=t.artistName),i.artistUris&&i.artistUris.length||!t.artistUris||!t.artistUris.length||(i.artistUris=t.artistUris),a}function Qn(t,e){if(V(e))return!0;const n=t&&X.get(t);return!!(n&&n.cyr>0)}function Gn(t,e){if("ru"===B.language&&!Qn(t,e))return!1;if("foreign"===B.language&&Qn(t,e))return!1;for(const n of se())if(!(n.ids.has(K(t))||e&&n.names.has(e.toLowerCase())))return!1;return!0}function Fn(t,e){if(!t||en(t)||B.blockAI&&rn(t))return!1;const n=ke.familiarIds.has(K(t))||!!e&&ke.familiarNames.has(e.toLowerCase());return!("favorite"===B.character&&!n)&&(("unfamiliar"!==B.character||!n)&&Gn(t,e))}function Yn(t,e,n){const r=nt(t.filter(n),e);return r.length>=e?r:r.concat(nt(t.filter((t=>!n(t))),e-r.length))}const Kn=()=>!!(B.language||B.character||Q().length);async function Vn(t){const e=[];for(let t=Bn.history.length-1;t>=0&&e.length<3;t--){const n=Bn.history[t];"skip"!==n.outcome&&"dislike"!==n.outcome&&n.artistUri&&!e.includes(n.artistUri)&&e.push(n.artistUri)}if(e.length<3){const t=Zn().slice(0,20).filter((t=>!e.includes(t.uri))),n=t.filter((t=>Gn(t.uri,t.name)));for(const r of rt(n.length>=2?n:t,3-e.length,(t=>t.weight)))e.push(r.uri)}const n=await Promise.all(e.slice(0,3).map(Et)),r=new Map;n.forEach((t=>t.forEach((t=>r.set(t,(r.get(t)||0)+1)))));for(const[t,e]of r)qn.set(t,Math.max(qn.get(t)||0,e));let i=[...r.keys()].filter((t=>!Bn.recentSet.has(t)&&!en(t)));"unfamiliar"===B.character&&(i=i.filter((t=>!ke.familiarIds.has(K(t)))));const a=t=>ln(t)>=2*an&&Fn(t,"")&&("popular"===B.character||(Dt.get(t)||0)<3e6),o=Yn(i,6,(t=>(t=>a(t)&&(ke.taste.get(t)||0)>0)(t)||!ke.taste.size&&a(t)));if(o.length){let t=(await Et(o[Math.random()*o.length|0])).filter((t=>!r.has(t)&&!Bn.recentSet.has(t)&&!en(t)));"unfamiliar"===B.character&&(t=t.filter((t=>!ke.familiarIds.has(K(t))))),ke.taste.size&&(t=t.filter((t=>(ke.taste.get(t)||0)>0))),o.push(...nt(t.filter(a),3))}(await Promise.all(o.map((t=>Xn(t,2))))).forEach((e=>e.forEach((e=>{_n(e,"rel",null,0)&&t.rel++}))))}function Xn(t,e){return Bt(t).then((t=>nt(t,e)))}const Zn=()=>Y?Y.topArtists:ke.topArtists;async function tr(t){const e=!(!t||!t.quick),n={sim:0,anchor:0,fav:0,rel:0,tag:0,liked:0,mood:0};await Promise.all(fe().map(ae));const r=Wn(),i=await Promise.all(Q().map(ae)),a=[];r.forEach(((t,e)=>a.push(Mt(t).then((r=>r.forEach((r=>{_n(r,"sim",t,zn[e]||.3)&&n.sim++})))))));const o=t=>ir(t,{cooldown:!0});for(const t of ue()){const e=ee.get(t);if(!e||!e.tracks.length)continue;Yn([...e.tracks,...ce().filter((e=>e.key.startsWith("combo:"+t+"|"))).flatMap((t=>t.tracks))],3,(t=>o(t)&&(t.playcount||0)<3e8)).forEach((t=>a.push(Mt(t.uri).then((e=>e.forEach((e=>{_n(e,"mood",t.uri,.4)&&n.mood++})))))))}if(e){if(i.forEach((t=>Yn(t.tracks,40,o).forEach((t=>{_n(t,"tag",null,0)&&n.tag++})))),"favorite"===B.character&&En(ke.likedItems,30,o).forEach((t=>_n(t,"liked",null,0))),await Promise.all(a),"instrumental"===B.language){const t=[...Bn.pool.values()].filter((t=>!$t.has(t.uri)&&ir(t,{cooldown:!0,lang:!0}))).sort(((t,e)=>e.recency-t.recency)).slice(0,5).map((t=>t.uri));await Promise.all(t.map((t=>Kt(t))))}return void(Bn.lastRefresh={...n,быстрый:!0,пул:Bn.pool.size})}const s=t=>!t.artistUri||Gn(t.artistUri,t.artistName);Yn(Y||ke.topTracks.length?Ee():ke.likedItems.length?ke.likedItems:De().map((t=>({uri:t}))),2,s).forEach((t=>a.push(Mt(t.uri).then((e=>e.forEach((e=>{_n(e,"anchor",t.uri,.25)&&n.anchor++})))))));const c=Y?[]:Dn(100),l=c.filter(s);if(rt(l.length?l:c,1,An).forEach((t=>a.push(Mt(t.uri).then((e=>e.forEach((e=>{_n(e,"like",t.uri,.35)&&n.anchor++}))))))),"unfamiliar"!==B.character&&function(t){const e=Zn().filter((t=>!en(t.uri)&&!Bn.recentSet.has(t.uri))),n=t=>t.weight+Math.max(0,Ue[t.uri]||0),r=rt(e.filter((t=>Fn(t.uri,t.name))),t,n);return r.length<t&&r.push(...rt(e.filter((t=>!r.includes(t))),t-r.length,n)),r}(Kn()?3:2).forEach((t=>a.push(Xn(t.uri,2).then((t=>t.forEach((t=>{_n(t,"fav",null,0)&&n.fav++}))))))),a.push(Vn(n)),i.forEach((t=>{const e=new Set;for(const r of Yn(t.tracks,120,o)){const t=r.artistUri||r.uri;if(!e.has(t)&&(e.add(t),_n(r,"tag",null,0)&&n.tag++,e.size>=15))break}Yn(t.artists.filter((t=>!Bn.recentSet.has(t.uri)&&Fn(t.uri,t.name))),5,(e=>ln(e.uri)>=2*an&&(e.core||!t.key.startsWith("genre:")))).forEach((t=>a.push(Xn(t.uri,2).then((t=>t.forEach((t=>{_n(t,"tag",null,0)&&n.tag++})))))))})),"favorite"===B.character&&En(ke.likedItems,30,o).forEach((t=>{_n(t,"liked",null,0)&&n.liked++})),await Promise.all(a),"ru"===B.language||"foreign"===B.language){const t=[...new Set([...Bn.pool.values()].filter((t=>t.artistUri&&!et(t)&&!tt.has(t.artistUri))).sort(((t,e)=>e.recency+.3*e.sources.size-(t.recency+.3*t.sources.size))).map((t=>t.artistUri)))].slice(0,30);await Promise.all(t.map((t=>Bt(t))))}if("instrumental"===B.language){const t=ee.get("lang:instrumental"),n=e=>(t&&t.uris.has(e.uri)?3:0)+(t&&Rn(e).some((e=>t.ids.has(K(e))))?1.5:0)+e.recency,r=[...Bn.pool.values()].filter((t=>!$t.has(t.uri)&&ir(t,{cooldown:!0,lang:!0}))).sort(((t,e)=>n(e)-n(t))).slice(0,e?5:12).map((t=>t.uri));await Promise.all(r.map((t=>Kt(t))))}if("popular"!==B.character){const t=[...Bn.pool.values()].filter((t=>!t.playcount&&t.artistUri&&!Ut.has(t.artistUri))),e=[...new Set(t.sort(((t,e)=>(e.sources.has("tag")?1:0)-(t.sources.has("tag")?1:0))).map((t=>t.artistUri)))].slice(0,25);await Promise.all(e.map((t=>Bt(t))));for(const t of Bn.pool.values())t.playcount||(t.playcount=xt.get(t.uri)||0),!t.listeners&&t.artistUri&&(t.listeners=Dt.get(t.artistUri)||0)}const u=[...Bn.pool.values()].filter((t=>ir(t,{cooldown:!0})));if(u.length<12){let t=0;const e=[];nt(u.map((t=>t.uri)),4).forEach((n=>e.push(Mt(n).then((e=>e.forEach((e=>{_n(e,"walk",n,.5)&&t++}))))))),nt([...new Set(u.map((t=>t.artistUri)).filter(Boolean))],3).forEach((n=>e.push(Et(n).then((t=>{const e=t.filter((t=>"unfamiliar"!==B.character||!ke.familiarIds.has(K(t))));return Promise.all(nt(e,2).map((t=>Xn(t,2))))})).then((e=>e.flat().forEach((e=>{_n(e,"walk",null,.3)&&t++}))))))),oe().forEach((e=>nt(e.tracks,150).forEach((e=>{_n(e,"tag",null,0)&&t++})))),await Promise.all(e),n.расширение=t,f("Мало подходящих ("+u.length+") — расширил",t)}!function(){for(const t of[...Bn.pool.keys()])Bn.played.has(t)&&Bn.pool.delete(t);const t=new Set(Wn());for(const e of Bn.pool.values())e.seed&&!t.has(e.seed)&&(e.recency*=.6);const e=new Map;for(const t of Bn.pool.values()){const n=t.artistUri||t.uri;(e.get(n)||e.set(n,[]).get(n)).push(t)}for(const t of e.values())if(!(t.length<=3)){t.sort(((t,e)=>e.recency+.3*e.sources.size-(t.recency+.3*t.sources.size)));for(const e of t.slice(3))Bn.pool.delete(e.uri)}if(Bn.pool.size>900){const t=[...Bn.pool.values()].sort(((t,e)=>t.addedAt-e.addedAt)).slice(0,Bn.pool.size-900);for(const e of t)Bn.pool.delete(e.uri)}}(),Bn.lastRefresh={...n,пул:Bn.pool.size,сиды:r.length},f("Кандидаты",Bn.lastRefresh)}async function er(){const t=[];Yn(Zn(),6,(t=>Fn(t.uri,t.name))).forEach((e=>t.push(Bt(e.uri).then((t=>t.forEach((t=>_n(t,"fav",null,0)))))))),nt(ke.likedItems,6).forEach((e=>t.push(Mt(e.uri).then((t=>t.forEach((t=>_n(t,"anchor",e.uri,.2)))))))),oe().forEach((t=>t.tracks.forEach((t=>_n(t,"tag",null,0))))),nt(ke.likedItems,40).forEach((t=>_n(t,"liked",null,0))),await Promise.all(t),f("Аварийный добор",{пул:Bn.pool.size})}function nr(){const t=[...Bn.pool.values()].sort(((t,e)=>e.recency+.3*e.sources.size-(t.recency+.3*t.sources.size))).slice(0,200).map((t=>[K(t.uri),t.name||"",Rn(t).map(K).join(","),t.artistName||"",t.explicit?1:0,t.playcount||0,t.listeners||0]));h(d.lastPool,JSON.stringify({t:Date.now(),items:t}))}async function rr(){if(Bn.poolBusy)Bn.poolDirty=!0;else{Bn.poolBusy=!0;try{do{Bn.poolDirty=!1,await tr()}while(Bn.poolDirty);x("lastPool",nr)}catch(t){f("кандидаты: ошибка",String(t&&t.stack||t))}finally{Bn.poolBusy=!1}}}function ir(t,e){if(!t.uri||Bn.played.has(t.uri))return!1;{const e=gn(t);if(e&&(Bn.playedKeys.has(e)||Le.has(e)))return!1}if(Le.has(t.uri))return!1;if(t.artistUri&&en(t.artistUri))return!1;if(B.blockAI&&rn(t.artistUri))return!1;if(B.explicitFilter&&t.explicit)return!1;const n=be(t);if("favorite"===B.character){if(!e.character&&!n&&!ke.likedTracks.has(t.uri))return!1}else if(!e.liked&&ke.likedTracks.has(t.uri))return!1;if("unfamiliar"===B.character&&!e.character&&(n||ke.heard.has(t.uri)||wn(t)))return!1;if(!e.cooldown&&Hn(t))return!1;if(!e.cooldown&&!e.artistGap&&Rn(t).some((t=>ln(t)<an&&!un(t))))return!1;if(!e.character&&function(t){const e=Un[K(t||"")];return!e||e.length,!1}(t.artistUri))return!1;if(!e.replay&&(t.artistUri,0))return!1;if(!e.replay&&("favorite"===B.character?jn(t)<4:kn(t)<pn()))return!1;if(e.replay,!e.lang){const e=et(t);if("ru"===B.language&&!e)return!1;if("foreign"===B.language){if(e)return!1;if(!t.artistUri||!tt.has(t.artistUri))return!1}}if("instrumental"===B.language&&!sr(t,!!e.lang))return!1;if(!0!==e.tags){const n=se().filter((t=>t.key.startsWith("genre:")));if(n.length)if("any"===e.tags){if(!n.some((e=>ie(e,t))))return!1}else if(!n.every((e=>re(e,t)>=1)))return!1;if(de()){if(!e.tags&&me(t)<1)return!1;if("any"===e.tags&&me(t)<1&&!ye(t))return!1}}return!(!e.liked&&function(t){return!ue().some((e=>he(t.uri,e)))&&fe().some((e=>{const n=ee.get(e);return n&&n.uris.has(t.uri)}))}(t))}function ar(){return[...ee.values()].filter((t=>"lang:instrumental"===t.key||t.key.endsWith("|instrumental")))}const or=t=>ar().some((e=>e.uris.has(t)));function sr(t,e){const n=$t.get(t.uri);return!0!==n&&(!!or(t.uri)||!1===n&&(!!e||ar().some((e=>Rn(t).some((t=>e.ids.has(K(t))))||t.seed&&e.uris.has(t.seed)))))}function cr(t){let e=2*t.recency;e+=.6*Math.max(0,t.sources.size-1),e+=.2*Math.max(-6,Math.min(Ue[t.artistUri]||0,8)),e-=1.5*(Bn.skipArtist.get(t.artistUri)||0),e-=Bn.skipNear.get(t.artistUri)||0,e-=Bn.soundAvoid.get(t.uri)||0,e-=(t.artistUri,0),e-=.8*Math.min(Tn(t.artistUri),4),t.seed&&(e-=1.2*(Bn.seedPenalty.get(t.seed)||0));const n=Rn(t);e-=1.5*(n.length?Math.max(...n.map($n)):0),n.length&&n.every((t=>ln(t)>400))&&(Me(t)>0||(qn.get(t.artistUri)||0)>0)&&(e+=1.2),e-=function(t){const e=wn(t);if(!e)return 0;const n=kn(t),r=pn();return(3+.5*Math.min(e[1]-1,4))*Math.exp(-Math.max(0,n-r)/(1.5*r))}(t),"popular"===B.character?e+=2.5*function(t){const e=t.playcount||0,n=t.listeners||0,r=e>0?e:n>0?20*n:0;return r<=0?.45:Math.max(0,Math.min(1,Math.log10(r)/7))}(t):(e+=function(t){let e=0;const n=t.playcount||0;n&&(n<15e3?e-=1.5:n<1e5?e-=.3:n<5e6?e+=.5:e-=n<3e7?.2:n<1e8?.5:n<3e8?.6:.9,"unfamiliar"===B.character&&n>15e7&&(e-=.5));const r=t.listeners||Dt.get(t.artistUri)||0;return n?r>1e7&&(e-=.4):r>3e7?e-=1:r>1e7&&(e-=.6),e}(t),ur(t)&&fr()&&(e-=2.5));const r=Me(t),i=Math.min(qn.get(t.artistUri)||0,4),a=be(t);if("favorite"===B.character?e+=ke.likedTracks.has(t.uri)?1.5:1:"unfamiliar"===B.character?(e+=1*r+.3*i,!r&&t.recency<.3&&(e-=1)):e+=r*("popular"===B.character?.5:.7)+.3*i,!B.character){const t=Bn.picksFamiliar.slice(-5).filter(Boolean).length;a&&(e+=t>=2?-2:.6)}for(const n of se())n.key.startsWith("genre:")&&(e+=[0,.5,1][re(n,t)]);for(const n of ue()){const r=ee.get(n);if(!r||!r.tracks.length)continue;const i=ge(t,n);2===i?e+=pe(t.uri,n)?4:3.5:1===i?e+=1.8:ie(r,t)&&(e+=.3)}return function(t){return!ye(t)&&fe().some((e=>{const n=ee.get(e);return n&&ie(n,t)}))}(t)&&(e-=1),e+=1.2*Math.random(),e}const lr=[{},{artistGap:!0},{cooldown:!0},{cooldown:!0,tags:"any"},{cooldown:!0,tags:"any",character:!0},{cooldown:!0,tags:!0,character:!0},{cooldown:!0,tags:!0,character:!0,adjacent:!0},{cooldown:!0,tags:!0,character:!0,adjacent:!0,replay:!0},{cooldown:!0,tags:!0,character:!0,adjacent:!0,replay:!0,lang:!0},{cooldown:!0,tags:!0,character:!0,adjacent:!0,replay:!0,lang:!0,liked:!0}];M("характер","character"),M("жанр/настроение","genre/mood"),M("язык","language");function ur(t){const e=t.playcount||0;return e?e>1e8:(t.listeners||Dt.get(t.artistUri)||0)>3e7}const fr=()=>Bn.recentHits.slice(-5).some(Boolean);function dr(t,e,n,r,i){const a=[],o=[],s="popular"!==B.character,c=new Set(e||[]),l=new Set(n||[]),u=Math.min(lr.length-1,r??99);for(let e=0;e<=u&&a.length<t;e++){const n=lr[e],r=[...Bn.pool.values()].filter((t=>!c.has(t.uri)&&ir(t,n)&&(!i||i(t))));if(!r.length)continue;r.forEach((t=>t._s=cr(t))),r.sort(((t,e)=>e._s-t._s));const u=a.length;for(const e of r){if(a.length>=t)break;const r=Rn(e);!n.adjacent&&r.some((t=>l.has(t)))||(s&&ur(e)&&(fr()||a.some(ur))?o.push(e):(r.forEach((t=>l.add(t))),c.add(e.uri),a.push(e)))}for(const e of o.splice(0)){if(a.length>=t)break;c.has(e.uri)||(c.add(e.uri),a.push(e))}if(a.length>u&&(Bn.tierUse[e]=(Bn.tierUse[e]||0)+a.length-u),a.length>u&&e>0){f("Добрал с уступкой",n),Bn.relaxNotified=Bn.relaxNotified||{};for(const t of["character","tags","lang"])!0!==n[t]||Bn.relaxNotified[t]||(Bn.relaxNotified[t]=!0)}}return a}async function pr(t,e,n,r){if("instrumental"!==B.language)return t;for(let i=0;t.length;i++){await Promise.all(t.map((t=>Kt(t.uri,0))));const a=t.filter((t=>sr(t,!0)));if(a.length===t.length||3===i)return a;const o=new Set([...n||[],...t.map((t=>t.uri))]);t=a.concat(dr(e-a.length,o,r))}return t}const hr="spotify:internal:recs:track-ilr";async function gr(t,e,n){if(Bn.rebuildUntil=Date.now()+3e3,await async function(){if(!Bn.inSpotifyQueue.size)return;try{await Spicetify.Platform.PlayerAPI.clearQueue()}catch(t){f("очистка очереди: ошибка",String(t))}Bn.inSpotifyQueue.clear()}(),n&&!n())return void(Bn.rebuildUntil=0);for(const t of Bn.ctx)Bn.queued.set(t.uri,t);const r={skipTo:{index:t}};e>1200&&(r.seekTo=Math.floor(e)),await Spicetify.Platform.PlayerAPI.play({uri:hr,pages:[{items:Bn.ctx.map((t=>({uri:t.uri,uid:null,type:"track",provider:null})))}]},{featureIdentifier:"volna",referrerIdentifier:"volna"},r),mr()}function mr(){setTimeout((()=>{try{const t=Spicetify.Queue&&Spicetify.Queue.nextTracks||[],e=t[0]?.contextTrack?.uri||t[0]?.uri,n=Spicetify.Player.data?.item?.uri,r=Bn.ctx.findIndex((t=>t.uri===n));if(-1===r)return;const i=Bn.ctx[r+1]?.uri;if(!i||!e)return;if(Bn.queueOk=e===i,Bn.queueOk)return void(Bn.queueMiss=0);const a=Bn.queued.get(e);if(Bn.feedMode&&a&&!Bn.played.has(e))return Bn.ctx=[...Bn.ctx.slice(0,Bn.head+1),a,...Bn.ctx.slice(Bn.head+1).filter((t=>t.uri!==e))],Bn.inSpotifyQueue.add(e),Bn.queueOk=!0,void f("План сверен с очередью Spotify",{следующий:e});f("ВНИМАНИЕ: Spotify играет не наш список",{ждали:i,уSpotify:e});const o=i+">"+e;o!==Bn.lastMissSig&&(Bn.lastMissSig=o,Bn.queueMiss=(Bn.queueMiss||0)+1),Bn.feedMode&&Bn.queueMiss>=2&&(Bn.feedMode=!1,f("Очередь Spotify ведёт себя не так — перехожу на пересборку списка"),Or().catch((()=>{})))}catch{}}),1500)}async function yr(t){Bn.played.add(t.uri);{const e=gn(t);e&&Bn.playedKeys.add(e)}Bn.pool.delete(t.uri),Jn(Rn(t));for(const e of Rn(t))Bn.artistPlays.set(e,(Bn.artistPlays.get(e)||0)+1);Bn.picksFamiliar.push(be(t)),Bn.picksFamiliar.length>20&&Bn.picksFamiliar.shift(),yn(t),function(t){if(!t||!t.artistUri)return;const e=K(t.artistUri);if(He[e]||ke.familiarIds.has(e))return;He[e]=Date.now();const n=Qe($e());n.newA[e]=n.newA[e]||0,t.artistName&&(n.names[e]=t.artistName),x("stats",We)}(t);for(const e of Rn(t))cn(e,dn,!0);x("artistLast",sn),Bn.recentHits.push(ur(t)),Bn.recentHits.length>20&&Bn.recentHits.shift(),t.wasLiked=ke.likedTracks.has(t.uri)||!Vt&&await Xt(t.uri)}function wr(t){return`${t.artistName||"?"} — ${t.name||K(t.uri)} [${[...t.sources||[]].join("+")}] ${null!=t._s?t._s.toFixed(2):""}`}function kr(t){if(t._likeApplied)return;t._likeApplied=!0;const e=t.artistUri;Ce(e,2),Oe(),ke.likedTracks.add(t.uri),function(t){vn=[[K(t.uri),K(t.artistUri||""),t.name||"",t.artistName||"",Date.now()],...vn.filter((e=>e[0]!==K(t.uri)))].slice(0,300),x("waveLikes",(()=>h(d.waveLikes,JSON.stringify(vn))))}(t),Ln(e,!0),function(t){const e=K(t||"");ze[e]&&(delete ze[e],x("dislikes",Be))}(e),ke.heard.add(t.uri),e&&ke.familiarIds.add(K(e)),Ae(e).catch((()=>{}))}async function vr(t){t._recorded=!0;const e=Bn.progress.get(t.uri)||0,n=Bn.duration.get(t.uri)||0,r=n?e/n:0;let i;i=t._disliked?"dislike":r>=.8||n&&n-e<15e3?"finished":(n?r<.5:e<3e4)?"skip":"partial","dislike"!==i&&!t.wasLiked&&(Vt?Bn.hearted.has(t.uri):await Xt(t.uri))&&(i="like"),Bn.lastOutcome=i;const a=t.artistUri;if("finished"===i)Ce(a,.3),Ln(a,!1);else if("partial"===i)Ce(a,.05);else if("skip"===i){const n=e<1e4?2.5:e<3e4?1.5:.8;a&&Bn.skipArtist.set(a,(Bn.skipArtist.get(a)||0)+n),t.seed&&Bn.seedPenalty.set(t.seed,(Bn.seedPenalty.get(t.seed)||0)+n),Ce(a,-.1*n),Cn(a),e<3e4&&function(t){const e=Date.now();In[K(t.uri)]=e;const n=gn(t);n&&(In[n]=e),x("quickSkips",(()=>h(d.quickSkips,JSON.stringify(In))))}(t),await br(t,n)}else"like"===i?kr(t):"dislike"===i&&(Ce(a,-2),Cn(a),Re(t),a&&Bn.skipArtist.set(a,(Bn.skipArtist.get(a)||0)+2.5),await Promise.all([br(t,2.5),Sr(t)]));if("finished"===i||"like"===i)for(const e of Rn(t))Bn.skipNear.delete(e);Bn.skipStreak="skip"===i||"dislike"===i?Bn.skipStreak+1:0,Bn.skipStreak>=2&&Bn.skipStreak%2==0&&function(){Bn.courseAt=Date.now(),Bn.likeSeed=null;for(const t of Bn.pool.values())t.recency*=.3;Cr(!0).then((t=>{t&&t.length&&(Bn.coldSeeds=t,rr())})).catch((()=>{})),f("Серия скипов — меняю направление",{подряд:Bn.skipStreak})}();for(const t of[Bn.skipArtist,Bn.seedPenalty,Bn.skipNear,Bn.soundAvoid])for(const[e,n]of[...t]){const r=.85*n;r<.1?t.delete(e):t.set(e,r)}Oe(),Bn.history.push({uri:t.uri,artistUri:a,artistName:t.artistName,name:t.name,outcome:i,seed:t.seed,sources:[...t.sources||[]].join("+"),at:Date.now()}),Bn.history.length>200&&Bn.history.shift(),function(t,e,n){const r=Ge[e];if(null==r)return;Je.out.push([Date.now(),r]),Je.out.length>400&&Je.out.splice(0,Je.out.length-400);const i=Qe($e());i.plays++,1===r&&i.good++,"like"===e?i.likes++:"skip"===e?i.skips++:"dislike"===e&&i.dislikes++;const a=t.artistUri&&K(t.artistUri);a&&a in i.newA&&(i.newA[a]+="like"===e?3:1===r?1:0);const o=new Date;i.ms+=Math.max(0,Math.min(n||0,12e5)),i.hours[o.getHours()]++;const s=i.days[o.getDate()]||(i.days[o.getDate()]=[0,0,0]);s[0]++,1===r&&s[1]++,"skip"!==e&&"dislike"!==e||s[2]++;const c=B.character||"-";if(i.chars[c]=(i.chars[c]||0)+1,a){const n=i.arts[a]||(i.arts[a]=[0,0,0]);n[0]++,1===r&&n[1]++,"like"===e&&n[2]++,t.artistName&&!i.names[a]&&(i.names[a]=t.artistName);const o=Object.keys(i.arts);if(o.length>400)for(const t of o.sort(((t,e)=>i.arts[t][0]-i.arts[e][0])).slice(0,o.length-400))t in i.newA||(delete i.arts[t],delete i.names[t])}x("stats",We)}(t,i,n?Math.min(e,n):e)}function br(t,e){const n=Rn(t).filter((t=>!un(t)));if(!n.length)return Promise.resolve();const r=Et(n[0]).then((t=>{for(const r of(t||[]).slice(0,20))n.includes(r)||un(r)||Bn.skipNear.set(r,Math.min((Bn.skipNear.get(r)||0)+.4*e,3))})).catch((()=>{}));return Promise.race([r,new Promise((t=>setTimeout(t,300)))])}function Sr(t){const e=Mt(t.uri).then((t=>{for(const e of t||[])e&&e.uri&&!un(e.artistUri)&&Bn.soundAvoid.set(e.uri,Math.max(Bn.soundAvoid.get(e.uri)||0,2.5))})).catch((()=>{}));return Promise.race([e,new Promise((t=>setTimeout(t,300)))])}async function xr(t,e,n,r){const i=Math.min(2,e.length+n),a=new Set([t,...e].flatMap(Rn));let o=dr(n,new Set([...e.map((t=>t.uri)),...r||[]]),a);if(e.length+o.length<i){await rr();const t=new Set([...e,...o].map((t=>t.uri)));o=o.concat(dr(n-o.length,t,a)),e.length+o.length<i&&(await er(),o=o.concat(dr(n-o.length,new Set([...e,...o].map((t=>t.uri))),a)))}if(o=await pr(o,n,new Set(e.map((t=>t.uri))),a),e.length+o.length<i){await rr(),await er();const t=new Set([...e,...o].map((t=>t.uri)));o=o.concat(await pr(dr(n-o.length,t,a),n-o.length,t,a))}return o}const Pr=5,Nr=()=>!!Bn.ctx[Bn.head]&&Spicetify.Player.data?.item?.uri===Bn.ctx[Bn.head].uri;let Mr=!1,Ar=!1,Er=0;async function Dr(){if(Er=Date.now(),Mr)Ar=!0;else{Mr=!0;try{do{Ar=!1,await Ur()}while(Ar&&Bn.active&&Bn.feedMode)}catch(t){f("подбор следующего: ошибка",String(t&&t.stack||t))}finally{Mr=!1}}}async function Ur(){const t=Bn.ctx[Bn.head];if(!t||!Nr())return;const e=Bn.headGen,n=()=>e!==Bn.headGen||Bn.ctx[Bn.head]!==t,{queued:r,nextUp:i}=await async function(){try{const t=await Spicetify.Platform.PlayerAPI.getQueue(),e=t=>t&&(t.uri||t.contextTrack?.uri),n=Array.isArray(t&&t.nextUp)?t.nextUp.map(e).filter((t=>t&&Bn.queued.has(t)&&!Bn.played.has(t))).length:-1;return{queued:(t&&t.queued||[]).map(e).filter(Boolean),nextUp:n}}catch{return{queued:Bn.ctx.slice(Bn.head+1).filter((t=>Bn.inSpotifyQueue.has(t.uri))).map((t=>t.uri)),nextUp:-1}}}();if(n())return void(Ar=!0);const a=r.filter((e=>e!==t.uri&&Bn.queued.has(e)&&!Bn.played.has(e))).map((t=>Bn.queued.get(t)));Bn.inSpotifyQueue=new Set(a.map((t=>t.uri)));const o=Bn.ctx.slice(Math.max(0,Bn.head-30),Bn.head);if(a.length)return Bn.ctx=[...o,t,...a],void(Bn.head=o.length);const s=[...Bn.queued.keys()].filter((t=>!Bn.played.has(t)));let c=null;Bn.urgentPick=!0;try{const e=xr(t,[],1,s);"instrumental"===B.language?(c=await Promise.race([e,new Promise((t=>setTimeout((()=>t(null)),1500)))]),c||(c=dr(1,new Set(s),new Set(Rn(t)),void 0,(t=>!1===$t.get(t.uri)&&sr(t,!0)))),c.length||(c=await e)):c=await e}finally{Bn.urgentPick=!1}if(n())Ar=!0;else if(c.length)if(i>=0&&i<2&&(Spicetify.Player.getProgress?.()||0)<2500){const e=new Set([...s,...c.map((t=>t.uri))]),r=dr(Pr,e,new Set([t,...c].flatMap(Rn)),3,"instrumental"===B.language?t=>!1===$t.get(t.uri)&&sr(t,!0):null),i=Bn.ctx.slice(Math.max(0,Bn.head-30),Bn.head);Bn.ctx=[...i,t,...c,...r],Bn.head=i.length,Bn.lastPicks=c.map(wr),f("Запас списка пополнен",{треков:r.length});try{await gr(Bn.head,Spicetify.Player.getProgress?.()||0,(()=>!n()&&Nr()))}catch(t){f("пополнение запаса не удалось",String(t))}}else try{if(Bn.ctx.slice(Bn.head+1).some((t=>Bn.inSpotifyQueue.has(t.uri))))return;if(c.some((t=>Bn.queued.has(t.uri))))return void(Ar=!0);if(await async function(t){for(const e of t)Bn.queued.set(e.uri,e),Bn.inSpotifyQueue.add(e.uri);const e=t.map((t=>({uri:t.uri,uid:null}))),n=Spicetify.Platform.PlayerAPI,r=n&&n._queue;try{r&&"function"==typeof r.addToQueue?await r.addToQueue(e):await n.addToQueue(e)}catch(e){for(const e of t)Bn.queued.delete(e.uri),Bn.inSpotifyQueue.delete(e.uri);throw e}}(c),n())return void(Ar=!0);const e=Bn.ctx.slice(Math.max(0,Bn.head-30),Bn.head);Bn.ctx=[...e,t,...c],Bn.head=e.length,Bn.lastPicks=c.map(wr),mr(),function(){if("instrumental"!==B.language)return;const t=[...Bn.pool.values()].filter((t=>!$t.has(t.uri)&&ir(t,{artistGap:!0,lang:!0}))).map((t=>[t,cr(t)])).sort(((t,e)=>e[1]-t[1])).slice(0,6);for(const[e]of t)Kt(e.uri,1).catch((()=>{}))}()}catch(t){f("очередь Spotify не приняла трек — перехожу на пересборку списка",String(t)),Bn.feedMode=!1}}async function Or(){const t=Bn.ctx[Bn.head],e=Bn.headGen,n=()=>e!==Bn.headGen||Bn.ctx[Bn.head]!==t;let r=Bn.ctx.slice(Bn.head+1).filter((t=>ir(t,{cooldown:!0})));const i=["skip","dislike","like"].includes(Bn.lastOutcome);if(!i&&r.length>=2)return;i&&(r=[]);const a=await xr(t,r,3-r.length);if(n())return void f("пересборка устарела — пропускаю");const o=Bn.ctx.slice(Math.max(0,Bn.head-30),Bn.head);Bn.ctx=[...o,t,...r,...a],Bn.head=o.length,Bn.lastPicks=a.map(wr);const s=Spicetify.Player.getProgress?.()||0;try{await gr(Bn.head,s+250),n()&&Bn.ctx[Bn.head]&&Spicetify.Player.data?.item?.uri!==Bn.ctx[Bn.head].uri&&await gr(Bn.head)}catch(t){f("пересборка очереди не удалась",String(t))}}async function Cr(t){if(Y&&Y.tracks.length){const t=t=>"ru"===B.language?et(t):"foreign"!==B.language||!et(t),e=Y.tracks.filter(t);return nt(e.length>=3?e:Y.tracks,5).map((t=>t.uri))}const e=Q();if(e.length){await Promise.all(e.map(ae));const n=se(),r=_().soft.map((t=>ee.get(t))).filter((t=>t&&t.tracks.length)),i=n[0];if(i){const e=t=>n.every((e=>ie(e,t))),a=t=>"ru"===B.language?et(t):"foreign"!==B.language||!et(t);let o=i.tracks.filter(e);o.length||(o=i.tracks);const s=[...ce(),...r].flatMap((t=>t.tracks)).filter(e);s.length>=3&&(o=s);const c=o.filter(a);c.length>=3&&(o=c);const l=o.filter((t=>be(t))),u=nt(l.length>=3&&!t?l:o,5);return u.forEach((t=>Jn(Rn(t)))),u.map((t=>t.uri))}}if(t)return rt(De(),5,An);let n=[];try{n=(await Rt("SHORT_TERM","LAST_PLAYED","SHORT_TERM","LAST_PLAYED",20)).tracks}catch{}n.forEach(Z),"ru"===B.language?n=n.filter(et):"foreign"===B.language&&(n=n.filter((t=>!et(t)))),n.slice(0,3).forEach((t=>Jn(Rn(t))));const r=n.slice(0,3).map((t=>t.uri)),i=ke.topTracks.length?Ee().slice(0,30).map((t=>t.uri)):De(),a=t=>"ru"===B.language?et(t):"foreign"!==B.language||!et(t);for(const t of rt(Dn(40).filter(a),2,An)){if(r.length>=4)break;r.includes(t.uri)||r.push(t.uri)}for(const t of nt(i,6)){if(r.length>=5)break;r.includes(t)||r.push(t)}return r}async function Lr(t){if(Bn.starting)return void(Bn.restartPending=!0);Bn.starting=!0;const e=Date.now();try{const n=(Spicetify.Player.data?.item?.artists||[]).map((t=>t?.uri)).filter(Boolean),r=[...Bn.pool.values()],i=!(!t||!t.shake);Bn.active=!1,Bn.ctx=[],Bn.head=-1,Bn.navBack=!1,Bn.artistPlays=new Map,Bn.sessionStart=Date.now(),Bn.recentHits=[],Bn.hearted=new Set,Bn.heartTicks=new Map,Bn.sinceRefresh=0,Bn.likeSeed=null,Bn.playedKeys=new Set,Bn.queued=new Map,Bn.inSpotifyQueue=new Set,Bn.tierUse={},Bn.history=[],Bn.played=new Set,Bn.recentArtists=[],Bn.recentSet=new Set,Bn.picksFamiliar=[],Bn.pool=new Map,Bn.coldSeeds=[],Bn.skipArtist=new Map,Bn.seedPenalty=new Map,Bn.skipNear=new Map,Bn.skipStreak=0,Bn.courseAt=0,Bn.soundAvoid=new Map,Bn.feedMode=!0,Bn.queueMiss=0,Bn.lastOutcome="",Bn.lastRefresh={},Bn.lastPicks=[],Bn.relaxNotified={},Jn(n),si(),await xe(!1),ke.taste.size?Pe().catch((()=>{})):await Pe(),[Bn.coldSeeds]=await Promise.all([Cr(i),Ht(!0),xn(!0),bn()]),await Promise.all(fe().map(ae)),i||(r.length>=30?r:function(){try{const t=JSON.parse(p(d.lastPool)||"null");return!t||Date.now()-t.t>1728e5?[]:t.items.map((([t,e,n,r,i,a,o])=>{const s=n?n.split(",").map(It):[];return{uri:jt(t),name:e,artistUri:s[0],artistName:r,artistUris:s,explicit:!!i,playcount:a,listeners:o}}))}catch{return[]}}()).forEach((t=>_n(t,"carry",null,0)));let a=[],o=!0;const s=lr.length-1,c=[async()=>(await tr({quick:!0}),4),async()=>(o=!1,await rr(),s),async()=>(await er(),s)];for(const t of c){const e=await t(),n=new Set(a.map((t=>t.uri))),r=new Set(a.flatMap(Rn)),i=dr(3-a.length,n,r,e);if(a=a.concat(await pr(i,3-a.length,n,r)),a.length>=(o?2:3))break}if(!a.length)return void Spicetify.showNotification(M("Drift for Spotify: Spotify не отдаёт треки — проверь интернет (подробности в Диагностике)","Drift for Spotify: Spotify isn't returning tracks — check your connection (see Diagnostics)"),!0);const l=dr(Pr,new Set(a.map((t=>t.uri))),new Set(a.flatMap(Rn)),3,"instrumental"===B.language?t=>!1===$t.get(t.uri)&&sr(t,!0):null);Bn.ctx=[...a,...l],Bn.head=0,Bn.headGen=(Bn.headGen||0)+1,Bn.lastPicks=a.map(wr);try{await Spicetify.Platform.PlayerAPI.clearQueue()}catch(t){f("очистка очереди: ошибка",String(t))}await gr(0),Bn.active=!0,await yr(Bn.ctx[0]),si(),f("Старт",{быстрый:o,мс:Date.now()-e}),rr()}catch(t){f("ОШИБКА старта",String(t&&t.stack||t)),Spicetify.showNotification(M("Drift for Spotify: ошибка (см. Диагностику)","Drift for Spotify: something went wrong (see Diagnostics)"),!0)}finally{Bn.starting=!1,Bn.restartPending&&(Bn.restartPending=!1,Lr())}}function Tr(){Bn.active=!1,si()}function Ir(){Bn.active?Tr():(Y=null,Lr())}async function jr(t,e){bi("artist"===t?M("Drift по артисту","Drift from an artist"):M("Drift по плейлисту","Drift from a playlist"))}function zr(){Y=null,si(),Bn.active&&Lr()}function qr(){Lr({shake:!0})}async function Br(){const t=Spicetify.Player.data?.item?.uri;if(!Bn.active&&t&&Bn.queued.has(t)&&!Bn.played.has(t)&&(Bn.played.add(t),yn(Bn.queued.get(t))),!Bn.active||Bn.starting)return;if(!t)return;let e=Bn.ctx.findIndex((e=>e.uri===t));if(e===Bn.head)return;if(-1===e){const n=Bn.queued.get(t);if(!n||Bn.played.has(t))return n&&Bn.feedMode?(f("повтор из запаса — пропускаю",{трек:t}),void Spicetify.Player.next()):Date.now()<Bn.rebuildUntil?void 0:(Bn.active=!1,void si());Bn.ctx.splice(Bn.head+1,0,n),e=Bn.head+1}if(e<Bn.head)return void(Bn.navBack=!0);Bn.inSpotifyQueue.delete(t);const n=Bn.ctx[Bn.head],r=Bn.navBack,i=Bn.ctx[e];if(Bn.navBack=!1,Bn.head=e,Bn.headGen++,r||!n||n._recorded?Bn.lastOutcome="":await vr(n),n&&n._likeHandled&&"like"===Bn.lastOutcome&&(Bn.lastOutcome=""),!i)return;const a=()=>Bn.ctx[Bn.head]===i;a()&&B.blockAI&&rn(i.artistUri)?Spicetify.Player.next():(await yr(i),a()&&(Bn.feedMode?await Dr():await Or(),function(){Bn.sinceRefresh++;const t=["skip","dislike","like"].includes(Bn.lastOutcome);if(Ht().catch((()=>{})),xn().catch((()=>{})),!t&&Bn.sinceRefresh<2&&function(){let t=0;for(const e of Bn.pool.values())ir(e,{cooldown:!0})&&t++;return t}()>=25)return;Bn.sinceRefresh=0,rr()}()))}function Rr(){const t=Spicetify.Player?.data?.item;return t?{uri:t.uri,artistUri:t.artists?.[0]?.uri,artistName:t.artists?.[0]?.name,name:t.metadata?.title||t.name}:null}let Jr=0;function Hr(){const t=Rr();if(!t)return;if(Date.now()-Jr<700)return;Jr=Date.now(),Le.add(t.uri);{const e=gn(t);e&&Le.add(e)}Te();const e=Bn.ctx[Bn.head];Bn.active&&e&&e.uri===t.uri?e._disliked=!0:t.artistUri&&(Ce(t.artistUri,-2),Oe(),Re(t)),Bn.active&&!Bn.feedMode&&e&&e.uri===t.uri&&Bn.ctx[Bn.head+1]?gr(Bn.head+1).catch((()=>Spicetify.Player.next())):Spicetify.Player.next()}function $r(){const t=Rr();t&&t.artistUri&&(tn.set(t.artistUri,Date.now()+6e4*B.dislikeBanMin),Ce(t.artistUri,-8),Oe(),Spicetify.showNotification(M(`🚫 ${t.artistName||"Артист"} убран из Drift for Spotify на ${Math.round(B.dislikeBanMin/60)} ч`,`🚫 ${t.artistName||"Artist"} removed from Drift for Spotify for ${Math.round(B.dislikeBanMin/60)} h`)),Spicetify.Player.next())}window.Volna={startWave:Lr,stopWave:Tr,toggleWave:Ir,shakeWave:qr,dislikeCurrent:Hr,banArtistCurrent:$r,rebuildProfile:()=>xe(!0),getProfile:()=>we,session:Bn,journal:u,loadTagPool:ae,inPool:ie,blockerOf:z,getSettings:()=>B,getTaste:()=>ke.taste,clearBannedTracks:()=>{Le.clear(),Te()},startSourceWave:jr,clearSource:zr,getSource:()=>Y,genreLevel:re,isPro:lt,banTracks:t=>((t||[]).forEach((t=>Le.add(t))),Te(),Le.size),bannedCount:Ie,flushSaves:P,lyricsOf:t=>$t.get(t),openRecap:function(){},getStats:()=>Je,getPresets:()=>Ve};const Wr='<svg height="18" width="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M3 15c3-5 6-5 9-2s6 3 9-2"/><path d="M3 20c3-5 6-5 9-2s6 3 9-2" stroke-opacity="0.5"/><path d="M3 10c3-5 6-5 9-2s6 3 9-2" stroke-opacity="0.5"/></svg>',_r=(Wr.replace('height="18" width="18"','height="16" width="16"'),'<svg height="16" width="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/></svg>');function Qr(t){try{return document.querySelector(t)}catch{return null}}const Gr='<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5.2v13.6a1 1 0 0 0 1.5.86l11.2-6.8a1 1 0 0 0 0-1.72L8.5 4.34A1 1 0 0 0 7 5.2z"/></svg>',Fr='<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="5.5" y="5" width="14" height="14" rx="2.2"/></svg>',Yr='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg>';function Kr(t){t.innerHTML=(Bn.active?Fr:Gr)+"<span></span>",t.lastChild.textContent=Bn.active?M("Остановить Drift for Spotify","Stop Drift for Spotify"):M("Запустить Drift for Spotify","Start Drift for Spotify")}function Vr(t,e,n,r,i){const a=document.createElement("button");return a.id=t,a.className="volna-ctrl-btn",a.innerHTML=e,a.title=n,i?(a.addEventListener("pointerdown",(t=>{0===t.button&&(t.preventDefault(),t.stopPropagation(),i(t))})),a.addEventListener("click",(t=>{t.stopPropagation(),0===t.detail&&i(t)}))):a.addEventListener("click",(t=>{t.stopPropagation(),r(t)})),a}function Xr(){return Qr('[data-testid="now-playing-bar"]')||Qr("footer")||Qr(".Root__now-playing-bar")}function Zr(){const t=document.getElementById("volna-wave-btn"),e=Xr();if(t&&(!e||e.contains(t)))return!0;t&&t.remove();const n=function(){const t=Xr()||document;return t.querySelector('[data-testid="control-button-shuffle"]')||[...t.querySelectorAll("button")].find((t=>/shuffl|перемеш/i.test(t.getAttribute("aria-label")||"")))||null}();return!(!n||!n.parentNode)&&(n.parentNode.insertBefore(Vr("volna-wave-btn",Wr,"Drift for Spotify",(t=>fi(t.currentTarget))),n),si(),!0)}function ti(){const t=Xr();[...document.querySelectorAll("#volna-dislike-btn")].forEach(((e,n)=>{(n>0||!t||!t.contains(e))&&e.remove()}));const e=function(){const t=Xr();if(!t)return null;const e=t.querySelector('[data-testid^="now-playing-widget"]')||t,n=/liked songs|add to|save to|remove from|playlist|медиатек|любим|плейлист|сохран/i;return[...e.querySelectorAll("button")].find((t=>!t.id&&"cover-art-button"!==t.getAttribute("data-testid")&&("add-button"===t.getAttribute("data-testid")||n.test(t.getAttribute("aria-label")||""))))||null}(),n=document.getElementById("volna-dislike-btn");if(n&&(!e||n.previousElementSibling===e))return!0;n&&n.remove();const r=Vr("volna-dislike-btn",_r,M("Не нравится этот трек","Don't like this track"),null,(()=>Hr()));if(e&&e.parentNode)return e.parentNode.insertBefore(r,e.nextSibling),!0;const i=document.getElementById("volna-wave-btn");return!(!i||!i.parentNode)&&(i.parentNode.insertBefore(r,i),!0)}function ei(){return Qr('aside[aria-label*="Now playing view" i]')||Qr("#Desktop_PanelContainer_Id")}const ni=new Map;let ri=!1;function ii(){try{Zr(),ti(),function(){const t=ei(),e=document.getElementById("volna-dislike-npv");if(!t)return e&&e.remove(),!1;const n=/liked songs|add to|save to|remove from|playlist|медиатек|любим|плейлист|сохран/i,r=[...t.querySelectorAll("button")].find((t=>!t.id&&n.test(t.getAttribute("aria-label")||"")&&!/copy|share|more|ссылк|ещё|поделит/i.test(t.getAttribute("aria-label")||"")));(!e||!r||e.previousElementSibling!==r)&&(e&&e.remove(),!r||!r.parentNode||r.parentNode.insertBefore(Vr("volna-dislike-npv",_r,M("Не нравится этот трек","Don't like this track"),null,(()=>Hr())),r.nextSibling))}()}catch(t){f("кнопки: ошибка",String(t))}}let ai=!1;function oi(){if(!ai){ai=!0;try{if(!document.getElementById("volna-wave-btn")&&Spicetify.Playbar&&Spicetify.Playbar.Button){const t=new Spicetify.Playbar.Button("Drift for Spotify",Wr,(()=>fi(t.element)),!1,!1);t.element.id="volna-wave-btn",t.element.classList.add("volna-ctrl-btn"),si()}}catch(t){f("запасная кнопка: ошибка",String(t))}}}function si(){document.querySelectorAll("#volna-wave-btn").forEach((t=>t.classList.toggle("volna-on",Bn.active)));const t=document.getElementById("volna-start");t&&Kr(t);const e=document.getElementById("volna-status");e&&(e.textContent=(Bn.active?M("Играет: ","Playing: "):M("Выключен · ","Off · "))+F(!0))}let ci=null;function li(){ci&&(ci.remove(),ci=null,document.removeEventListener("mousedown",ui,!0))}function ui(t){!ci||ci.contains(t.target)||t.target.closest?.("#volna-wave-btn")||li()}function fi(t){if(ci)return void li();ci=function(){gi=[];const t=!1,e=document.createElement("div");e.className="volna-panel",e.addEventListener("click",(t=>t.stopPropagation()));const n=document.createElement("div");if(n.id="volna-status",n.className="volna-status",n.textContent=(Bn.active?M("Играет: ","Playing: "):M("Выключен · ","Off · "))+F(!0),e.appendChild(n),Y){const t=document.createElement("div");t.className="volna-src";const n=document.createElement("span");n.className="volna-src-name",n.textContent=("artist"===Y.type?M("Артист: ","Artist: "):M("Плейлист: ","Playlist: "))+(Y.name||"…"),n.title=Y.name||"";const r=document.createElement("button");r.className="volna-src-x",r.textContent="✕",r.title=M("Вернуть обычный Drift for Spotify","Back to regular Drift for Spotify"),r.addEventListener("click",(()=>{zr(),li()})),t.appendChild(n),t.appendChild(r),e.appendChild(t)}const r=null;r&&e.appendChild(r);const i=document.createElement("div");i.className="volna-row";const a=document.createElement("button");a.id="volna-start",a.className="volna-start",Kr(a),a.addEventListener("click",(()=>Ir()));const c=document.createElement("button");c.className="volna-shake",c.innerHTML=Yr,c.title=M("Встряхнуть — новое направление","Shake up — new direction"),c.addEventListener("click",(()=>qr())),i.appendChild(a),i.appendChild(c),e.appendChild(i),t&&function(t){const e=!1,n=di(M("Мои волны","My waves"));e||n.appendChild(Oi());t.appendChild(n);const r=document.createElement("div");if(r.className="volna-chips",Ve.forEach((t=>{const n=pi(t.name,!1,(()=>function(t){return void bi(M("Сохранённые волны","Saved waves"));for(const e of Xe)B[e]=t.s[e]||"";q(),I(),li(),t.src&&t.src.uri?jr(t.src.type,t.src.uri):(Y=null,Lr())}(t)));e||n.classList.add("locked");const i=document.createElement("span");i.className="volna-chip-x",i.textContent="✕",i.title=M("Удалить","Delete"),i.addEventListener("click",(e=>{e.stopPropagation(),Ve=Ve.filter((e=>e!==t)),Ze(),n.remove()})),n.appendChild(i),r.appendChild(n)})),Ve.length<6){const t=pi("＋ "+M("Сохранить текущую","Save current"),!1,(()=>{bi(M("Сохранённые волны","Saved waves"))}));t.classList.add("volna-chip-add"),e||t.classList.add("locked"),r.appendChild(t)}t.appendChild(r)}(e);t&&Ci(e,M("По занятию","Activity"),U,"activity");if(Ci(e,M("По характеру","Character"),A,"character"),t){N?(Ci(e,"Под настроение",E,"mood"),Ci(e,"По языку",D,"language")):Ci(e,"Mood",[...E,["instrumental","Instrumental","language"]],"mood");let t=null;const n=Ci(e,M("Жанр","Genre"),O,"genre",(()=>{t&&(t.value="")}));t=document.createElement("input"),t.className="volna-input",t.placeholder=M("Свой жанр… (Enter)","Custom genre… (Enter)"),t.value=B.genre&&!O.some((t=>t[0]===B.genre))?B.genre:"",t.addEventListener("keydown",(e=>{var r,i;e.stopPropagation(),"Enter"===e.key&&(B.genre=t.value.trim(),r=n,i=B.genre,[...r.children].forEach((t=>t.classList.toggle("on",t.dataset.val===String(i)))),yi(),hi())})),e.appendChild(t)}yi();const u=(t,n)=>{const r=document.createElement("label");r.className="volna-exrow";const i=document.createElement("input");i.type="checkbox",i.checked=!!B[n],i.addEventListener("change",(()=>{B[n]=i.checked,hi()})),r.appendChild(i),r.appendChild(document.createTextNode(" "+t)),e.appendChild(r)};u(M("Без ИИ-треков","No AI tracks"),"blockAI"),u(M("Пропускать explicit","Skip explicit"),"explicitFilter");const f=document.createElement("div");if(f.className="volna-foot",Ai){const t=document.createElement("button");t.className="volna-link volna-up",t.textContent=M(`🆕 Обновить до ${Ai} →`,`🆕 Update to ${Ai} →`),t.title=M("Новая версия — на странице Drift на GitHub","The new version is on the Drift GitHub page"),t.addEventListener("click",(()=>Si(l||"https://spicetify.app"))),f.appendChild(t)}const d=document.createElement("button");if(d.className="volna-link",d.textContent=M("Пересобрать вкус","Rebuild taste"),d.addEventListener("click",(async()=>{try{await xe(!0),Spicetify.showNotification(M("Вкус пересобран","Taste rebuilt"))}catch{}})),f.appendChild(d),!t){const t=document.createElement("button");if(t.className="volna-link",t.textContent=vi()?M("Drift Pro — настроение, жанры и ещё кое-что →","Drift Pro — moods, genres and more →"):M("Продлить Drift Pro →","Renew Drift Pro →"),t.title=M("Настроение, занятие, язык, жанр, волна по плейлисту и артисту, мгновенный лайк, память на 2000 песен, сохранённые волны, итог месяца. 7 дней бесплатно","Mood, activity, genre, Drift from a playlist or artist, instant likes, 2000-song memory, saved waves, monthly recap. Free for 7 days"),t.addEventListener("click",(()=>Si(vi()?s:o))),f.appendChild(t),vi()){const t=document.createElement("button");t.className="volna-link",t.textContent=M("☕ Поддержать автора","☕ Support the author"),t.addEventListener("click",(()=>Si(o))),f.appendChild(t)}else{const t=document.createElement("button");t.className="volna-link",t.textContent=M("Я подписался — проверить","I subscribed — check"),t.addEventListener("click",(()=>xi())),f.appendChild(t)}}return e.appendChild(f),e}(),document.body.appendChild(ci);const e=t.getBoundingClientRect(),n=ci.offsetWidth,r=ci.offsetHeight,i=Math.max(8,Math.min(Math.round(e.left+e.width/2-n/2),window.innerWidth-n-8));ci.style.left=i+"px",ci.style.top=Math.max(8,Math.round(e.top-r-10))+"px",setTimeout((()=>document.addEventListener("mousedown",ui,!0)),0)}function di(t){const e=document.createElement("div");return e.className="volna-sec",e.textContent=t,e}function pi(t,e,n){const r=document.createElement("button");return r.className="volna-chip"+(e?" on":""),r.textContent=t,r.addEventListener("click",(t=>{t.stopPropagation(),n()})),r}function hi(){I(),si(),Bn.active&&Lr()}let gi=[];function mi(t,e){return G({character:A,mood:E,language:D,activity:U,genre:O}[t]||[],e)}function yi(){for(const t of gi){const e=B[t.key]===t.val,n=e?null:z(t.key,t.val);t.el.classList.toggle("on",e),t.el.classList.toggle("blocked",!!n),t.el.title=n?M(`Не сочетается с «${mi(n[0],n[1])}»`,`Doesn't go with “${mi(n[0],n[1])}”`):""}}const wi=t=>L.includes(t)&&!0;let ki=0;const vi=()=>!0;function bi(t){const e=!vi();Spicetify.showNotification(e?ot.trial?M("Пробный Drift Pro закончился — подписка на Boosty, потом /key боту (переустанавливать не нужно)","Your Drift Pro trial has ended — subscribe on Boosty to keep Pro"):M("Подписка Drift Pro закончилась — продли её на Boosty и напиши боту /key","Your Drift Pro subscription has ended — renew it on Boosty"):M(`🔒 ${t} — в Drift Pro. Попробуй 7 дней бесплатно`,`🔒 ${t} is a Drift Pro feature. Try it free for 7 days`)),Date.now()-ki>6e4&&(ki=Date.now(),setTimeout((()=>Si(e?o:s)),900))}function Si(t){try{window.open(t,"_blank")}catch{}}async function xi(){Spicetify.showNotification(M("Проверяю подписку…","Checking your subscription…")),await gt(!0).catch((()=>{})),Spicetify.showNotification(M("Подписка пока не найдена — если только что оформил, напиши боту /key и проверь ещё раз","No subscription found yet — message the bot /key and check again"))}function Pi(t,e,n){const r=document.createElement("p");if(n){const t=document.createElement("b");t.textContent=e,r.appendChild(t)}else r.textContent=e;t.appendChild(r)}function Ni(){const t=function(){const t=document.createElement("div");return t.className="volna-box volna-end",t}(),e=Object.keys(on).length,n=Object.keys(ze).length;Pi(t,M(`Drift запомнил ${Ke(e)} артистов и 2 000 песен — во Free память сократится до 200, песни начнут повторяться чаще.`,`Drift remembered ${Ke(e)} artists and 2,000 songs — Free keeps only 200, so songs will repeat more often.`)),n&&Pi(t,M(`${Ke(n)} дизлайкнутых артистов снова могут попадаться.`,`${Ke(n)} artists you disliked may come back.`));const r=T?Object.entries(T).map((([t,e])=>mi(t,e))).filter(Boolean).join(" · "):"";r&&Pi(t,M(`Твои настройки «${r}» сохранены.`,`Your settings “${r}” are saved.`)),Ve.length&&Pi(t,M(`Сохранённые волны (${Ve.length}) ждут тебя.`,`Your ${Ve.length} saved waves are waiting.`)),Pi(t,M("Всё вернётся сразу после продления.","Everything comes back as soon as you renew."),!0),function(t,e){const n=document.createElement("div");n.className="volna-end-btns";for(const[t,r,i]of e){const e=document.createElement("button");e.textContent=t,i&&(e.className="volna-btn2"),e.addEventListener("click",r),n.appendChild(e)}t.appendChild(n)}(t,[[M("Продлить на Boosty","Renew on Boosty"),()=>Si(o)],[M("Я подписался — проверить","I subscribed — check"),()=>xi(),!0],[M("Остаться на Free","Stay on Free"),()=>Spicetify.PopupModal.hide(),!0]]),Spicetify.PopupModal.display({title:ot.trial?M("Пробный Drift Pro закончился","Your Drift Pro trial has ended"):M("Drift Pro закончился","Drift Pro has ended"),content:t})}function Mi(){ot.trial}let Ai=null;function Ei(t,n){if(!/^\d+(\.\d+){0,2}$/.test(String(t))||!function(t,e){const n=String(t).split(".").map(Number),r=String(e).split(".").map(Number);for(let t=0;t<Math.max(n.length,r.length);t++){const e=(n[t]||0)-(r[t]||0);if(e)return e>0}return!1}(t,e))return;if(Ai=String(t),p(d.updateSeen)===Ai)return;h(d.updateSeen,Ai);const r=M("скачай её с GitHub","get it from GitHub");setTimeout((()=>Spicetify.showNotification(M(`🆕 Вышла версия Drift ${Ai} — ${r}`,`🆕 Drift ${Ai} is out — ${r}`))),6e3)}let Di=null;function Ui(){const t=!1;if(t===Di)return;const e=null===Di;Di=t,function(){for(const t of L)B[t]&&((T=T||{})[t]=B[t],B[t]="")}(),e||(f("Pro выключен"),ci&&li(),si(),Bn.active&&Lr())}function Oi(){const t=document.createElement("span");return t.className="volna-pro",t.textContent="PRO",t}function Ci(t,e,n,r,i){const a=di(e);wi(r)&&a.appendChild(Oi()),t.appendChild(a);const o=document.createElement("div");return o.className="volna-chips",n.forEach((([t,n,a])=>{const s=a||r;if(wi(s)){const r=pi(n,!1,(()=>bi(e)));return r.classList.add("locked"),r.dataset.val=t,r.title=M("Доступно в Drift Pro","Available in Drift Pro"),void o.appendChild(r)}const c=pi(n,B[s]===t,(()=>{const e=B[s]===t?null:z(s,t);e?Spicetify.showNotification(M(`«${n}» не сочетается с «${mi(e[0],e[1])}» — сначала сними его`,`“${n}” doesn't go with “${mi(e[0],e[1])}” — turn that off first`)):(B[s]=B[s]===t?"":t,i&&i(),yi(),hi())}));c.dataset.val=t,o.appendChild(c),gi.push({key:s,val:t,el:c})})),t.appendChild(o),o}function Li(){const t=document.createElement("div");t.className="volna-box";const n={version:e,сборка:a+""+(ot.until?" · ключ до "+new Date(ot.until).toLocaleDateString():"")+(ot.reason?" · сервер: "+ot.reason:""),настройки:B,волна:Bn.active?"играет":"выключена",очередьНаша:void 0===Bn.queueOk?"ещё не проверено":Bn.queueOk?"да":"НЕТ — Spotify подменяет список",профиль:we?{собран:new Date(we.builtAt).toLocaleString(),лайков:ke.likedTracks.size,знакомыхАртистов:ke.familiarIds.size,услышанныхТреков:ke.heard.size,историяSpotify:!!we.historyOk,самыхСлушаемыхТреков:ke.topTracks.length,окрестностьВкуса:ke.taste.size,топАртисты:ke.topArtists.slice(0,12).map((t=>t.name||K(t.uri)))}:"ещё не собран",разметка:[...ee.values()].map((t=>`${t.key}: ${t.tracks.length} треков из ${t.playlists} плейлистов`)),кандидаты:Bn.lastRefresh,последниеВыборы:Bn.lastPicks,сессия:Bn.history.slice(-15).map((t=>`${t.outcome} · ${t.artistName||"?"} — ${t.name||""} [${t.sources}]`)),graphql:bt,забаненоТреков:Ie(),дизлайкнутыхАртистов:Object.keys(ze).length,ИИартистов:nn.size,память:v(),сборка:{pro:!!r,покупатель:i||"—",сервер:"не задан"},кэш:{артистов:Object.keys(Tt).length,текстов:Object.keys(Qt).length,размерКБ:Math.round([d.artists,d.lyrics,d.lastPool,d.trackHist].reduce(((t,e)=>t+(p(e)||"").length),0)/1024)},сеть:{одновременно:wt,вОчереди:yt[0].length+yt[1].length}},o="== ОТЧЁТ ==\n"+JSON.stringify(n,null,2)+"\n\n== ЖУРНАЛ ==\n"+(u.join("\n")||"(пусто)");t.innerHTML='<button id="v-copy">📋 '+M("Копировать","Copy")+'</button><button id="v-tags">♻ '+M("Обновить разметку","Refresh tags")+'</button><button id="v-cache">🧹 '+M("Очистить кэш","Clear cache")+'</button><pre id="v-rep"></pre>',t.querySelector("#v-rep").textContent=o,t.querySelector("#v-copy").addEventListener("click",(async()=>{try{await Spicetify.Platform.ClipboardAPI.copy(o),Spicetify.showNotification(M("Скопировано","Copied"))}catch{try{await navigator.clipboard.writeText(o),Spicetify.showNotification(M("Скопировано","Copied"))}catch{Spicetify.showNotification(M("Выдели текст вручную","Select the text manually"),!0)}}})),t.querySelector("#v-tags").addEventListener("click",(()=>{for(const t of Object.keys(R))h(d.tagPrefix+t,"");ee.clear(),Spicetify.showNotification(M("Разметка сброшена — загрузится при следующем запуске","Tags reset — they'll reload on next start"))})),t.querySelector("#v-cache").addEventListener("click",(()=>{b.delete("artists"),b.delete("lyrics"),b.delete("lastPool"),Tt={},Qt={};for(const t of[d.artists,d.lyrics,d.lastPool])h(t,"");Ut.clear(),At.clear(),Wt.clear(),$t.clear(),Spicetify.showNotification(M("Кэш очищен — данные подтянутся заново","Cache cleared — data will reload"))})),Spicetify.PopupModal.display({title:M("Drift for Spotify — диагностика","Drift for Spotify — Diagnostics"),content:t,isLarge:!0})}function Ti(){const t=Spicetify.ContextMenu;t&&t.Item||f("контекстное меню недоступно")}let Ii=null,ji=!1;y(),function(){try{const t=JSON.parse(p(d.remoteCfg)||"null");t&&t.cfg&&(ct(t.cfg),ot.at=t.at||0,ot.ok=!0,ot.until=Date.parse(t.until||"")||0,ot.trial=!!t.trial,ot.top=t.top||null)}catch{}}(),Ui(),function(){try{vn=JSON.parse(p(d.waveLikes)||"[]")||[]}catch{vn=[]}}(),function(){try{In=JSON.parse(p(d.quickSkips)||"{}")||{}}catch{In={}}const t=Date.now()-6048e5;for(const e of Object.keys(In))In[e]<t&&delete In[e]}(),function(){try{Le=new Set(JSON.parse(p(d.banned)||"[]"))}catch{Le=new Set}}(),function(){try{ze=JSON.parse(p(d.dislikes)||"{}")||{}}catch{ze={}}try{qe=JSON.parse(p(d.dislikeNear)||"{}")||{}}catch{qe={}}const t=Date.now();for(const[e,n]of Object.entries(ze)){const r=Array.isArray(n)?n.filter((e=>t-e<180*je)).slice(-5):[];r.length?ze[e]=r:delete ze[e]}for(const[e,n]of Object.entries(qe))(!Array.isArray(n)||n[0]*Math.exp(-(t-n[1])/(60*je))<.05)&&delete qe[e]}(),function(){try{const t=JSON.parse(p(d.stats)||"null");t&&Array.isArray(t.out)&&t.months&&(Je=t)}catch{}try{He=JSON.parse(p(d.discovered)||"{}")||{}}catch{He={}}const t=Object.keys(Je.months).sort().slice(-13);Je.months=Object.fromEntries(t.map((t=>[t,Je.months[t]])));const e=Object.keys(He);e.length>4e3&&(He=Object.fromEntries(e.sort(((t,e)=>He[e]-He[t])).slice(0,4e3).map((t=>[t,He[t]]))))}(),function(){try{Ve=(JSON.parse(p(d.presets)||"[]")||[]).filter((t=>t&&t.name&&t.s))}catch{Ve=[]}}(),function(){try{Ue=JSON.parse(p(d.affinity)||"{}")||{}}catch{Ue={}}}(),function(){try{fn=JSON.parse(p(d.trackHist)||"{}")||{}}catch{fn={}}dn=parseInt(p(d.playNo)||"0",10)||0;const t=Date.now()-10368e6;let e=Object.entries(fn).filter((([,e])=>Array.isArray(e)&&e[0]>t));e=e.map((([t,e])=>[t.startsWith("spotify:track:")?"t:"+K(t):t,e])),dn||(dn=e.length);for(const t of e)null==t[1][2]&&(t[1][2]=Math.max(0,dn-Math.round((Date.now()-t[1][0])/18e4)));e.length>9e3&&(e=e.sort(((t,e)=>e[1][0]-t[1][0])).slice(0,9e3)),fn=Object.fromEntries(e)}(),function(){try{on=JSON.parse(p(d.artistLast)||"null")}catch{on=null}if(!on||"object"!=typeof on){on={};try{const t=JSON.parse(p(d.artistHist)||"{}")||{};for(const[e,n]of Object.entries(t))Array.isArray(n)&&n.length&&(on[K(e)]=[Math.max(0,dn-Math.round((Date.now()-Math.max(...n))/18e4)),n.length]);sn(),localStorage.removeItem(d.artistHist)}catch{}}let t=Object.entries(on).filter((([,t])=>Array.isArray(t)&&dn-t[0]<=3e3));t.length>4e3&&(t=t.sort(((t,e)=>e[1][0]-t[1][0])).slice(0,4e3)),on=Object.fromEntries(t)}(),function(){try{Tt=JSON.parse(p(d.artists)||"{}")||{}}catch{Tt={}}const t=Date.now();for(const[e,n]of Object.entries(Tt))n&&"object"==typeof n?(n.t&&t-n.t>Ct&&(delete n.t,delete n.tr,delete n.l,delete n.n),n.rt&&t-n.rt>Lt&&(delete n.r,delete n.rt),n.t||n.rt?n.t&&qt(It(e),n):delete Tt[e]):delete Tt[e]}(),function(){try{Qt=JSON.parse(p(d.lyrics)||"{}")||{}}catch{Qt={}}for(const[t,e]of Object.entries(Qt))$t.set(jt(t),!!e)}(),function(){try{Un=JSON.parse(p(d.skipHist)||"{}")||{}}catch{Un={}}const t=Date.now()-432e6;for(const e of Object.keys(Un)){const n=(Un[e]||[]).filter((e=>e>t)).slice(-6);n.length?Un[e]=n:delete Un[e]}}();try{window.addEventListener("beforeunload",P)}catch{}!function(){try{nn=new Set(JSON.parse(p(d.aiList)||"[]"))}catch{nn=new Set}}(),async function(t){try{const e=parseInt(p(d.aiTs)||"0",10);if(!t&&nn.size&&Date.now()-e<6048e5)return;const n=await(await fetch("https://raw.githubusercontent.com/xoundbyte/soul-over-ai/main/dist/artists.json")).json(),r=[];for(const t of Array.isArray(n)?n:[])t&&"string"==typeof t.spotify&&/^[0-9A-Za-z]{22}$/.test(t.spotify)&&!t.removed&&r.push(t.spotify);if(!r.length)throw new Error("пустой или испорченный список");nn=new Set(r),h(d.aiList,JSON.stringify(r)),h(d.aiTs,String(Date.now())),f("Список ИИ-артистов обновлён",nn.size)}catch(t){f("Список ИИ не загрузился",String(t))}}(!1);try{const t=JSON.parse(p(d.profile)||"null");t&&ve(t)}catch{}!function(){ii(),setInterval(ii,1500),setInterval((()=>{for(const t of[Xr(),ei()]){if(!t||ni.has(t))continue;const e=new MutationObserver((()=>{document.getElementById("volna-dislike-btn")&&document.getElementById("volna-wave-btn")&&(!ei()||document.getElementById("volna-dislike-npv"))||ri||(ri=!0,requestAnimationFrame((()=>{ri=!1,ii()})))}));e.observe(t,{childList:!0,subtree:!0}),ni.set(t,e)}for(const[t,e]of ni)t.isConnected||(e.disconnect(),ni.delete(t))}),1e3),setTimeout(oi,4e3);try{Ii=new Spicetify.Menu.Item(M("Drift for Spotify — диагностика","Drift for Spotify — Diagnostics"),!1,Li),Ii.register(),ji=!0}catch(t){f("меню: ошибка",String(t))}try{Ti()}catch(t){f("контекстное меню: ошибка",String(t))}try{Spicetify.Keyboard?.registerShortcut?.({key:"j",ctrl:!0,alt:!0},(()=>Hr())),Spicetify.Keyboard?.registerShortcut?.({key:"k",ctrl:!0,alt:!0},(()=>$r()))}catch{}const t=document.createElement("style");t.textContent="\n      .volna-ctrl-btn{background:transparent;border:none;color:var(--spice-subtext,#b3b3b3);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0;border-radius:50%;flex:none;}\n      .volna-ctrl-btn:hover{color:var(--spice-text,#fff);}\n      .volna-ctrl-btn.volna-on{color:#1ed760;}\n      .volna-panel{position:fixed;z-index:9999;width:340px;max-width:92vw;max-height:80vh;overflow-y:auto;background:#181818;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px;box-shadow:0 16px 48px rgba(0,0,0,.6);color:#fff;font-size:13px;box-sizing:border-box;}\n      .volna-status{font-size:12px;opacity:.7;margin-bottom:10px;line-height:1.4;overflow-wrap:anywhere;}\n      .volna-src{display:flex;align-items:center;gap:8px;margin:-4px 0 10px;padding:6px 6px 6px 10px;border-radius:8px;background:rgba(255,255,255,.07);}\n      .volna-src-name{flex:1;min-width:0;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}\n      .volna-src-x{flex:none;width:24px;height:24px;border:none;border-radius:50%;background:transparent;color:#fff;opacity:.7;cursor:pointer;font-size:12px;}\n      .volna-src-x:hover{opacity:1;background:rgba(255,255,255,.12);}\n      .volna-row{display:flex;gap:8px;}\n      .volna-start{flex:1;padding:10px;border:none;border-radius:999px;background:#1ed760;color:#000;font-weight:700;cursor:pointer;font-size:14px;}\n      .volna-shake{width:44px;border:1px solid rgba(255,255,255,.25);border-radius:999px;background:transparent;color:#fff;cursor:pointer;font-size:16px;display:inline-flex;align-items:center;justify-content:center;}\n      .volna-shake:hover{border-color:#fff;}\n      .volna-start{display:inline-flex;align-items:center;justify-content:center;gap:8px;}\n      .volna-start svg{display:block;flex:none;}\n      .volna-sec{margin:14px 0 6px;font-weight:700;opacity:.7;font-size:11px;text-transform:uppercase;letter-spacing:.05em;}\n      .volna-chips{display:flex;flex-wrap:wrap;gap:6px;}\n      .volna-chip{padding:6px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:transparent;color:#fff;cursor:pointer;font-size:12px;}\n      .volna-chip:hover{border-color:#fff;}\n      .volna-chip.on{background:#1ed760;color:#000;border-color:#1ed760;font-weight:700;}\n      .volna-chip.blocked{opacity:.3;cursor:not-allowed;}\n      .volna-chip.blocked:hover{border-color:rgba(255,255,255,.18);}\n      .volna-chip.locked{opacity:.45;}\n      .volna-chip.locked:hover{opacity:.8;border-color:#1ed760;}\n      .volna-pro{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:999px;background:#1ed760;color:#000;font-size:9px;letter-spacing:.04em;vertical-align:1px;opacity:1;}\n      .volna-up{margin-left:auto;font-weight:700;}\n      .volna-input{width:100%;margin-top:8px;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.18);background:#121212;color:#fff;box-sizing:border-box;}\n      .volna-exrow{display:flex;align-items:center;gap:8px;margin-top:12px;cursor:pointer;}\n      .volna-foot{display:flex;gap:14px;margin-top:14px;border-top:1px solid rgba(255,255,255,.1);padding-top:10px;}\n      .volna-link{background:none;border:none;color:#1ed760;cursor:pointer;font-size:12px;padding:0;}\n      .volna-box pre{white-space:pre-wrap;word-break:break-word;background:#0a0a0a;border:1px solid #333;border-radius:8px;padding:12px;max-height:48vh;overflow:auto;font-size:11px;line-height:1.5;}\n      .volna-box button{padding:7px 16px;border-radius:999px;border:none;background:#1ed760;color:#000;font-weight:700;cursor:pointer;margin-right:8px;}\n      .volna-box button.volna-btn2{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3);}\n      .volna-end p{margin:0 0 10px;line-height:1.5;font-size:14px;}\n      .volna-end-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}\n      .volna-chip-x{margin-left:7px;opacity:.5;font-size:10px;}\n      .volna-chip-x:hover{opacity:1;}\n      .volna-chip-add{border-style:dashed;}\n      .volna-foot{flex-wrap:wrap;row-gap:6px;}\n      .drw-ov{position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.86);display:flex;align-items:center;justify-content:center;}\n      .drw-frame{position:relative;height:min(88vh,860px);aspect-ratio:9/16;border-radius:18px;overflow:hidden;color:#fff;cursor:pointer;user-select:none;box-shadow:0 30px 80px rgba(0,0,0,.6);transition:background .4s;}\n      .drw-bars{position:absolute;top:12px;left:12px;right:12px;display:flex;gap:4px;z-index:2;}\n      .drw-bar{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.35);overflow:hidden;}\n      .drw-bar i{display:block;height:100%;width:0;background:#fff;}\n      @keyframes drw-fill{from{width:0}to{width:100%}}\n      .drw-x{position:absolute;top:24px;right:14px;z-index:3;width:32px;height:32px;border:none;border-radius:50%;background:rgba(0,0,0,.25);color:#fff;font-size:14px;cursor:pointer;}\n      .drw-demo{position:absolute;top:30px;left:16px;z-index:3;font-size:11px;padding:2px 8px;border-radius:999px;background:rgba(0,0,0,.35);}\n      .drw-stage{position:absolute;inset:0;}\n      .drw-slide{position:absolute;inset:0;padding:70px 28px 36px;display:flex;flex-direction:column;justify-content:center;gap:6px;animation:drw-in .5s ease-out;}\n      .drw-center{align-items:center;text-align:center;}\n      @keyframes drw-in{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}\n      .drw-kicker{font-size:15px;font-weight:700;letter-spacing:.02em;opacity:.9;}\n      .drw-big{font-size:96px;font-weight:900;line-height:1;letter-spacing:-.03em;}\n      .drw-h1{font-size:40px;font-weight:900;line-height:1.05;letter-spacing:-.02em;}\n      .drw-h2{font-size:26px;font-weight:800;}\n      .drw-sub{font-size:15px;font-weight:600;opacity:.9;margin-top:8px;line-height:1.4;}\n      .drw-logo svg{color:#fff;margin-bottom:10px;}\n      .drw-emoji{font-size:84px;line-height:1.1;margin:6px 0;}\n      .drw-list{margin-top:18px;display:flex;flex-direction:column;gap:10px;}\n      .drw-row{display:flex;align-items:center;gap:12px;font-weight:700;font-size:17px;}\n      .drw-num{width:18px;opacity:.8;}\n      .drw-ava{width:46px;height:46px;border-radius:50%;object-fit:cover;background:rgba(255,255,255,.2);}\n      .drw-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}\n      .drw-hero{width:62%;aspect-ratio:1;border-radius:50%;object-fit:cover;margin:14px 0;box-shadow:0 18px 50px rgba(0,0,0,.35);}\n      .drw-curve{width:100%;height:auto;margin:22px 0 6px;overflow:visible;}\n      .drw-split{margin:26px 0 10px;}\n      .drw-banner{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;margin:0 0 10px;padding:10px 14px;border:none;border-radius:12px;cursor:pointer;color:#fff;text-align:left;\n        background:linear-gradient(110deg,#1a0b4d,#4100f5 45%,#0d72ea 80%,#4100f5);background-size:200% 100%;animation:drw-shine 6s ease-in-out infinite;box-shadow:0 6px 22px rgba(65,0,245,.4);}\n      .drw-banner:hover{filter:brightness(1.08);}\n      .drw-banner-t{font-size:15px;font-weight:800;}\n      .drw-banner-s{font-size:12px;font-weight:600;opacity:.9;}\n      .drw-banner{position:relative;}\n      .drw-banner-x{position:absolute;top:6px;right:6px;width:22px;height:22px;border:none;border-radius:50%;background:rgba(0,0,0,.25);color:#fff;font-size:11px;line-height:22px;padding:0;cursor:pointer;opacity:.75;}\n      .drw-banner-x:hover{opacity:1;background:rgba(0,0,0,.45);}\n      @keyframes drw-shine{0%,100%{background-position:0 0}50%{background-position:100% 0}}\n      .drw-split-bar{display:flex;height:22px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.12);}\n      .drw-split-bar i{display:block;height:100%;transform-origin:left;transform:scaleX(0);animation:drw-grow .7s ease-out forwards;}\n      @keyframes drw-grow{to{transform:scaleX(1)}}\n      .drw-split-legend{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;font-size:14px;font-weight:700;}\n      .drw-split-row{display:flex;align-items:center;gap:8px;}\n      .drw-split-row b{width:12px;height:12px;border-radius:50%;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.35);}\n      .drw-line{stroke-dasharray:1000;stroke-dashoffset:1000;animation:drw-draw 1.6s ease-out .15s forwards;}\n      .drw-area{opacity:0;animation:drw-fade .8s ease-out 1.1s forwards;}\n      .drw-dot,.drw-lbl{opacity:0;animation:drw-fade .4s ease-out forwards;}\n      .drw-lbl{fill:#fff;font-size:17px;font-weight:800;}\n      @keyframes drw-draw{to{stroke-dashoffset:0}}\n      @keyframes drw-fade{to{opacity:1}}\n      .drw-card{height:62%;border-radius:12px;margin:12px 0;box-shadow:0 12px 40px rgba(0,0,0,.5);}\n      .drw-actions{display:flex;gap:10px;}\n      .drw-btn{padding:10px 18px;border-radius:999px;border:none;background:#1ed760;color:#000;font-weight:800;cursor:pointer;font-size:14px;}\n      .drw-btn2{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);}",document.head.appendChild(t)}();try{Spicetify.Platform.PlayerAPI.getEvents().addListener("action",(function(t){if(!t||!t.data||"skipToPrevious"!==t.data.action)return;if(!Bn.active||Bn.starting||!Bn.feedMode)return;if((Spicetify.Player.getProgress?.()||0)>3e3)return;const e=Bn.ctx.findIndex((t=>t.uri===Spicetify.Player.data?.item?.uri));if(e<=0)return;t.preventDefault();const n=[...Bn.queued.values()].filter((t=>!Bn.played.has(t.uri)&&!Bn.ctx.includes(t))).slice(0,Pr);Bn.ctx=[...Bn.ctx,...n],gr(e-1).catch((t=>f("назад: не получилось",String(t))))}))}catch(t){f("«назад»: событие недоступно",String(t))}Spicetify.Player.addEventListener("songchange",(()=>{Br().catch((t=>f("смена трека: ошибка",String(t&&t.stack||t))))})),Spicetify.Player.addEventListener("onprogress",(t=>{const e=Spicetify.Player.data?.item?.uri;if(!e)return;Bn.progress.set(e,"number"==typeof t?.data?t.data:Spicetify.Player.getProgress?.()||0);const n=Spicetify.Player.getDuration?.();if(n&&Bn.duration.set(e,n),!Bn.active||Bn.starting||!Bn.feedMode||Mr||Date.now()-Er<4e3||!Nr()||Bn.ctx.slice(Bn.head+1).some((t=>Bn.inSpotifyQueue.has(t.uri)))||Dr(),Bn.active&&function(){try{const t=Spicetify.Player.getHeart?.();if("boolean"==typeof t)return Vt=!0,t}catch{}return null}()){const t=(Bn.heartTicks.get(e)||0)+1;if(Bn.heartTicks.set(e,t),t>=3&&(Bn.progress.get(e)||0)>=2e3&&!Bn.hearted.has(e)){Bn.hearted.add(e);const t=Bn.ctx[Bn.head];t&&t.uri===e&&Xt(e).then((t=>{t?async function(){}().catch((t=>f("лайк: ошибка",String(t)))):Bn.hearted.delete(e)}))}}})),setTimeout((()=>{xn(!0),bn()}),3e3),gt().catch((()=>{})),setInterval((()=>{gt().catch((()=>{})),Ui(),Mi()}),6e5),setTimeout((()=>{Mi(),async function(){if(!(Date.now()-(parseInt(p(d.updateAt)||"0",10)||0)<72e6)){h(d.updateAt,String(Date.now()));try{const t=await(await fetch(c,{cache:"no-store"})).json(),e=Array.isArray(t)?t[0]&&t[0].version:t&&t.version;e&&Ei(e)}catch{}}}()}),8e3),f("Загружено v"+e),Spicetify.showNotification(M("Drift for Spotify загружен","Drift for Spotify loaded")+" (v"+e+")")}();
+// Drift for Spotify 1.0 (Free) — © bayok. Код відкритий для читання; поширювати змінені копії заборонено — див. LICENSE.
+// Pro: https://t.me/Spotify_drift_bot
+// NAME: Drift for Spotify
+// AUTHOR: bayok
+// DESCRIPTION: An endless personal wave that learns from your likes and skips and almost never repeats. Free edition.
+// VERSION: 1.0
+
+/* eslint-disable no-console */
+(function Volna() {
+  "use strict";
+
+  const VERSION = "1.0";
+  const TAG = "[Волна]";
+
+  // Особиста збірка Pro: бот підставляє сюди ключ і номер покупця (водяний знак). Порожньо — безкоштовна версія.
+  const BUILD = { key: "", buyer: "" };
+  // Сервер налаштувань Drift (Supabase Edge Function). Порожньо — працюємо на вбудованих налаштуваннях.
+  const CONFIG_URL = "";
+  // Збірка: "dev" — усе відкрито (вихідний код), "free" — безкоштовна, "pro" — за ключем підписки. Підставляє tools/build.js.
+  const EDITION = "free";
+  // Куди вести по Pro (сторінка Boosty). Підставляє tools/build.js.
+  const UPGRADE_URL = "https://boosty.to/meenbeens";
+  // Пробний Pro на 7 днів — бот видає його за посиланням ?start=trial (один раз на Telegram-акаунт і на встановлення Spotify)
+  const TRIAL_URL = "https://t.me/Spotify_drift_bot?start=trial";
+  const TRIAL_DAYS = 7;
+  // Free дізнається про нову версію з manifest.json на GitHub (Pro — з налаштувань сервера). Підставляє tools/build.js.
+  const UPDATE_URL = "https://raw.githubusercontent.com/mayl0o/drift-for-spotify/main/manifest.json";
+  const REPO_URL = "https://github.com/mayl0o/drift-for-spotify"; // сторінка Free на GitHub (підставляє tools/build.js)
+  const BOT_KEY_URL = "https://t.me/Spotify_drift_bot?start=key";
+
+  // ==================================================================
+  // Журнал (видно в «Діагностиці», DevTools не потрібні)
+  // ==================================================================
+  const journal = [];
+  function safeJson(v) { try { return typeof v === "string" ? v : JSON.stringify(v); } catch { return String(v); } }
+  function logEvent(msg, data) {
+    const line = `${new Date().toLocaleTimeString()}  ${msg}` + (data !== undefined ? `  ${safeJson(data)}` : "");
+    journal.push(line);
+    if (journal.length > 400) journal.shift();
+    console.log(TAG, msg, data ?? "");
+  }
+
+  // ==================================================================
+  // Чекаємо, поки Spicetify буде готовий
+  // ==================================================================
+  if (!(window.Spicetify && Spicetify.Platform && Spicetify.Platform.PlayerAPI && Spicetify.Player &&
+        Spicetify.Menu && Spicetify.PopupModal && Spicetify.showNotification && Spicetify.LocalStorage &&
+        Spicetify.GraphQL && Spicetify.GraphQL.Definitions)) {
+    Volna.tries = (Volna.tries || 0) + 1;
+    if (Volna.tries > 300) { console.error(TAG, "Spicetify не инициализировался"); return; }
+    setTimeout(Volna, 200);
+    return;
+  }
+
+  // ==================================================================
+  // Сховище
+  // ==================================================================
+  const K = {
+    settings: "volna:settings:v3",
+    oldSettings: "volna:settings:v2",
+    profile: "volna:profile:v6",
+    banned: "volna:bannedTracks:v2",
+    affinity: "volna:affinity:v2",
+    aiList: "volna:aiArtists:v1",
+    aiTs: "volna:aiArtistsTs:v1",
+    tagPrefix: "volna:tag:v5:",       // компактний формат: [id, назва, "id,id" артистів, ім'я артиста, explicit]
+    artistHist: "volna:artistHist:v1", // стара пам'ять артистів по днях — переноситься в artistLast і видаляється
+    artistLast: "volna:artistLast:v1", // артист -> [номер останнього прослуховування, скільки разів]
+    trackHist: "volna:trackHist:v1",
+    playNo: "volna:playNo:v1",       // наскрізний лічильник прослуховувань (для «не повторювати 2000 пісень»)
+    artists: "volna:artists:v1",     // кеш артистів (топ-треки, слухачі, схожі)
+    lyrics: "volna:lyrics:v1",       // чи є в треку текст
+    lastPool: "volna:lastPool:v1",   // кандидати минулого запуску — для миттєвого старту
+    remoteCfg: "volna:remoteCfg:v1", // налаштування з сервера (хеші запитів Spotify, розмітка) — останні отримані
+    waveLikes: "volna:waveLikes:v1", // лайки, поставлені в хвилі (впливають на хвилю й далі)
+    skipHist: "volna:skipHist:v1",   // скіпи артистів за останні дні
+    quickSkips: "volna:quickSkips:v1", // треки, скіпнуті в перші 30 с (тиждень не ставимо)
+    dislikes: "volna:dislikes:v1",   // дизлайки за артистами: id -> [ts…] (Pro: довга пам'ять)
+    dislikeNear: "volna:dislikeNear:v1", // схожі на дизлайкнутих артистів: id -> [вага, ts]
+    installId: "volna:installId:v1", // номер встановлення (Pro: на скількох комп'ютерах один ключ)
+    stats: "volna:stats:v1",         // результати треків хвилі й підсумки за місяцями («Drift тебе знає», підсумок місяця)
+    discovered: "volna:discovered:v1", // артисти, вперше почуті в Drift: id -> ts
+    presets: "volna:presets:v1",     // збережені хвилі (Pro)
+    proWas: "volna:proWas:v1",       // чи був Pro минулого разу — щоб один раз показати «Pro закінчився»
+    trialRemind: "volna:trialRemind:v1", // нагадування «завтра пробний закінчиться» вже було
+    recapSeen: "volna:recapSeen:v1", // сповіщення «підсумок місяця готовий» вже було
+    recapHide: "volna:recapHide:v1", // плашку підсумку цього місяця закрили хрестиком
+    updateSeen: "volna:updateSeen:v1", // про яку нову версію вже сказали
+    updateAt: "volna:updateAt:v1",   // коли Free востаннє перевіряв GitHub
+  };
+  function lsGet(k) { try { return Spicetify.LocalStorage.get(k); } catch { return null; } }
+  function lsSet(k, v) {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try { Spicetify.LocalStorage.set(k, v); return true; }
+      catch (e) {
+        if (attempt < 2 && /quota/i.test(String(e))) { freeStorage(attempt + 1, k); continue; } // місце скінчилося — чистимо й пробуємо ще раз
+        logEvent("Не сохранилось " + k, String(e)); return false;
+      }
+    }
+    return false;
+  }
+  // Пам'ять Spotify для розширень ~5 МБ на все. Старі версії даних видаляємо, розмітку тримаємо в межах бюджету.
+  const TAG_CACHE_BUDGET = 900000;
+  function volnaKeys() { try { return Object.keys(localStorage).filter((k) => k.startsWith("volna:")); } catch { return []; } }
+  function cleanupStorage() {
+    const keep = new Set(Object.values(K));
+    let freed = 0;
+    for (const k of volnaKeys()) {
+      if (keep.has(k) || k.startsWith(K.tagPrefix)) continue;
+      try { freed += (localStorage.getItem(k) || "").length; localStorage.removeItem(k); } catch {}
+    }
+    trimTagCaches(TAG_CACHE_BUDGET);
+    if (freed) logEvent("Память: удалены старые данные", { КБ: Math.round(freed / 1024) });
+  }
+  // розмітка понад бюджет — спершу найстаріша (і не та, що потрібна зараз)
+  function trimTagCaches(budget, protect) {
+    const rows = volnaKeys().filter((k) => k.startsWith(K.tagPrefix)).map((k) => {
+      const v = localStorage.getItem(k) || "";
+      const m = /"ts":(\d+)/.exec(v.slice(0, 40));
+      return { k, n: v.length, ts: m ? +m[1] : 0 };
+    }).sort((a, b) => a.ts - b.ts);
+    let total = rows.reduce((x, r) => x + r.n, 0);
+    for (const r of rows) {
+      if (total <= budget) break;
+      if (protect && protect.has(r.k)) continue;
+      try { localStorage.removeItem(r.k); total -= r.n; } catch {}
+    }
+  }
+  // Видаляється лише те, що можна завантажити знову. Особисте — профіль, смак, лайки, скіпи, бани,
+  // симпатія до артистів, історія треків — не видаляється ніколи.
+  // 1-й крок: старі версії + зайва розмітка; 2-й: уся розмітка й кеші (артисти, тексти, пул минулого запуску).
+  function freeStorage(level, forKey) {
+    try {
+      cleanupStorage();
+      const active = new Set(activeTags().map((k) => K.tagPrefix + k));
+      trimTagCaches(level >= 2 ? 0 : TAG_CACHE_BUDGET / 3, level >= 2 ? null : active);
+      if (level >= 2) for (const k of [K.lastPool, K.lyrics, K.artists]) if (k !== forKey) { try { localStorage.removeItem(k); } catch {} }
+      logEvent("Память: освобождено место", { шаг: level, для: forKey });
+    } catch {}
+  }
+  function storageUsage() {
+    let all = 0, volna = 0;
+    try { for (const k of Object.keys(localStorage)) { const n = k.length + (localStorage.getItem(k) || "").length; all += n; if (k.startsWith("volna:")) volna += n; } } catch {}
+    return { всегоКБ: Math.round(all / 1024), волнаКБ: Math.round(volna / 1024), лимитКБ: 5120 };
+  }
+  // Запис на диск пачкою: не на кожен трек, а раз на кілька секунд (і під час закриття Spotify)
+  const pendingSaves = new Map(); let saveTimer = 0;
+  function saveLater(key, fn) {
+    pendingSaves.set(key, fn);
+    if (!saveTimer) saveTimer = setTimeout(flushSaves, 5000);
+  }
+  function flushSaves() {
+    saveTimer = 0; // якщо таймер ще попереду — він просто нічого не знайде
+    for (const fn of pendingSaves.values()) { try { fn(); } catch {} }
+    pendingSaves.clear();
+  }
+
+  // ==================================================================
+  // Налаштування — як у «Моїй хвилі»: заняття, характер, настрій, мова (+ жанр)
+  // ==================================================================
+  // Мова інтерфейсу — як у самого Spotify: російська → російською, будь-яка інша → англійською
+  const UI_RU = (() => {
+    try { return /^ru/i.test((Spicetify.Locale?.getLocale?.()) || navigator.language || ""); } catch { return true; }
+  })();
+  const L = (ru, en) => (UI_RU ? ru : en);
+
+  const CHARACTERS = [["favorite", L("Любимое", "Favorites")], ["unfamiliar", L("Незнакомое", "Discover")], ["popular", L("Популярное", "Popular")]];
+  const MOODS = [["energetic", L("Бодрое", "Energetic")], ["happy", L("Весёлое", "Happy")], ["calm", L("Спокойное", "Calm")], ["sad", L("Грустное", "Sad")]];
+  const LANGS = [["ru", L("Русский", "Russian")], ["foreign", L("Иностранный", "Non-Russian")], ["instrumental", L("Без слов", "Instrumental")]];
+  const ACTIVITIES = [["wakeup", L("Просыпаюсь", "Waking up")], ["work", L("Работаю", "Working")], ["workout", L("Тренируюсь", "Workout")],
+    ["road", L("В дороге", "On the road")], ["sleep", L("Засыпаю", "Falling asleep")]];
+  const GENRES = [["rap", L("Рэп", "Rap")], ["phonk", L("Фонк", "Phonk")], ["rock", L("Рок", "Rock")], ["pop", L("Поп", "Pop")],
+    ["electronic", L("Электроника", "Electronic")], ["lofi", "Lo-fi"], ["indie", L("Инди", "Indie")], ["metal", L("Метал", "Metal")]];
+
+  const DEFAULTS = {
+    character: "",   // '' (звичайна) | favorite | unfamiliar | popular
+    mood: "",        // '' | energetic | happy | calm | sad
+    language: "",    // '' | ru | foreign | instrumental
+    activity: "",    // '' | wakeup | work | workout | road | sleep
+    genre: "",       // '' | ключ із GENRES | свій текст
+    blockAI: true,
+    explicitFilter: false,
+    dislikeBanMin: 180,
+  };
+  function loadSettings() {
+    try { const r = lsGet(K.settings); if (r) return { ...DEFAULTS, ...JSON.parse(r) }; } catch {}
+    const s = { ...DEFAULTS };
+    try { // перенесення зі старої версії
+      const o = JSON.parse(lsGet(K.oldSettings) || "null");
+      if (o) {
+        s.character = { familiar: "favorite", discover: "unfamiliar" }[o.character] || "";
+        s.language = { ru: "ru", en: "foreign", nonru: "foreign" }[o.language] || "";
+        s.blockAI = o.blockAI !== false;
+        s.explicitFilter = !!o.explicitFilter;
+      }
+    } catch {}
+    return s;
+  }
+  // Pro-налаштування без Pro не діють, але й не стираються: лежать у proStash і повернуться, коли Pro знову відкриється
+  const PRO_KEYS = ["mood", "language", "activity", "genre"];
+  let proStash = null;
+  function saveSettings() { lsSet(K.settings, JSON.stringify(proStash ? { ...settings, ...proStash } : settings)); }
+  function gateSettings() {
+    if (proActive()) {
+      if (proStash) { for (const k of PRO_KEYS) if (!settings[k] && proStash[k]) settings[k] = proStash[k]; proStash = null; sanitizeSettings(); }
+      return;
+    }
+    for (const k of PRO_KEYS) if (settings[k]) { (proStash = proStash || {})[k] = settings[k]; settings[k] = ""; }
+  }
+  // Несумісні параметри: [що зняти при конфлікті в збережених налаштуваннях, з чим конфліктує]
+  const CONFLICTS = [
+    [["language", "instrumental"], ["genre", "rap"]],   // репу без слів не буває
+    [["language", "instrumental"], ["genre", "pop"]],
+    [["mood", "energetic"], ["activity", "sleep"]],     // бадьоре для сну
+    [["mood", "calm"], ["activity", "workout"]],        // спокійне для тренування
+  ];
+  function blockerOf(key, val) {
+    for (const [a, b] of CONFLICTS) {
+      if (a[0] === key && a[1] === val && settings[b[0]] === b[1]) return b;
+      if (b[0] === key && b[1] === val && settings[a[0]] === a[1]) return a;
+    }
+    return null;
+  }
+  function sanitizeSettings() {
+    for (const [a, b] of CONFLICTS) if (settings[a[0]] === a[1] && settings[b[0]] === b[1]) settings[a[0]] = "";
+    // в неросійському інтерфейсі цих варіантів немає — невидимий фільтр не залишаємо
+    if (!UI_RU && (settings.language === "ru" || settings.language === "foreign")) settings.language = "";
+  }
+  let settings = loadSettings();
+  sanitizeSettings();
+
+  // Розмітка тегів: кураторські плейлисти Spotify, за якими визначаємо належність треку
+  // до жанру / настрою / «без слів» (аналог класифікаторів Яндекса).
+  // Розмітки немає у збірках: Free без неї, Pro отримує її із сервера за ключем (tools/build.js вирізає блоки з міткою @markup).
+  const TAG_QUERIES = {};
+  // Слова для комбінованої розмітки «жанр × настрій»: «sad rap», «грустный рэп», «chill rock»…
+  const MOOD_WORDS = {};
+  const GENRE_WORDS = {};
+  // Як зі слів збираються запити: свій жанр ({g}) і «жанр × настрій» ({m} {g}). Теж приходить із сервера —
+  // без ключа шаблонів немає, і жанр із настроєм не дають жодного запиту (раніше жанр збирався прямо в коді).
+  const QUERY_TEMPLATES = {};
+  const fillTemplates = (list, vars) => (list || []).map((t) => t.replace(/\{(\w)\}/g, (_, k) => vars[k] || ""));
+  function tagQueries(key) {
+    if (TAG_QUERIES[key]) return TAG_QUERIES[key];
+    if (key.startsWith("combo:")) { // combo:<mood|act key>|<genre>
+      const [moodKey, genre] = key.slice(6).split("|");
+      const g = GENRE_WORDS[genre] || [[genre, "en"], [genre, "ru"]];
+      const out = [];
+      for (const [m, ml] of MOOD_WORDS[moodKey] || []) for (const [gw, gl] of g) {
+        if (ml !== gl) continue;
+        out.push(...fillTemplates(ml === "en" ? QUERY_TEMPLATES.comboEn : QUERY_TEMPLATES.comboRu, { m, g: gw }));
+      }
+      return out;
+    }
+    if (key.startsWith("genre:")) return fillTemplates(QUERY_TEMPLATES.genre, { g: key.slice(6) });
+    return [];
+  }
+  const isMoodKey = (key) => key.startsWith("mood:") || key.startsWith("act:") || key.startsWith("combo:");
+  // Ієрархія умов: мова і жанр — головні (жорсткі); настрій і заняття — нахил поверх жанру.
+  // Якщо жанр не вибрано, настрій/заняття стають головною умовою (інакше майже ні на що не впливали б).
+  function tagKinds() {
+    const hard = [], moodish = [];
+    if (settings.genre) hard.push("genre:" + settings.genre);
+    if (settings.language === "instrumental") hard.push("lang:instrumental");
+    if (settings.mood) moodish.push("mood:" + settings.mood);
+    if (settings.activity) moodish.push("act:" + settings.activity);
+    // жанр × настрій і «Без слів» × настрій: окрема точна розмітка («грустный рэп», «sad piano»)
+    const combo = [];
+    if (settings.genre) combo.push(...moodish.map((m) => "combo:" + m + "|" + settings.genre));
+    if (settings.language === "instrumental") combo.push(...moodish.map((m) => "combo:" + m + "|instrumental"));
+    if (!hard.length) return { hard: moodish, soft: [], combo };
+    // без жанру настрій — головна умова (і при «Без слів» теж, інакше Energetic лишається чиловим)
+    if (!settings.genre) return { hard: [...hard, ...moodish], soft: [], combo };
+    return { hard, soft: moodish, combo };
+  }
+  function activeTags() { const k = tagKinds(); return [...k.hard, ...k.soft, ...k.combo]; }
+  function labelOf(list, v) { const f = list.find((x) => x[0] === v); return f ? f[1] : v; }
+  function waveLabel(noSource) {
+    const parts = [];
+    if (settings.activity) parts.push(labelOf(ACTIVITIES, settings.activity));
+    if (settings.character) parts.push(labelOf(CHARACTERS, settings.character));
+    if (settings.mood) parts.push(labelOf(MOODS, settings.mood));
+    if (settings.language) parts.push(labelOf(LANGS, settings.language));
+    if (settings.genre) parts.push(labelOf(GENRES, settings.genre));
+    const src = waveSource && !noSource ? L(` по «${waveSource.name || "…"}»`, ` from “${waveSource.name || "…"}”`) : "";
+    return "Drift for Spotify" + src + (parts.length ? " · " + parts.join(" · ") : "");
+  }
+  // Хвиля за плейлистом / артистом: { type, uri, name, tracks, trackSet, artists, related }
+  let waveSource = null;
+
+  // ==================================================================
+  // Утиліти
+  // ==================================================================
+  const idOf = (uri) => (uri || "").split(":").pop();
+  const isCyrillic = (s) => /[Ѐ-ӿ]/.test(s || "");
+  // Мова за артистом: якщо хоч один його трек із кирилицею — артист російськомовний
+  // (інакше LIL KRYSTALLL, FACE, OBLADAET тощо з латинськими іменами проходили як «іноземні»).
+  const artistLang = new Map(); // artistUri -> { cyr, total }
+  function noteArtistLang(t) {
+    if (!t || !t.artistUri) return;
+    const o = artistLang.get(t.artistUri) || { cyr: 0, total: 0 };
+    o.total++;
+    if (isCyrillic(t.name) || isCyrillic(t.artistName)) o.cyr++;
+    artistLang.set(t.artistUri, o);
+  }
+  const langChecked = new Set(); // артисти, чиї топ-треки ми перевірили повністю
+  function isRuTrack(t) {
+    if (isCyrillic(t.name) || isCyrillic(t.artistName)) return true;
+    const list = t.artistUris && t.artistUris.length ? t.artistUris : (t.artistUri ? [t.artistUri] : []);
+    return list.some((u) => (artistLang.get(u)?.cyr || 0) > 0); // зокрема фіти з російськомовними
+  }
+  function sampleArr(arr, n) {
+    if (!arr || !arr.length || n <= 0) return [];
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; }
+    return a.slice(0, n);
+  }
+  function weightedSample(items, n, weightOf) {
+    const pool = items.map((x) => ({ x, w: Math.max(0.05, weightOf(x)) }));
+    const out = [];
+    while (out.length < n && pool.length) {
+      const total = pool.reduce((s, p) => s + p.w, 0);
+      let r = Math.random() * total, i = 0;
+      for (; i < pool.length - 1; i++) { r -= pool[i].w; if (r <= 0) break; }
+      out.push(pool[i].x); pool.splice(i, 1);
+    }
+    return out;
+  }
+  function collectUris(obj, type, acc) {
+    acc = acc || new Set();
+    if (!obj) return acc;
+    if (typeof obj === "string") { if (obj.startsWith(`spotify:${type}:`)) acc.add(obj); return acc; }
+    if (Array.isArray(obj)) { for (const v of obj) collectUris(v, type, acc); return acc; }
+    if (typeof obj === "object") for (const k in obj) collectUris(obj[k], type, acc);
+    return acc;
+  }
+
+  // ==================================================================
+  // GraphQL (операції реєструються ліниво — збираємо визначення самі)
+  // ==================================================================
+  const DEF_HASHES = {
+    queryArtistRelated: "3d031d6cb22a2aa7c8d203d49b49df731f58b1e2799cc38d9876d58771aa66f3",
+    internalLinkRecommenderTrack: "c77098ee9d6ee8ad3eb844938722db60570d040b49f41f5ec6e7be9160a7c86b",
+    searchTracks: "b02683192a98dde7966b5e6655a79eeb62713eab703eda9902c932818dd52751",
+    searchPlaylists: "d520014e748f9ea44f7707d8df1819867ac1205e8b7f3e28f22fe5fc858921b1",
+    queryArtistOverview: "9f8134ef565e78621f1e1793555bd6633c5ac144ae0f89604ed3ae3f80b3c8e6",
+    userTopContent: "61b7353d3625780022dbc63d459eb64cd609e7e5e2a820f9160d65030efe2e15",
+  };
+  // ---------------- Налаштування із сервера ----------------
+  // «Секрети», які Spotify може зламати оновленням (хеші внутрішніх запитів, пошукові запити розмітки),
+  // приходять із сервера раз на добу за ключем Pro. Немає відповіді — працюємо на останніх отриманих, потім на вбудованих.
+  const remote = { ok: false, at: 0, reason: "", until: 0, trial: false, triedAt: 0, top: null };
+  const ownDefs = new Set(); // описи запитів, які зібрала хвиля (а не сам Spotify)
+  function applyRemoteConfig(cfg) {
+    if (!cfg || typeof cfg !== "object") return;
+    if (cfg.hashes) for (const [k, v] of Object.entries(cfg.hashes)) if (typeof v === "string" && /^[0-9a-f]{64}$/.test(v)) {
+      if (DEF_HASHES[k] !== v) { DEF_HASHES[k] = v; if (ownDefs.has(k)) { delete Spicetify.GraphQL.Definitions[k]; ownDefs.delete(k); } } // наше — перезбереться з новим хешем; рідне Spotify не чіпаємо
+    }
+    if (cfg.tagQueries) for (const [k, v] of Object.entries(cfg.tagQueries)) if (Array.isArray(v) && v.length) TAG_QUERIES[k] = v.map(String);
+    if (cfg.latest && typeof cfg.latest.version === "string") noteLatest(cfg.latest.version, cfg.latest.note);
+    const pairs = (v) => Array.isArray(v) && v.length && v.every((p) => Array.isArray(p) && p.length === 2);
+    for (const [field, target] of [["moodWords", MOOD_WORDS], ["genreWords", GENRE_WORDS]]) {
+      if (cfg[field]) for (const [k, v] of Object.entries(cfg[field])) if (pairs(v)) target[k] = v.map(([w, l]) => [String(w), String(l)]);
+    }
+    if (cfg.queryTemplates && typeof cfg.queryTemplates === "object")
+      for (const [k, v] of Object.entries(cfg.queryTemplates)) if (Array.isArray(v) && v.length) QUERY_TEMPLATES[k] = v.map(String);
+  }
+  // Pro відкритий, поки ключ діє, і ще 3 дні після (продовження на Boosty буває не миттєвим)
+  const PRO_GRACE_MS = 3 * 86400000;
+  function proActive() {
+    if (EDITION === "dev") return true;
+    if (EDITION !== "pro" || !CONFIG_URL || !BUILD.key) return false;
+    return remote.until > 0 && Date.now() < remote.until + (remote.trial ? 0 : PRO_GRACE_MS); // у пробного запасу немає
+  }
+  function loadCachedRemote() {
+    try {
+      const c = JSON.parse(lsGet(K.remoteCfg) || "null");
+      if (c && c.cfg) { applyRemoteConfig(c.cfg); remote.at = c.at || 0; remote.ok = true; remote.until = Date.parse(c.until || "") || 0; remote.trial = !!c.trial; remote.top = c.top || null; }
+    } catch {}
+  }
+  // Хеш акаунта Spotify (SHA-256 із сіллю; саме ім'я нікуди не йде) — пробний Pro дається один раз на акаунт
+  let acctHash = "";
+  async function accountHash() {
+    if (acctHash) return acctHash;
+    try {
+      const u = await Spicetify.Platform.UserAPI.getUser();
+      if (!u || !u.username) return "";
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("spotify-drift:" + u.username));
+      acctHash = [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+    } catch {}
+    return acctHash;
+  }
+  // номер цього встановлення — сервер за ним бачить, на скількох комп'ютерах працює один ключ
+  function installId() {
+    let id = lsGet(K.installId);
+    if (!id) { id = Math.random().toString(36).slice(2, 10) + Date.now().toString(36); lsSet(K.installId, id); }
+    return id;
+  }
+  // Pro вимкнувся (скінчився строк / ключ вимкнено) — розмітка із сервера не повинна лишатися на диску:
+  // прибираємо її з пам'яті, зі збережених налаштувань сервера і кеші розмітки. Продовження поверне все з першою відповіддю сервера.
+  function dropServerMarkup() {
+    for (const o of [TAG_QUERIES, MOOD_WORDS, GENRE_WORDS, QUERY_TEMPLATES]) for (const k of Object.keys(o)) delete o[k];
+    try {
+      const c = JSON.parse(lsGet(K.remoteCfg) || "null");
+      if (c && c.cfg && (c.cfg.tagQueries || c.cfg.moodWords || c.cfg.genreWords || c.cfg.queryTemplates)) {
+        delete c.cfg.tagQueries; delete c.cfg.moodWords; delete c.cfg.genreWords; delete c.cfg.queryTemplates;
+        lsSet(K.remoteCfg, JSON.stringify(c));
+      }
+    } catch {}
+    for (const k of volnaKeys()) if (k.startsWith(K.tagPrefix)) { try { localStorage.removeItem(k); } catch {} }
+    try { tagPools.clear(); } catch {}
+  }
+  // «Pro закінчився» показуємо, лише коли сервер уже відповів: раптом ключ якраз продовжився
+  let remoteChecked = false, endModalPending = false;
+  async function refreshRemoteConfig(force) {
+    try { await refreshRemoteOnce(force); }
+    finally {
+      remoteChecked = true;
+      if (endModalPending) { endModalPending = false; if (!proActive()) showProEndedModal(); }
+    }
+  }
+  async function refreshRemoteOnce(force) {
+    if (!CONFIG_URL) return;
+    // Pro працює — раз на добу; Pro вимкнений — раз на 15 хв (підписався — Pro увімкнеться сам, без перезапуску)
+    if (!force && (proActive() ? Date.now() - remote.at < 20 * 3600000 : Date.now() - remote.triedAt < 15 * 60000)) return;
+    remote.triedAt = Date.now();
+    try {
+      // ключ — у заголовку, а не в адресі (адреси осідають у журналах)
+      const res = await fetch(CONFIG_URL + "?v=" + encodeURIComponent(VERSION), {
+        method: "GET", headers: { "X-Drift-Key": BUILD.key || "", "X-Drift-Install": installId(), "X-Drift-Acct": await accountHash(), "X-Drift-Stats": statsForBot() },
+      });
+      const data = await res.json().catch(() => null);
+      if (data && data.ok && data.cfg) {
+        applyRemoteConfig(data.cfg);
+        remote.ok = true; remote.at = Date.now(); remote.reason = "";
+        remote.until = Date.parse(data.expiresAt || "") || 0;
+        remote.trial = !!data.trial;
+        remote.top = data.top && typeof data.top === "object" ? data.top : null; // { "2026-10": 8 } — «топ 8% за відкриттями»
+        lsSet(K.remoteCfg, JSON.stringify({ at: remote.at, cfg: data.cfg, until: data.expiresAt || null, trial: remote.trial, top: remote.top }));
+        logEvent("Настройки с сервера получены", { до: data.expiresAt || "—" });
+      } else {
+        remote.reason = (data && data.reason) || "HTTP " + res.status;
+        if (data && typeof data.trial === "boolean") remote.trial = data.trial;
+        // ключ вимкнено, невідомий або пробний на цьому встановленні вже був — Pro закривається одразу; «минув» — ще 3 дні (підписка)
+        if (["revoked", "unknown-key", "trial-used", "trial-device"].includes(remote.reason)) {
+          remote.until = 0;
+          try { const c = JSON.parse(lsGet(K.remoteCfg) || "null"); if (c) { c.until = null; lsSet(K.remoteCfg, JSON.stringify(c)); } } catch {}
+        }
+        logEvent("Сервер настроек отказал", remote.reason);
+      }
+    } catch (e) {
+      remote.reason = String(e); logEvent("Сервер настроек недоступен — работаю на сохранённых", String(e));
+      if (!remote.ok) setTimeout(() => refreshRemoteConfig(true).catch(() => {}), 5 * 60000); // ще жодного разу не отримували — пробуємо частіше
+    }
+    onProChanged();
+  }
+  function getDef(name) {
+    const D = Spicetify.GraphQL.Definitions;
+    if (D[name]) return D[name];
+    const hash = DEF_HASHES[name];
+    if (!hash) return null;
+    const sample = Object.values(D).find((v) => v && typeof v === "object" && v.constructor && v.constructor !== Object);
+    try {
+      if (sample) { const def = new sample.constructor(name, "query", hash, null); D[name] = def; ownDefs.add(name); return def; }
+    } catch (e) { logEvent("getDef: конструктор не сработал для " + name, String(e)); }
+    const flat = { name, operationName: name, operation: "query", sha256Hash: hash, value: null };
+    D[name] = flat; ownDefs.add(name);
+    return flat;
+  }
+  // Обмежувач запитів: не більше NET_MAX одночасно (пачки по 30–50 Spotify може різати),
+  // термінове (те, що потрібне для найближчого треку) — попереду фонового довантаження.
+  const NET_MAX = 8;
+  const netQ = [[], []]; // 0 — термінове, 1 — фон
+  let netActive = 0;
+  function netPrio() { try { return S.starting || S.urgentPick ? 0 : 1; } catch { return 0; } } // старт і підбір наступного треку — наперед
+  function net(fn, prio) {
+    return new Promise((resolve, reject) => {
+      netQ[prio == null ? netPrio() : prio].push({ fn, resolve, reject });
+      netPump();
+    });
+  }
+  function netPump() {
+    while (netActive < NET_MAX) {
+      const job = netQ[0].shift() || netQ[1].shift();
+      if (!job) return;
+      netActive++;
+      Promise.resolve().then(job.fn).then(job.resolve, job.reject)
+        .finally(() => { netActive--; netPump(); });
+    }
+  }
+  const gqlStats = {};
+  async function gql(name, variables, prio) {
+    const def = getDef(name);
+    if (!def) throw new Error("нет GraphQL-операции " + name);
+    const st = gqlStats[name] || (gqlStats[name] = { ok: 0, err: 0 });
+    try {
+      const res = await net(() => Spicetify.GraphQL.Request(def, variables), prio);
+      if (res && res.errors && res.errors.length) {
+        st.err++;
+        if (st.err <= 2) logEvent(name + ": ошибки GraphQL", res.errors.slice(0, 2));
+      } else st.ok++;
+      return res && res.data !== undefined ? res.data : res;
+    } catch (e) { st.err++; throw e; }
+  }
+
+  // кількість прослуховувань усіх побачених треків — підставляємо трекам із плейлистів (у них її немає)
+  const knownPlaycount = new Map();
+  function trackFromGql(d) {
+    if (!d || (d.__typename && d.__typename !== "Track") || typeof d.uri !== "string" || !d.uri.startsWith("spotify:track:")) return null;
+    const a = d.artists?.items?.[0];
+    const pc = parseInt(d.playcount || "0", 10) || 0;
+    if (pc) knownPlaycount.set(d.uri, pc);
+    return {
+      uri: d.uri, name: d.name, artistUri: a?.uri, artistName: a?.profile?.name,
+      artistUris: (d.artists?.items || []).map((x) => x?.uri).filter(Boolean), // усі артисти, включно з фітами
+      explicit: d.contentRating?.label === "EXPLICIT", playcount: parseInt(d.playcount || "0", 10) || 0,
+    };
+  }
+
+  // ==================================================================
+  // Джерела даних (із кешем на сесію)
+  // ==================================================================
+  // Селектор «схоже на трек»
+  const recCache = new Map();
+  function recommendByTrack(uri, prio) {
+    if (recCache.has(uri)) return recCache.get(uri);
+    const p = (async () => {
+      try {
+        const data = await gql("internalLinkRecommenderTrack", { uri, limit: 20 }, prio);
+        return (data?.seoRecommendedTrack?.items || []).map((it) => trackFromGql(it?.data)).filter(Boolean);
+      } catch (e) { logEvent("рекомендатель: ошибка", String(e)); return []; }
+    })();
+    recCache.set(uri, p);
+    return p;
+  }
+
+  // Схожі артисти
+  const relCache = new Map();
+  function relatedArtists(artistUri) {
+    if (relCache.has(artistUri)) return relCache.get(artistUri);
+    const disk = artistDisk[idOf(artistUri)];
+    if (disk && disk.r && Date.now() - disk.rt < REL_TTL) {
+      const p = Promise.resolve(disk.r.map(AU));
+      relCache.set(artistUri, p);
+      return p;
+    }
+    const p = (async () => {
+      try {
+        const data = await gql("queryArtistRelated", { uri: artistUri });
+        const items = data?.artistUnion?.relatedContent?.relatedArtists?.items || [];
+        let uris = items.map((a) => a?.uri).filter((u) => typeof u === "string" && u.startsWith("spotify:artist:"));
+        if (!uris.length) uris = [...collectUris(data, "artist")];
+        uris = uris.filter((u) => u !== artistUri);
+        if (uris.length) {
+          const d = artistDisk[idOf(artistUri)] || (artistDisk[idOf(artistUri)] = {});
+          d.r = uris.map(idOf); d.rt = Date.now();
+          saveLater("artists", saveArtistDisk);
+        }
+        return uris;
+      } catch (e) { logEvent("похожие артисты: ошибка", String(e)); return []; }
+    })();
+    relCache.set(artistUri, p);
+    return p;
+  }
+
+  // Топ-треки артиста (+ запам'ятовуємо його місячних слухачів — мірило «розкрученості»)
+  const artistFame = new Map(); // artistUri -> monthlyListeners
+  const ovCache = new Map();
+
+  // Кеш артистів на диску (localStorage Spotify — у користувача, нікуди не надсилається).
+  // Лише витяг (~1 КБ на артиста), не більше ARTIST_CACHE_MAX артистів, старе викидається.
+  const ARTIST_CACHE_MAX = 700, OV_TTL = 5 * 86400000, REL_TTL = 14 * 86400000;
+  // id -> { t, n: ім'я, l: слухачі, tr: [[id, назва, прослуховування, explicit, "id,id" артистів, ім'я 1-го артиста | 0]], r: [id схожих], rt }
+  let artistDisk = {};
+  const AU = (id) => "spotify:artist:" + id, TU = (id) => "spotify:track:" + id;
+  function loadArtistDisk() {
+    try { artistDisk = JSON.parse(lsGet(K.artists) || "{}") || {}; } catch { artistDisk = {}; }
+    const now = Date.now();
+    for (const [id, e] of Object.entries(artistDisk)) {
+      if (!e || typeof e !== "object") { delete artistDisk[id]; continue; }
+      if (e.t && now - e.t > OV_TTL) { delete e.t; delete e.tr; delete e.l; delete e.n; }
+      if (e.rt && now - e.rt > REL_TTL) { delete e.r; delete e.rt; }
+      if (!e.t && !e.rt) { delete artistDisk[id]; continue; }
+      if (e.t) applyOverview(AU(id), e); // мова, слухачі й прослуховування відомі одразу
+    }
+  }
+  function saveArtistDisk() {
+    let rows = Object.entries(artistDisk);
+    const fresh = (e) => Math.max(e.t || 0, e.rt || 0);
+    if (rows.length > ARTIST_CACHE_MAX) {
+      rows = rows.sort((a, b) => fresh(b[1]) - fresh(a[1])).slice(0, ARTIST_CACHE_MAX);
+      artistDisk = Object.fromEntries(rows);
+    }
+    if (!lsSet(K.artists, JSON.stringify(artistDisk))) { // пам'ять Spotify переповнена — лишаємо свіжу половину
+      rows = rows.sort((a, b) => fresh(b[1]) - fresh(a[1])).slice(0, rows.length >> 1);
+      artistDisk = Object.fromEntries(rows);
+      lsSet(K.artists, JSON.stringify(artistDisk));
+    }
+  }
+  // запис кешу -> треки артиста (+ мова, слухачі, прослуховування)
+  function applyOverview(artistUri, e) {
+    if (e.l) artistFame.set(artistUri, e.l);
+    const out = [];
+    for (const [id, name, pc, ex, feats, an] of e.tr || []) {
+      const uris = feats ? feats.split(",").map(AU) : [artistUri];
+      const t = { uri: TU(id), name, artistUri: uris[0], artistName: an || e.n, artistUris: uris,
+        explicit: !!ex, playcount: pc || 0, listeners: e.l || 0 };
+      if (pc) knownPlaycount.set(t.uri, pc);
+      noteArtistLang({ ...t, artistUri, artistName: e.n }); // мову рахуємо за цього артиста
+      out.push(t);
+    }
+    if (isCyrillic(e.n)) noteArtistLang({ uri: "", name: e.n, artistUri, artistName: e.n });
+    langChecked.add(artistUri);
+    return out;
+  }
+  function artistOverviewTracks(artistUri) {
+    if (ovCache.has(artistUri)) return ovCache.get(artistUri);
+    const disk = artistDisk[idOf(artistUri)];
+    if (disk && disk.tr && Date.now() - disk.t < OV_TTL) {
+      const p = Promise.resolve(applyOverview(artistUri, disk));
+      ovCache.set(artistUri, p);
+      return p;
+    }
+    const p = (async () => {
+      try {
+        const data = await gql("queryArtistOverview", { uri: artistUri, locale: "", includePrerelease: false });
+        const au = data?.artistUnion;
+        if (!au) return [];
+        const aname = au.profile?.name || "";
+        const e = { t: Date.now(), n: aname, l: parseInt(au.stats?.monthlyListeners || "0", 10) || 0, tr: [] };
+        for (const it of au.discography?.topTracks?.items || []) {
+          const t = trackFromGql(it?.track || it?.data);
+          if (!t) continue;
+          e.tr.push([idOf(t.uri), t.name || "", t.playcount || 0, t.explicit ? 1 : 0,
+            (t.artistUris || []).map(idOf).join(","), t.artistName && t.artistName !== aname ? t.artistName : 0]);
+        }
+        if (!e.tr.length && !e.l) return [];
+        const d = artistDisk[idOf(artistUri)] || (artistDisk[idOf(artistUri)] = {});
+        Object.assign(d, e);
+        saveLater("artists", saveArtistDisk);
+        return applyOverview(artistUri, d);
+      } catch (e) { logEvent("треки артиста: ошибка", String(e)); return []; }
+    })();
+    ovCache.set(artistUri, p);
+    return p;
+  }
+
+  // Твоя історія прослуховувань Spotify (топ за кількістю прослуховувань / останні)
+  async function fetchTop(artistRange, artistSort, trackRange, trackSort, limit) {
+    const build = (lim) => ({
+      includeTopArtists: true,
+      topArtistsInput: { offset: 0, limit: lim, sortBy: artistSort, timeRange: artistRange },
+      includeTopTracks: true,
+      topTracksInput: { offset: 0, limit: lim, sortBy: trackSort, timeRange: trackRange },
+    });
+    for (const lim of [limit || 50, 20]) {
+      try {
+        const data = await gql("userTopContent", build(lim));
+        const prof = data?.me?.profile;
+        if (!prof) continue;
+        const artists = (prof.topArtists?.items || []).map((i) => i?.data)
+          .filter((a) => a && typeof a.uri === "string").map((a) => ({ uri: a.uri, name: a.profile?.name || "" }));
+        const tracks = (prof.topTracks?.items || []).map((i) => trackFromGql(i?.data)).filter(Boolean);
+        return { artists, tracks, ok: true };
+      } catch (e) { logEvent("история Spotify: ошибка", String(e)); }
+    }
+    return { artists: [], tracks: [], ok: false };
+  }
+
+  // Улюблені треки
+  async function fetchLikedTracks() {
+    const out = [];
+    const lib = Spicetify.Platform.LibraryAPI;
+    if (lib && typeof lib.getTracks === "function") {
+      try {
+        let offset = 0; const limit = 200;
+        while (out.length < 2000) {
+          const res = await lib.getTracks({ limit, offset, sort: { field: "ADDED_AT", order: "DESC" } });
+          const items = (res && (res.items || res.tracks)) || [];
+          if (!items.length) break;
+          for (const it of items) {
+            const uri = it.uri || it.link;
+            const a = it.artists && it.artists[0];
+            if (uri) out.push({ uri, name: it.name, artistUri: a?.uri, artistName: a?.name,
+              artistUris: (it.artists || []).map((x) => x?.uri).filter(Boolean), at: Date.parse(it.addedAt || "") || 0 });
+          }
+          offset += items.length;
+          if (items.length < limit) break;
+        }
+      } catch (e) { logEvent("Любимые: ошибка LibraryAPI", String(e)); }
+    }
+    return out;
+  }
+
+  // Лайки, поставлені будь-де в Spotify (не лише в хвилі), підтягуються одразу: одна сторінка свіжих
+  // лайків під час запуску хвилі й раз на 10 хвилин — не чекаємо перезбирання профілю (раз на 12 годин).
+  let likesSyncAt = 0;
+  async function syncRecentLikes(force) {
+    if (!profile || (!force && Date.now() - likesSyncAt < 10 * 60000)) return;
+    likesSyncAt = Date.now();
+    try {
+      const res = await Spicetify.Platform.LibraryAPI.getTracks({ limit: 50, offset: 0, sort: { field: "ADDED_AT", order: "DESC" } });
+      const fresh = [];
+      for (const it of ((res && (res.items || res.tracks)) || []).slice(0, 50)) {
+        const uri = it.uri || it.link;
+        if (!uri || P.likedTracks.has(uri)) continue;
+        const a = it.artists && it.artists[0];
+        const t = { uri, name: it.name, artistUri: a?.uri, artistName: a?.name, artistUris: (it.artists || []).map((x) => x?.uri).filter(Boolean),
+          at: Date.parse(it.addedAt || "") || Date.now() };
+        P.likedTracks.add(uri); P.heard.add(uri); P.likeAt.set(uri, t.at);
+        if (t.artistUri) P.familiarIds.add(idOf(t.artistUri));
+        if (t.artistName) P.familiarNames.add(t.artistName.toLowerCase());
+        noteArtistLang(t);
+        (isRuTrack(t) ? P.byLang.ru : P.byLang.foreign).unshift(uri);
+        fresh.push(t);
+      }
+      if (!fresh.length) return;
+      P.likedItems = [...fresh, ...P.likedItems].slice(0, 2000);
+      Object.assign(profile, { likedTracks: [...P.likedTracks], likedItems: P.likedItems, heard: [...P.heard],
+        familiarIds: [...P.familiarIds], familiarNames: [...P.familiarNames], byLang: P.byLang });
+      saveLater("profile", () => lsSet(K.profile, JSON.stringify(profile)));
+      for (const t of fresh.slice(0, 10)) if (t.artistUri) learnTasteFromLike(t.artistUri).catch(() => {});
+      logEvent("Новые лайки из библиотеки", fresh.length);
+    } catch (e) { logEvent("свежие лайки: ошибка", String(e)); }
+  }
+
+  // Чи є в треку текст (= вокал). true — є, false — точно немає (404), null — не вдалося дізнатися.
+  // Відповідь майже не змінюється — пам'ятаємо на диску (id -> 1/0), не більше LYRICS_MAX треків.
+  const lyricsKnown = new Map();
+  const lyricsReq = new Map();
+  const LYRICS_MAX = 6000;
+  let lyricsDisk = {};
+  function loadLyricsDisk() {
+    try { lyricsDisk = JSON.parse(lsGet(K.lyrics) || "{}") || {}; } catch { lyricsDisk = {}; }
+    for (const [id, v] of Object.entries(lyricsDisk)) lyricsKnown.set(TU(id), !!v);
+  }
+  function saveLyricsDisk() {
+    const keys = Object.keys(lyricsDisk);
+    if (keys.length > LYRICS_MAX) for (const k of keys.slice(0, keys.length - LYRICS_MAX)) delete lyricsDisk[k]; // старі — першими
+    lsSet(K.lyrics, JSON.stringify(lyricsDisk));
+  }
+  // Spotify обмежує часті запити до текстів (429) — тоді пауза, що зростає до години
+  let lyricsPauseUntil = 0, lyricsPauseMin = 10;
+  function checkLyrics(uri, prio) {
+    if (lyricsKnown.has(uri)) return Promise.resolve(lyricsKnown.get(uri));
+    if (Date.now() < lyricsPauseUntil) return Promise.resolve(null);
+    if (lyricsReq.has(uri)) return lyricsReq.get(uri);
+    const p = (async () => {
+      let v = null;
+      try {
+        const res = await net(() => Spicetify.CosmosAsync.get(
+          `https://spclient.wg.spotify.com/color-lyrics/v2/track/${idOf(uri)}?format=json&vocalRemoval=false&market=from_token`), prio);
+        if (res && res.code === 429) {
+          lyricsPauseUntil = Date.now() + lyricsPauseMin * 60000;
+          logEvent("Тексты: Spotify просит паузу (429)", { минут: lyricsPauseMin });
+          lyricsPauseMin = Math.min(60, lyricsPauseMin * 2);
+          lyricsReq.delete(uri);
+          return null;
+        }
+        if (res && res.code === 404) v = false;
+        const lines = res?.lyrics?.lines;
+        if (Array.isArray(lines)) { v = lines.length > 0; lyricsPauseMin = 10; }
+      } catch (e) {
+        if (/404|not found/i.test(String(e && (e.status || e.message || e)))) v = false;
+      }
+      if (v !== null) {
+        lyricsKnown.set(uri, v);
+        lyricsDisk[idOf(uri)] = v ? 1 : 0;
+        saveLater("lyrics", saveLyricsDisk);
+      }
+      return v;
+    })();
+    lyricsReq.set(uri, p);
+    return p;
+  }
+
+  // Лайк поточного треку Spotify знає локально (сердечко в плеєрі) — без запиту в мережу.
+  // Якщо в цій збірці getHeart не віддає true/false — питаємо бібліотеку, як раніше.
+  let heartApi = false;
+  function probeHeart() {
+    try { const h = Spicetify.Player.getHeart?.(); if (typeof h === "boolean") { heartApi = true; return h; } } catch {}
+    return null;
+  }
+  async function isLiked(uri) {
+    try {
+      const r = await Spicetify.Platform.LibraryAPI.contains(uri);
+      return Array.isArray(r) ? !!r[0] : !!r;
+    } catch { return false; }
+  }
+
+  // Плейлисти
+  async function searchPlaylistUris(q) {
+    try {
+      const data = await gql("searchPlaylists", {
+        searchTerm: q, offset: 0, limit: 10, numberOfTopResults: 5,
+        includeAudiobooks: false, includePreReleases: false, includeAlbumPreReleases: false,
+        includeAuthors: false, includeEpisodeContentRatingsV2: false,
+      });
+      let uris = (data?.searchV2?.playlists?.items || []).map((it) => (it?.data || it)?.uri)
+        .filter((u) => typeof u === "string" && u.startsWith("spotify:playlist:"));
+      if (!uris.length) uris = [...collectUris(data, "playlist")];
+      return uris;
+    } catch (e) { logEvent("поиск плейлистов: ошибка", String(e)); return []; }
+  }
+  async function playlistTracks(uri, limit) {
+    try {
+      const res = await net(() => Spicetify.Platform.PlaylistAPI.getContents(uri, { limit: limit || 100 }));
+      return (res?.items || []).filter(Boolean).map((it) => {
+        if (typeof it.uri !== "string" || !it.uri.startsWith("spotify:track:")) return null;
+        const a = it.artists && it.artists[0];
+        return { uri: it.uri, name: it.name, artistUri: a?.uri, artistName: a?.name, explicit: !!(it.isExplicit || it.explicit),
+          artistUris: (it.artists || []).map((x) => x?.uri).filter(Boolean) };
+      }).filter(Boolean);
+    } catch (e) { logEvent("плейлист не загрузился", String(e)); return []; }
+  }
+
+  // ==================================================================
+  // Розмітка тегів (жанр / настрій / заняття / без слів)
+  // ==================================================================
+  const tagPools = new Map();
+  function makePool(key, tracks, playlists, extra) {
+    const uris = new Set(), ids = new Set(), names = new Set(), artists = new Map();
+    for (const t of tracks) {
+      noteArtistLang(t);
+      uris.add(t.uri);
+      for (const u of artistsOf(t)) { ids.add(idOf(u)); if (!artists.has(u)) artists.set(u, u === t.artistUri ? t.artistName : ""); }
+      if (t.artistName) names.add(t.artistName.toLowerCase());
+    }
+    const coreIds = new Set(ids); // артисти із самих кураторських плейлистів
+    // сусіди за графом схожих артистів — «біля жанру» (андеграунд, якого немає в редакторських плейлистах)
+    for (const u of extra || []) { ids.add(idOf(u)); if (!artists.has(u)) artists.set(u, ""); }
+    return { key, tracks, uris, ids, coreIds, names, playlists, extraCount: (extra || []).length,
+      artists: [...artists.entries()].map(([uri, name]) => ({ uri, name, core: coreIds.has(idOf(uri)) })) };
+  }
+  function genreLevel(pool, c) {
+    if (pool.uris.has(c.uri)) return 2;
+    if (artistsOf(c).some((u) => pool.coreIds && pool.coreIds.has(idOf(u)))) return 1;
+    if (c.artistName && pool.names.has(c.artistName.toLowerCase())) return 1;
+    if (c.genreChain && c.genreChain.has(pool.key)) return 1;
+    return 0; // лише «схожий артист» — не жанр, а біля нього
+  }
+  function inPool(pool, c) {
+    if (pool.uris.has(c.uri)) return true;
+    if (artistsOf(c).some((u) => pool.ids.has(idOf(u)))) return true;
+    return !!(c.artistName && pool.names.has(c.artistName.toLowerCase()));
+  }
+  // Розширення розмітки на крок за графом схожих артистів.
+  // Жанр — властивість артиста: схожий на репера з розмітки → теж реп. Настрій/заняття — суворіше (≥2 зв'язків).
+  // «Без слів» не розширюємо: вокал — властивість треку, а не артиста.
+  async function expandTag(key, tracks) {
+    // розширюємо лише жанр: настрій і вокал — властивості треку, а не артиста
+    if (!key.startsWith("genre:")) return [];
+    const freq = new Map();
+    for (const t of tracks) if (t.artistUri) freq.set(t.artistUri, (freq.get(t.artistUri) || 0) + 1);
+    const ranked = [...freq.entries()].sort((a, b) => b[1] - a[1]).map(([u]) => u);
+    const ru = ranked.filter((u) => (artistLang.get(u)?.cyr || 0) > 0).slice(0, 25);
+    const other = ranked.filter((u) => !((artistLang.get(u)?.cyr || 0) > 0)).slice(0, 25);
+    const rels = await Promise.all([...ru, ...other].map(relatedArtists));
+    const cnt = new Map();
+    rels.forEach((list) => list.forEach((u) => cnt.set(u, (cnt.get(u) || 0) + 1)));
+    const minHits = key.startsWith("genre:") ? 1 : 2;
+    return [...cnt.entries()].filter(([u, n]) => n >= minHits && !freq.has(u)).map(([u]) => u);
+  }
+  async function loadTagPool(key) {
+    if (tagPools.has(key)) return tagPools.get(key);
+    try {
+      const c = JSON.parse(lsGet(K.tagPrefix + key) || "null");
+      if (c && Date.now() - c.ts < 3 * 86400000 && c.tracks && c.tracks.length) {
+        const tracks = c.tracks.map(([id, name, arts, an, ex]) => {
+          const uris = arts ? arts.split(",").map(AU) : [];
+          return { uri: TU(id), name, artistUri: uris[0], artistName: an, artistUris: uris, explicit: !!ex };
+        });
+        const pool = makePool(key, tracks, c.playlists, (c.extra || []).map(AU));
+        tagPools.set(key, pool);
+        return pool;
+      }
+    } catch {}
+    // для настроїв/занять — більше розмітки: потреково вона має покривати багато музики
+    const moodish = key.startsWith("mood:") || key.startsWith("act:") || key.startsWith("combo:");
+    const perQuery = moodish ? 3 : 2, maxPlaylists = moodish ? 14 : 10, cap = moodish ? 1200 : 800;
+    const found = await Promise.all(tagQueries(key).map(searchPlaylistUris));
+    const chosen = [];
+    for (const list of found) {
+      const editorial = list.filter((u) => idOf(u).startsWith("37i9dQZF1")); // кураторські плейлисти Spotify
+      for (const u of (editorial.length ? editorial : list).slice(0, perQuery)) if (!chosen.includes(u)) chosen.push(u);
+    }
+    const lists = await Promise.all(chosen.slice(0, maxPlaylists).map(playlistTracks));
+    const seen = new Set(); const tracks = [];
+    for (const l of lists) for (const t of l) if (!seen.has(t.uri)) { seen.add(t.uri); tracks.push(t); }
+    const compact = tracks.slice(0, cap);
+    compact.forEach(noteArtistLang);
+    const save = (extra) => {
+      if (!compact.length) return;
+      lsSet(K.tagPrefix + key, JSON.stringify({ ts: Date.now(), playlists: chosen.length, extra: extra.map(idOf),
+        tracks: compact.map((t) => [idOf(t.uri), t.name || "", artistsOf(t).map(idOf).join(","), t.artistName || "", t.explicit ? 1 : 0]) }));
+      trimTagCaches(TAG_CACHE_BUDGET, new Set([K.tagPrefix + key]));
+    };
+    save([]);
+    const pool = makePool(key, compact, chosen.length, []);
+    tagPools.set(key, pool);
+    logEvent("Разметка «" + key + "»", { плейлистов: chosen.length, треков: compact.length, артистов: pool.artists.length });
+    // розширення схожими артистами — у фоні (до 50 запитів): хвиля стартує, не чекаючи його
+    if (compact.length && key.startsWith("genre:")) expandTag(key, compact).then((extra) => {
+      if (!extra.length || tagPools.get(key) !== pool) return;
+      tagPools.set(key, makePool(key, compact, chosen.length, extra));
+      save(extra);
+      logEvent("Разметка «" + key + "» расширена похожими", extra.length);
+    }).catch(() => {});
+    return pool;
+  }
+  function activePools() { return activeTags().map((k) => tagPools.get(k)).filter((p) => p && p.tracks.length); }
+  function hardPools() { return tagKinds().hard.map((k) => tagPools.get(k)).filter((p) => p && p.tracks.length); }
+  function softPools() { return tagKinds().soft.map((k) => tagPools.get(k)).filter((p) => p && p.tracks.length); }
+  function comboPools() { return tagKinds().combo.map((k) => tagPools.get(k)).filter((p) => p && p.tracks.length); }
+
+  // ---------- Настрій / заняття — властивість ТРЕКУ ----------
+  // Рівні: 2 — трек сам із розмітки цього настрою; 1 — схожий на трек звідти (рекомендатор Spotify
+  // від перевіреного треку); 0 — ні. Протилежний настрій (бадьоре при «Спокійному» тощо) відсікається.
+  const MOOD_OPPOSITES = {
+    "mood:calm": ["mood:energetic", "act:workout"], "mood:energetic": ["mood:calm", "act:sleep"],
+    "mood:happy": ["mood:sad"], "mood:sad": ["mood:happy"],
+    "act:sleep": ["mood:energetic", "act:workout"], "act:workout": ["mood:calm", "act:sleep"],
+    "act:work": ["act:workout"], "act:wakeup": ["act:sleep"], "act:road": [],
+  };
+  function moodKeysSel() {
+    const k = [];
+    if (settings.mood) k.push("mood:" + settings.mood);
+    if (settings.activity) k.push("act:" + settings.activity);
+    return k;
+  }
+  function oppositeKeys() {
+    const sel = moodKeysSel(); const out = new Set();
+    for (const k of sel) for (const o of MOOD_OPPOSITES[k] || []) if (!sel.includes(o)) out.add(o);
+    return [...out];
+  }
+  const moodIsHard = () => tagKinds().hard.some((k) => k.startsWith("mood:") || k.startsWith("act:"));
+  function moodComboExact(uri, k) {
+    for (const cp of comboPools()) if (cp.key.startsWith("combo:" + k + "|") && cp.uris.has(uri)) return true;
+    return false;
+  }
+  function moodExact(uri, k) {
+    const p = tagPools.get(k);
+    return !!(p && p.uris.has(uri)) || moodComboExact(uri, k);
+  }
+  function moodLevel(c, k) {
+    const p = tagPools.get(k);
+    if (!p || !p.tracks.length) return 2; // розмітка не завантажилася — не заважаємо
+    if (moodExact(c.uri, k)) return 2;
+    return c.moodChain && c.moodChain.has(k) ? 1 : 0;
+  }
+  function moodLevelAll(c) { const ks = moodKeysSel(); return ks.length ? Math.min(...ks.map((k) => moodLevel(c, k))) : 2; }
+  function moodArtistAny(c) { return moodKeysSel().some((k) => { const p = tagPools.get(k); return p && inPool(p, c); }); }
+  function isOppositeTrack(c) {
+    if (moodKeysSel().some((k) => moodExact(c.uri, k))) return false; // трек і в «своєму» настрої — лишаємо
+    return oppositeKeys().some((k) => { const p = tagPools.get(k); return p && p.uris.has(c.uri); });
+  }
+  function oppositeArtistOnly(c) {
+    if (moodArtistAny(c)) return false;
+    return oppositeKeys().some((k) => { const p = tagPools.get(k); return p && inPool(p, c); });
+  }
+  // кандидат, схожий на перевірений трек потрібного настрою, отримує «ланцюжок»
+  function markMoodChain(c, seedUri) {
+    for (const k of moodKeysSel()) if (moodExact(seedUri, k)) (c.moodChain || (c.moodChain = new Set())).add(k);
+    // схожий на трек точно з жанру — теж жанр
+    for (const p of hardPools()) if (p.key.startsWith("genre:") && p.uris.has(seedUri)) (c.genreChain || (c.genreChain = new Set())).add(p.key);
+  }
+
+  // ==================================================================
+  // Профіль смаку: лайки + історія прослуховувань Spotify
+  // ==================================================================
+  let profile = null;
+  const P = {
+    likedTracks: new Set(), likedItems: [], likeAt: new Map(), familiarIds: new Set(), familiarNames: new Set(), // likeAt: uri -> дата лайка
+    heard: new Set(), byLang: { ru: [], foreign: [] }, topArtists: [],
+    topTracks: [],        // твої найбільш слухані треки (історія Spotify) — якорі смаку
+    taste: new Map(),     // «околиця смаку»: артист -> наскільки він схожий на твоїх улюблених
+  };
+  function applyProfile(p) {
+    profile = p;
+    P.likedTracks = new Set(p.likedTracks || []);
+    P.likedItems = p.likedItems || [];
+    P.likeAt = new Map(P.likedItems.filter((t) => t.at).map((t) => [t.uri, t.at]));
+    for (const l of waveLikes) if (l[4] && !P.likeAt.has(TU(l[0]))) P.likeAt.set(TU(l[0]), l[4]);
+    P.familiarIds = new Set(p.familiarIds || []);
+    P.familiarNames = new Set(p.familiarNames || []);
+    P.heard = new Set(p.heard || []);
+    P.topArtists = p.topArtists || [];
+    P.topTracks = p.topTracks || [];
+    P.taste = new Map(p.taste || []);
+    for (const [id, aid] of waveLikes) { P.likedTracks.add(TU(id)); P.heard.add(TU(id)); if (aid) P.familiarIds.add(aid); }
+    for (const t of P.topTracks) noteArtistLang(t);
+    // мова лайків — за артистом, а не лише за літерами в назві
+    for (const t of P.likedItems) noteArtistLang(t);
+    P.byLang = { ru: [], foreign: [] };
+    for (const t of P.likedItems) (isRuTrack(t) ? P.byLang.ru : P.byLang.foreign).push(t.uri);
+  }
+  // «Знайомий» артист: є в лайках або в історії прослуховувань (аналог «слухав > 5 разів» у Яндекса)
+  function isFamiliar(c) {
+    if (c.artistUri && P.familiarIds.has(idOf(c.artistUri))) return true;
+    return !!(c.artistName && P.familiarNames.has(c.artistName.toLowerCase()));
+  }
+
+  let profileBg = null;
+  async function buildProfile(force, quiet) {
+    // профіль без дат лайків (стара версія) — теж застарілий: перезбереться у фоні
+    const fresh = (p) => p && Date.now() - p.builtAt < 12 * 3600000 && !(p.likedItems && p.likedItems.length && !p.likedItems[0].at);
+    if (!force) {
+      if (!profile) { try { const c = JSON.parse(lsGet(K.profile) || "null"); if (c) applyProfile(c); } catch {} }
+      if (fresh(profile)) return profile;
+      // застарілий профіль — граємо за ним одразу, а свіжий збираємо у фоні
+      if (profile) {
+        if (!profileBg) profileBg = buildProfile(true, true).then(() => ensureTaste())
+          .catch((e) => logEvent("профиль в фоне: ошибка", String(e))).finally(() => { profileBg = null; });
+        return profile;
+      }
+    }
+    const liked = await fetchLikedTracks();
+    const tops = await Promise.all([
+      fetchTop("LONG_TERM", "PLAY_COUNT", "LONG_TERM", "PLAY_COUNT"),
+      fetchTop("MID_TERM", "PLAY_COUNT", "MID_TERM", "PLAY_COUNT"),
+      fetchTop("SHORT_TERM", "PLAY_COUNT", "SHORT_TERM", "PLAY_COUNT"),
+    ]);
+
+    const names = new Map(); const weight = new Map();
+    const familiar = new Set(); const fnames = new Set();
+    for (const t of liked) {
+      if (t.artistName) fnames.add(t.artistName.toLowerCase());
+      if (!t.artistUri) continue;
+      familiar.add(idOf(t.artistUri));
+      if (t.artistName) names.set(t.artistUri, t.artistName);
+      weight.set(t.artistUri, (weight.get(t.artistUri) || 0) + likeWeight(t.at)); // свіжий лайк вагоміший за старий
+    }
+    // за весь час / пів року / місяць — свіже трохи вагоміше, але помірно: у «місяць» потрапляє й те, що вмикав сам Drift
+    const TERM_W = [0.8, 1, 1.2];
+    tops.forEach((r, k) => r.artists.forEach((a, i) => {
+      familiar.add(idOf(a.uri));
+      if (a.name) { fnames.add(a.name.toLowerCase()); names.set(a.uri, a.name); }
+      weight.set(a.uri, (weight.get(a.uri) || 0) + Math.max(1, (50 - i) / 8) * TERM_W[k]);
+    }));
+    const topArtists = [...weight.entries()].sort((x, y) => y[1] - x[1]).slice(0, 80)
+      .map(([uri, w]) => ({ uri, name: names.get(uri) || "", weight: w }));
+    const heard = new Set(liked.map((t) => t.uri));
+    tops.forEach((r) => r.tracks.forEach((t) => heard.add(t.uri)));
+    const byLang = { ru: [], foreign: [] };
+    for (const t of liked) (isCyrillic(t.name) || isCyrillic(t.artistName) ? byLang.ru : byLang.foreign).push(t.uri);
+    // найбільш слухані треки: недавні — першими
+    const seenTop = new Set(); const topTracks = [];
+    for (const r of [tops[2], tops[1], tops[0]]) for (const t of r.tracks) if (!seenTop.has(t.uri)) { seenTop.add(t.uri); topTracks.push(t); }
+
+    const p = {
+      builtAt: Date.now(),
+      likedTracks: liked.map((t) => t.uri),
+      likedItems: liked.slice(0, 2000),
+      familiarIds: [...familiar], familiarNames: [...fnames],
+      heard: [...heard], byLang, topArtists, topTracks: topTracks.slice(0, 150),
+      taste: profile && Array.isArray(profile.taste) ? profile.taste : [], tasteAt: 0, // старий смак — поки не перераховано
+      historyOk: tops.some((r) => r.ok),
+    };
+    applyProfile(p);
+    lsSet(K.profile, JSON.stringify(p));
+    for (const a of topArtists) affinity[a.uri] = Math.max(affinity[a.uri] || 0, Math.min(a.weight / 3, 6));
+    saveAffinity();
+    logEvent("Профиль собран", {
+      лайков: liked.length, знакомыхАртистов: familiar.size, услышанныхТреков: heard.size,
+      историяSpotify: p.historyOk,
+    });
+    return profile;
+  }
+  // Околиця смаку: схожі на твоїх топ-артистів (за прослуховуваннями). Що до більшої кількості
+  // улюблених артистів схожий — то ближче до смаку. Будується раз на 12 годин, далі донавчається на лайках у хвилі.
+  async function ensureTaste() {
+    if (!P.topArtists.length) return;
+    // смак свіжіший за профіль і порахований за нинішніми правилами (tasteV 5: 30 улюблених артистів, лайки за датою) — перераховувати нема чого
+    if (P.taste.size && profile?.tasteV === 5 && (profile?.tasteAt || 0) >= (profile?.builtAt || 0)) return;
+    // 30 найулюбленіших: ширше (50) — і в коло потрапляли артисти, яких нещодавно вмикав сам Drift, хвиля спливала від смаку
+    const top = P.topArtists.slice(0, 30);
+    const maxW = Math.max(...top.map((a) => a.weight), 1);
+    const rels = await Promise.all(top.map((a) => relatedArtists(a.uri)));
+    const taste = new Map();
+    rels.forEach((list, i) => {
+      const w = 0.5 + top[i].weight / maxW; // що улюбленіший артист — то вагоміші його сусіди
+      list.forEach((u) => taste.set(u, (taste.get(u) || 0) + w));
+    });
+    for (const a of top) taste.set(a.uri, (taste.get(a.uri) || 0) + 1);
+    // 100 останніх лайків рухають смак: артист лайка і його схожі ближчі, вага — за датою лайка (свіжі сильніші)
+    const likes = recentLikes(100).filter((t) => t.artistUri);
+    const artW = new Map();
+    for (const t of likes) artW.set(t.artistUri, Math.max(artW.get(t.artistUri) || 0, likeWeightOf(t)));
+    const likeArts = [...artW.keys()];
+    const likeRels = await Promise.all(likeArts.map((u) => relatedArtists(u)));
+    likeArts.forEach((u, i) => {
+      const w = artW.get(u);
+      taste.set(u, (taste.get(u) || 0) + 1.5 * w);
+      likeRels[i].forEach((r) => taste.set(r, (taste.get(r) || 0) + 0.7 * w));
+    });
+    P.taste = taste;
+    saveTaste(true);
+    logEvent("Окрестность вкуса", { артистов: taste.size });
+  }
+  function saveTaste(rebuilt) {
+    if (!profile) return;
+    if (rebuilt) { profile.tasteAt = Date.now(); profile.tasteV = 5; }
+    profile.taste = [...P.taste.entries()].sort((a, b) => b[1] - a[1]).slice(0, 2000);
+    lsSet(K.profile, JSON.stringify(profile));
+  }
+  function tasteOf(c) {
+    let t = 0;
+    const taste = waveSource ? waveSource.taste : P.taste;
+    for (const a of artistsOf(c)) t = Math.max(t, taste.get(a) || 0);
+    return Math.min(t, 4);
+  }
+  // Лайк у хвилі розширює смак: цей артист і його схожі стають ближчими
+  async function learnTasteFromLike(artistUri) {
+    if (!artistUri) return;
+    P.taste.set(artistUri, (P.taste.get(artistUri) || 0) + 1.5);
+    const rel = await relatedArtists(artistUri);
+    rel.forEach((u) => P.taste.set(u, (P.taste.get(u) || 0) + 0.7));
+    saveTaste();
+  }
+  // Твої найбільш слухані треки під вибрану мову (якорі смаку)
+  function topTracksForLang() {
+    const lang = settings.language, base = waveSource ? waveSource.tracks : P.topTracks;
+    const list = base.filter((t) => lang === "ru" ? isRuTrack(t) : lang === "foreign" ? !isRuTrack(t) : true);
+    return list.length >= 3 ? list : base;
+  }
+
+  function langSeedBase() {
+    if (settings.language === "ru" && P.byLang.ru.length) return P.byLang.ru;
+    if (settings.language === "foreign" && P.byLang.foreign.length) return P.byLang.foreign;
+    return [...P.likedTracks];
+  }
+
+  // ==================================================================
+  // Постійна пам'ять: симпатія до артистів, бан треків, список ШІ-артистів
+  // ==================================================================
+  let affinity = {};
+  function loadAffinity() { try { affinity = JSON.parse(lsGet(K.affinity) || "{}") || {}; } catch { affinity = {}; } }
+  function saveAffinity() { lsSet(K.affinity, JSON.stringify(affinity)); }
+  function bumpAffinity(artistUri, d) {
+    if (!artistUri) return;
+    affinity[artistUri] = Math.max(-12, Math.min(20, (affinity[artistUri] || 0) + d));
+  }
+
+  let bannedTracks = new Set();
+  function loadBannedTracks() { try { bannedTracks = new Set(JSON.parse(lsGet(K.banned) || "[]")); } catch { bannedTracks = new Set(); } }
+  function saveBannedTracks() { lsSet(K.banned, JSON.stringify([...bannedTracks])); }
+  // (у бані і id треків, і ключі пісень «k:артист|назва» — щоб та сама пісня в іншій версії теж не повернулася)
+  const bannedTrackCount = () => [...bannedTracks].filter((x) => x.startsWith("spotify:")).length;
+
+  // Дизлайк — надовго (Pro): артист значно нижче ~тиждень, плюс довгий хвіст ~2 місяці, його схожі — слабше
+  // (дзеркально до лайка, який розширює смак). 2 дизлайки артиста за 30 днів — прихований на 2 тижні. Назавжди — ніколи.
+  // Лайк треку цього артиста дизлайки прощає. Записується завжди (і у Free) — на випадок переходу на Pro.
+  const DAY_MS = 86400000;
+  let dislikes = {}, dislikeNear = {};
+  function loadDislikes() {
+    try { dislikes = JSON.parse(lsGet(K.dislikes) || "{}") || {}; } catch { dislikes = {}; }
+    try { dislikeNear = JSON.parse(lsGet(K.dislikeNear) || "{}") || {}; } catch { dislikeNear = {}; }
+    const now = Date.now();
+    for (const [id, a] of Object.entries(dislikes)) {
+      const keep = Array.isArray(a) ? a.filter((t) => now - t < 180 * DAY_MS).slice(-5) : [];
+      if (keep.length) dislikes[id] = keep; else delete dislikes[id];
+    }
+    for (const [id, v] of Object.entries(dislikeNear)) if (!Array.isArray(v) || v[0] * Math.exp(-(now - v[1]) / (60 * DAY_MS)) < 0.05) delete dislikeNear[id];
+  }
+  function saveDislikes() { lsSet(K.dislikes, JSON.stringify(dislikes)); lsSet(K.dislikeNear, JSON.stringify(dislikeNear)); }
+  function noteDislike(c) {
+    if (!c || !c.artistUri) return;
+    const id = idOf(c.artistUri), now = Date.now();
+    dislikes[id] = [...(dislikes[id] || []), now].slice(-5);
+    saveLater("dislikes", saveDislikes);
+    relatedArtists(c.artistUri).then((rel) => {
+      for (const u of (rel || []).slice(0, 20)) {
+        const r = idOf(u); if (r === id) continue;
+        const v = dislikeNear[r], w0 = v ? v[0] * Math.exp(-(now - v[1]) / (60 * DAY_MS)) : 0;
+        dislikeNear[r] = [Math.min(w0 + 1, 3), now];
+      }
+      const rows = Object.entries(dislikeNear);
+      if (rows.length > 1500) dislikeNear = Object.fromEntries(rows.sort((a, b) => b[1][1] - a[1][1]).slice(0, 1500));
+      saveLater("dislikes", saveDislikes);
+    }).catch(() => {});
+  }
+  function forgiveDislikes(artistUri) {
+    const id = idOf(artistUri || "");
+    if (dislikes[id]) { delete dislikes[id]; saveLater("dislikes", saveDislikes); }
+  }
+  function dislikePenalty(artistUri) {
+    if (!artistUri || !proActive()) return 0;
+    const id = idOf(artistUri), now = Date.now();
+    let p = 0;
+    for (const ts of dislikes[id] || []) { const age = now - ts; p += 2.5 * Math.exp(-age / (7 * DAY_MS)) + 0.8 * Math.exp(-age / (60 * DAY_MS)); }
+    const v = dislikeNear[id];
+    if (v) p += 0.4 * v[0] * Math.exp(-(now - v[1]) / (60 * DAY_MS));
+    return Math.min(p, 6);
+  }
+  // ---------------- Статистика: «Drift тебе знає» і підсумок місяця (пишеться завжди, і у Free) ----------------
+  let stats = { out: [], months: {} }, discovered = {};
+  const monthKey = (ts) => { const d = new Date(ts || Date.now()); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"); };
+  function loadStats() {
+    try { const v = JSON.parse(lsGet(K.stats) || "null"); if (v && Array.isArray(v.out) && v.months) stats = v; } catch {}
+    try { discovered = JSON.parse(lsGet(K.discovered) || "{}") || {}; } catch { discovered = {}; }
+    const keep = Object.keys(stats.months).sort().slice(-13); // рік із невеликим
+    stats.months = Object.fromEntries(keep.map((k) => [k, stats.months[k]]));
+    const ids = Object.keys(discovered);
+    if (ids.length > 4000) discovered = Object.fromEntries(ids.sort((a, b) => discovered[b] - discovered[a]).slice(0, 4000).map((k) => [k, discovered[k]]));
+  }
+  function saveStats() { lsSet(K.stats, JSON.stringify(stats)); lsSet(K.discovered, JSON.stringify(discovered)); }
+  const prevMonthKey = () => { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - 1); return monthKey(d.getTime()); };
+  function monthStats(k) {
+    const m = stats.months[k] || (stats.months[k] = { plays: 0, good: 0, likes: 0, skips: 0, dislikes: 0, newA: {}, names: {} });
+    // для підсумку місяця: час прослуховування, години доби, дні (крива точності), артисти [звучав, дослуханий, лайк], характер хвилі
+    if (m.ms == null) Object.assign(m, { ms: 0, hours: Array(24).fill(0), days: {}, arts: {}, chars: {} });
+    return m;
+  }
+  // артист, якого ти раніше не слухав (не з лайків/історії і не звучав у Drift), — нова знахідка цього місяця
+  function noteDiscovery(c) {
+    if (!c || !c.artistUri) return;
+    const id = idOf(c.artistUri);
+    if (discovered[id] || P.familiarIds.has(id)) return;
+    discovered[id] = Date.now();
+    const m = monthStats(monthKey());
+    m.newA[id] = m.newA[id] || 0;
+    if (c.artistName) m.names[id] = c.artistName;
+    saveLater("stats", saveStats);
+  }
+  const OUT_CODE = { finished: 1, like: 1, partial: 0.5, skip: 0, dislike: 0 };
+  function noteStats(c, outcome, listenedMs) {
+    const code = OUT_CODE[outcome];
+    if (code == null) return;
+    stats.out.push([Date.now(), code]);
+    if (stats.out.length > 400) stats.out.splice(0, stats.out.length - 400);
+    const m = monthStats(monthKey());
+    m.plays++; if (code === 1) m.good++;
+    if (outcome === "like") m.likes++; else if (outcome === "skip") m.skips++; else if (outcome === "dislike") m.dislikes++;
+    const id = c.artistUri && idOf(c.artistUri);
+    if (id && id in m.newA) m.newA[id] += outcome === "like" ? 3 : code === 1 ? 1 : 0; // головна знахідка — більше дослуховувань і лайків
+    const now = new Date();
+    m.ms += Math.max(0, Math.min(listenedMs || 0, 20 * 60000));
+    m.hours[now.getHours()]++;
+    const day = m.days[now.getDate()] || (m.days[now.getDate()] = [0, 0, 0]);
+    day[0]++; if (code === 1) day[1]++; if (outcome === "skip" || outcome === "dislike") day[2]++;
+    const ch = settings.character || "-"; m.chars[ch] = (m.chars[ch] || 0) + 1;
+    if (id) {
+      const ar = m.arts[id] || (m.arts[id] = [0, 0, 0]);
+      ar[0]++; if (code === 1) ar[1]++; if (outcome === "like") ar[2]++;
+      if (c.artistName && !m.names[id]) m.names[id] = c.artistName;
+      const ids = Object.keys(m.arts);
+      if (ids.length > 400) for (const x of ids.sort((p, q) => m.arts[p][0] - m.arts[q][0]).slice(0, ids.length - 400)) if (!(x in m.newA)) { delete m.arts[x]; delete m.names[x]; }
+    }
+    saveLater("stats", saveStats);
+  }
+  // Точність хвилі: частка дослуханих і лайкнутих серед останніх 50 треків (недослуханий до половини — половина)
+  function waveAccuracy() {
+    const avg = (a) => a.reduce((x, o) => x + o[1], 0) / a.length * 100;
+    const last = stats.out.slice(-50), now = Date.now(), wk = 7 * 86400000;
+    const cur = stats.out.filter((o) => now - o[0] < wk), prev = stats.out.filter((o) => now - o[0] >= wk && now - o[0] < 2 * wk);
+    return {
+      acc: last.length >= 15 ? Math.round(avg(last)) : null, need: Math.max(0, 15 - last.length),
+      delta: cur.length >= 10 && prev.length >= 10 ? Math.round(avg(cur) - avg(prev)) : null,
+    };
+  }
+  // Коротке зведення для сервера: бот пише «пробний закінчується» / «Pro закінчився», сервер рахує «топ X% за відкриттями».
+  // Лише лічильники, без назв треків і артистів
+  // версія Spotify («1.3.6.1921») — автор дізнається від бота, що Spotify оновився, і перевіряє, чи нічого не зламалося
+  function spotifyVersion() {
+    const v = (Spicetify.Platform && Spicetify.Platform.version) || (/Spotify\/([\d.]+)/.exec(navigator.userAgent) || [])[1] || "";
+    return String(v).slice(0, 24);
+  }
+  function statsForBot() {
+    try {
+      const { acc, delta } = waveAccuracy(), wk = Date.now() - 7 * 86400000;
+      return JSON.stringify({
+        a: Object.keys(artistLast).length, d: Object.keys(dislikes).length, l: waveLikes.length,
+        acc, dw: delta, nw: Object.values(discovered).filter((t) => t > wk).length, p7: stats.out.filter((o) => o[0] > wk).length,
+        mk: monthKey(), mn: Object.keys(stats.months[monthKey()]?.newA || {}).length,
+        pk: prevMonthKey(), pn: Object.keys(stats.months[prevMonthKey()]?.newA || {}).length,
+        sv: spotifyVersion(), xv: String((Spicetify.Config && Spicetify.Config.version) || "").slice(0, 16),
+      });
+    } catch { return "{}"; }
+  }
+  const fmtN = (n) => Number(n || 0).toLocaleString(UI_RU ? "ru-RU" : "en-US");
+
+  // ---------------- Збережені хвилі (Pro) ----------------
+  let presets = [];
+  const PRESET_KEYS = ["character", "mood", "language", "activity", "genre"];
+  function loadPresets() { try { presets = (JSON.parse(lsGet(K.presets) || "[]") || []).filter((x) => x && x.name && x.s); } catch { presets = []; } }
+  function savePresets() { lsSet(K.presets, JSON.stringify(presets.slice(0, 6))); }
+
+  function artistDislikedOut(artistUri) {
+    if (!artistUri || !proActive()) return false;
+    const a = (dislikes[idOf(artistUri)] || []).slice().sort((x, y) => x - y), n = a.length;
+    return n >= 2 && a[n - 1] - a[n - 2] <= 30 * DAY_MS && Date.now() - a[n - 1] < 14 * DAY_MS;
+  }
+  const bannedArtists = new Map(); // artistUri -> до якого часу
+  function isArtistBanned(uri) {
+    const until = bannedArtists.get(uri);
+    if (!until) return false;
+    if (Date.now() > until) { bannedArtists.delete(uri); return false; }
+    return true;
+  }
+
+  const AI_URL = "https://raw.githubusercontent.com/xoundbyte/soul-over-ai/main/dist/artists.json";
+  let aiArtists = new Set();
+  function loadAICache() { try { aiArtists = new Set(JSON.parse(lsGet(K.aiList) || "[]")); } catch { aiArtists = new Set(); } }
+  async function refreshAIList(force) {
+    try {
+      const ts = parseInt(lsGet(K.aiTs) || "0", 10);
+      if (!force && aiArtists.size && Date.now() - ts < 7 * 86400000) return;
+      const arr = await (await fetch(AI_URL)).json();
+      const ids = [];
+      // чужий список — беремо лише те, що схоже на id артиста Spotify
+      for (const a of Array.isArray(arr) ? arr : []) if (a && typeof a.spotify === "string" && /^[0-9A-Za-z]{22}$/.test(a.spotify) && !a.removed) ids.push(a.spotify);
+      if (!ids.length) throw new Error("пустой или испорченный список");
+      aiArtists = new Set(ids);
+      lsSet(K.aiList, JSON.stringify(ids));
+      lsSet(K.aiTs, String(Date.now()));
+      logEvent("Список ИИ-артистов обновлён", aiArtists.size);
+    } catch (e) { logEvent("Список ИИ не загрузился", String(e)); }
+  }
+  const isAIArtist = (uri) => !!uri && aiArtists.has(idOf(uri));
+
+  // Довга пам'ять артистів — у піснях, а не в днях (як у треків): id артиста -> [номер останнього прослуховування, скільки разів].
+  // Поки після артиста не прозвучало ARTIST_GAP інших пісень, він не ставиться, якщо є ким замінити; далі — штраф,
+  // який сходить за кілька сотень пісень. Діє між запусками й днями (раніше — лише 25 треків у сесії).
+  const ARTIST_GAP = 250, ARTIST_MEM = 3000;
+  let artistLast = {};
+  function loadArtistHist() { // після loadTrackHist: потрібен playNo
+    try { artistLast = JSON.parse(lsGet(K.artistLast) || "null"); } catch { artistLast = null; }
+    if (!artistLast || typeof artistLast !== "object") { // перенесення зі старої пам'яті по днях (~3 хв на пісню)
+      artistLast = {};
+      try {
+        const old = JSON.parse(lsGet(K.artistHist) || "{}") || {};
+        for (const [u, ts] of Object.entries(old)) if (Array.isArray(ts) && ts.length) {
+          artistLast[idOf(u)] = [Math.max(0, playNo - Math.round((Date.now() - Math.max(...ts)) / 180000)), ts.length];
+        }
+        saveArtistHist();
+        localStorage.removeItem(K.artistHist);
+      } catch {}
+    }
+    let rows = Object.entries(artistLast).filter(([, v]) => Array.isArray(v) && playNo - v[0] <= ARTIST_MEM);
+    if (rows.length > 4000) rows = rows.sort((a, b) => b[1][0] - a[1][0]).slice(0, 4000);
+    artistLast = Object.fromEntries(rows);
+  }
+  function saveArtistHist() { lsSet(K.artistLast, JSON.stringify(artistLast)); }
+  function noteArtistPlayed(uri, no, count) {
+    if (!uri) return;
+    const id = idOf(uri), v = artistLast[id];
+    artistLast[id] = [Math.max(no, v ? v[0] : 0), (v ? v[1] : 0) + (count ? 1 : 0)];
+  }
+  // скільки пісень прозвучало після артиста (Infinity — давно або жодного разу)
+  function artistSince(uri) { const v = artistLast[idOf(uri || "")]; return v ? Math.max(0, playNo - v[0]) : Infinity; }
+  // артисти плейлиста/артиста, за яким запущено хвилю, — їх ти попросив сам: довга пам'ять їх не притримує
+  function isSourceArtist(uri) {
+    if (!waveSource) return false;
+    if (!waveSource.artistSet) waveSource.artistSet = new Set(waveSource.topArtists.map((a) => a.uri));
+    return waveSource.artistSet.has(uri);
+  }
+
+  // Пам'ять про зіграні хвилею ТРЕКИ (між запусками і зміною налаштувань): uri -> [останній ts, скільки разів].
+  // Не заборона назавжди: ~12 год трек не беремо, поки є інші; далі штраф згасає за пару днів.
+  // Довга пам'ять зіграного: пісня не повторюється, поки після неї не прозвучить repeatGap() інших
+  // (рахуємо в треках, а не в годинах). Запис: ключ пісні (або "t:"+id) -> [ts, скільки разів, номер прослуховування].
+  // Накопичується з власного запису хвилі + кожні 10 хв з історії Spotify (вона віддає лише останні ~500).
+  let trackHist = {};
+  let playNo = 0; // наскрізний лічильник прослуховувань
+  const TRACK_HIST_MAX = 9000;
+  const repeatGap = () => (proActive() ? 2000 : 200); // Free пам'ятає ~200 пісень, Pro — ~2000 (записується все — для переходу на Pro)
+  function loadTrackHist() {
+    try { trackHist = JSON.parse(lsGet(K.trackHist) || "{}") || {}; } catch { trackHist = {}; }
+    playNo = parseInt(lsGet(K.playNo) || "0", 10) || 0;
+    const cut = Date.now() - 120 * 86400000;
+    let rows = Object.entries(trackHist).filter(([, v]) => Array.isArray(v) && v[0] > cut);
+    // старий формат (повний uri) — переводимо в короткий "t:"+id
+    rows = rows.map(([k, v]) => [k.startsWith("spotify:track:") ? "t:" + idOf(k) : k, v]);
+    if (!playNo) playNo = rows.length; // перший запуск із новим форматом
+    for (const r of rows) if (r[1][2] == null) r[1][2] = Math.max(0, playNo - Math.round((Date.now() - r[1][0]) / 180000)); // ~3 хв на трек
+    if (rows.length > TRACK_HIST_MAX) rows = rows.sort((a, b) => b[1][0] - a[1][0]).slice(0, TRACK_HIST_MAX);
+    trackHist = Object.fromEntries(rows);
+  }
+  function saveTrackHist() { lsSet(K.trackHist, JSON.stringify(trackHist)); lsSet(K.playNo, String(playNo)); }
+  // Та сама пісня буває під різними ID: сингл і альбом, «(speed up)», «- Remastered», «[prod. …]».
+  // Ключ пісні = артист + назва без хвостів у дужках і після « - ».
+  function songKey(c) {
+    const name = String(c.name || "").toLowerCase().replace(/\([^)]*\)|\[[^\]]*\]/g, " ").split(" - ")[0]
+      .replace(/\b(sped up|speed up|slowed|reverb|remaster(ed)?|radio edit|extended)\b/g, "").replace(/[^a-zа-яё0-9]/gi, "");
+    return name && c.artistUri ? "k:" + idOf(c.artistUri) + "|" + name : ""; // без артиста не склеюємо: «Intro» в усіх різні
+  }
+  // один запис на пісню: ключ пісні (склеює двійників), а без артиста — id треку
+  const histKey = (c) => songKey(c) || "t:" + idOf(c.uri);
+  function noteTrackPlayed(c, ts, no) {
+    const k = histKey(c), h = trackHist[k];
+    if (no == null) no = ++playNo;
+    trackHist[k] = [ts || Date.now(), (h ? h[1] : 0) + 1, no];
+    if (trackHist["t:" + idOf(c.uri)] && k !== "t:" + idOf(c.uri)) delete trackHist["t:" + idOf(c.uri)]; // дубль старого формату
+    saveLater("trackHist", saveTrackHist);
+  }
+  function histOf(c) {
+    const a = songKey(c) ? trackHist[songKey(c)] : null, b = trackHist["t:" + idOf(c.uri)];
+    if (!a) return b || null;
+    if (!b) return a;
+    return a[0] >= b[0] ? a : b;
+  }
+  // скільки пісень прозвучало відтоді (Infinity — жодного разу)
+  function playsSince(c) { const h = histOf(c); return h ? playNo - (h[2] ?? playNo) : Infinity; }
+  // Лайки, поставлені в хвилі: [id треку, id артиста, назва, ім'я артиста, ts] — нові першими, ≤300.
+  let waveLikes = [];
+  function loadWaveLikes() { try { waveLikes = JSON.parse(lsGet(K.waveLikes) || "[]") || []; } catch { waveLikes = []; } }
+  function rememberLike(c) {
+    waveLikes = [[idOf(c.uri), idOf(c.artistUri || ""), c.name || "", c.artistName || "", Date.now()],
+      ...waveLikes.filter((l) => l[0] !== idOf(c.uri))].slice(0, 300);
+    saveLater("waveLikes", () => lsSet(K.waveLikes, JSON.stringify(waveLikes)));
+  }
+  // Лайки, зняті потім у Spotify, на хвилю більше не впливають: звіряємо з медіатекою під час запуску
+  async function syncWaveLikes() {
+    if (!waveLikes.length) return;
+    try {
+      const flags = await Spicetify.Platform.LibraryAPI.contains(...waveLikes.map((l) => TU(l[0])));
+      if (!Array.isArray(flags)) return;
+      const keep = waveLikes.filter((_, i) => flags[i]);
+      if (keep.length === waveLikes.length) return;
+      const gone = waveLikes.filter((_, i) => !flags[i]).map((l) => TU(l[0]));
+      waveLikes = keep;
+      lsSet(K.waveLikes, JSON.stringify(waveLikes));
+      for (const u of gone) P.likedTracks.delete(u);
+      if (profile) { profile.tasteAt = 0; } // смак перерахується без знятих лайків
+      logEvent("Снятые лайки убраны из волны", gone.length);
+    } catch (e) { logEvent("сверка лайков: ошибка", String(e)); }
+  }
+  // Справжня історія Spotify («Recently played», ~500 треків, включно зі скіпнутими й зіграними повз хвилю) —
+  // усе це «вже звучало». Тоді пропуски у власному записі хвилі не важливі.
+  let playHistAt = 0;
+  async function markRecentlyPlayed(force) {
+    if (!force && Date.now() - playHistAt < 10 * 60000) return;
+    playHistAt = Date.now();
+    try {
+      const api = Spicetify.Platform.PlayHistoryAPI;
+      let items = [];
+      if (api && api.getContents) {
+        const r = await api.getContents({ limit: 500, offset: 0 });
+        items = (r && (r.items || r.contents)) || [];
+      }
+      const now = Date.now();
+      // нові (хвиля про них не знала): прослухане повз хвилю теж рухає лічильник «скільки пісень минуло»
+      const fresh = [];
+      items.forEach((x, i) => {
+        if (!x || typeof x.uri !== "string" || !x.uri.startsWith("spotify:track:")) return;
+        const a = x.artists && x.artists[0];
+        const t = { uri: x.uri, name: x.name, artistUri: a?.uri, artistName: a?.name };
+        if (!histOf(t) && !fresh.some((f) => histKey(f.t) === histKey(t))) fresh.push({ t, i });
+      });
+      playNo += fresh.length;
+      // час Spotify не віддає — порядок від свіжих до старих: номер прослуховування «i пісень тому»
+      fresh.forEach(({ t, i }, rank) => { trackHist[histKey(t)] = [now - i * 3 * 60000, 1, playNo - rank]; });
+      // артисти з історії (зокрема фіти): «звучав i пісень тому» — пам'ять артистів знає і те, що грало повз хвилю
+      const freshSet = new Set(fresh.map((f) => f.i));
+      items.forEach((x, i) => { for (const a of (x && x.artists) || []) if (a && a.uri) noteArtistPlayed(a.uri, playNo - i, freshSet.has(i)); });
+      saveLater("artistLast", saveArtistHist);
+      const added = fresh.length;
+      if (added) { saveLater("trackHist", saveTrackHist); logEvent("Из истории Spotify отмечено прослушанных", added); }
+    } catch (e) { logEvent("история Spotify: ошибка", String(e)); }
+  }
+  // Свіжі лайки — з хвилі й з твоєї бібліотеки (там вони за датою додавання), нові першими
+  // Вага лайка за свіжістю: свіжий — 1, за ~4 місяці половина згасальної частини, але не менше 0,15 —
+  // старий смак не зникає, а відходить на другий план (тиждень захоплення новим хвилю не перевертає)
+  const LIKE_HALF_DAYS = 120, LIKE_FLOOR = 0.15;
+  function likeWeight(at) {
+    if (!at) return 0.4; // дата невідома — середньо
+    const days = Math.max(0, (Date.now() - at) / 86400000);
+    return LIKE_FLOOR + (1 - LIKE_FLOOR) * Math.pow(0.5, days / LIKE_HALF_DAYS);
+  }
+  const likeWeightOf = (t) => likeWeight((t && t.at) || P.likeAt.get(typeof t === "string" ? t : t && t.uri) || 0);
+  // випадковий вибір із лайків, свіжі — частіше (ok — спершу ті, що підходять під налаштування)
+  function sampleLikesPreferring(list, n, ok) {
+    const good = weightedSample(list.filter(ok), n, likeWeightOf);
+    if (good.length >= n) return good;
+    return good.concat(weightedSample(list.filter((x) => !ok(x)), n - good.length, likeWeightOf));
+  }
+  function recentLikes(n) {
+    const out = [], seen = new Set();
+    const push = (t) => { if (t.uri && !seen.has(t.uri)) { seen.add(t.uri); out.push(t); } };
+    waveLikes.forEach(([id, aid, name, an, ts]) => push({ uri: TU(id), artistUri: aid ? AU(aid) : undefined, artistName: an, name,
+      artistUris: aid ? [AU(aid)] : [], at: ts || 0 }));
+    P.likedItems.slice(0, n).forEach(push);
+    return out.slice(0, n);
+  }
+
+  // Скіпи артистів між запусками: «зараз не те» пам'ятається ~3–4 дні й згасає.
+  // Дослухав трек артиста — один скіп прощено, лайкнув — усі.
+  let skipHist = {}; // artistId -> [ts, ...]
+  const SKIP_TAU_D = 1.3; // через 1 день ≈45% штрафу, через 3 дні ≈10%, через 4 ≈5%
+  function loadSkipHist() {
+    try { skipHist = JSON.parse(lsGet(K.skipHist) || "{}") || {}; } catch { skipHist = {}; }
+    const cut = Date.now() - 5 * 86400000;
+    for (const k of Object.keys(skipHist)) {
+      const a = (skipHist[k] || []).filter((t) => t > cut).slice(-6);
+      if (a.length) skipHist[k] = a; else delete skipHist[k];
+    }
+  }
+  function saveSkipHist() { lsSet(K.skipHist, JSON.stringify(skipHist)); }
+  function noteSkip(artistUri) {
+    if (!artistUri) return;
+    const id = idOf(artistUri);
+    (skipHist[id] = skipHist[id] || []).push(Date.now());
+    skipHist[id] = skipHist[id].slice(-6);
+    saveLater("skipHist", saveSkipHist);
+  }
+  function forgiveSkips(artistUri, all) {
+    const id = idOf(artistUri || ""), a = skipHist[id];
+    if (!a || !a.length) return;
+    if (all) delete skipHist[id]; else { a.shift(); if (!a.length) delete skipHist[id]; }
+    saveLater("skipHist", saveSkipHist);
+  }
+  // «Навантаження» скіпів артиста (усі запуски, включно з поточним): свіжий скіп = 1, згасає за ~3–4 дні.
+  // Пам'ять скіпів між запусками — Pro (Free враховує скіпи лише всередині поточної хвилі). Записуються завжди.
+  function skipLoad(artistUri) {
+    const a = skipHist[idOf(artistUri || "")];
+    if (!a || !proActive()) return 0;
+    const now = Date.now();
+    let m = 0;
+    for (const ts of a) m += Math.exp(-(now - ts) / (SKIP_TAU_D * 86400000));
+    return m;
+  }
+  // 3+ скіпи/дизлайки за 3 дні — артист зникає майже на добу (поки навантаження ≥ 1.5), далі м'який штраф
+  function artistSkippedOut(artistUri) {
+    const a = skipHist[idOf(artistUri || "")];
+    if (!a || a.length < 3 || !proActive()) return false;
+    const cut = Date.now() - 3 * 86400000;
+    return a.filter((t) => t > cut).length >= 3 && skipLoad(artistUri) >= 1.5;
+  }
+  // Треки, скіпнуті в перші 30 секунд: id/ключ пісні -> ts, тримаємо 7 днів
+  let quickSkips = {};
+  function loadQuickSkips() {
+    try { quickSkips = JSON.parse(lsGet(K.quickSkips) || "{}") || {}; } catch { quickSkips = {}; }
+    const cut = Date.now() - 7 * 86400000;
+    for (const k of Object.keys(quickSkips)) if (quickSkips[k] < cut) delete quickSkips[k];
+  }
+  function noteQuickSkip(c) {
+    const now = Date.now();
+    quickSkips[idOf(c.uri)] = now;
+    const k = songKey(c); if (k) quickSkips[k] = now;
+    saveLater("quickSkips", () => lsSet(K.quickSkips, JSON.stringify(quickSkips)));
+  }
+  function quickSkipped(c) {
+    if (!proActive()) return false;
+    const cut = Date.now() - 7 * 86400000, k = songKey(c);
+    return (quickSkips[idOf(c.uri)] || 0) > cut || (!!k && (quickSkips[k] || 0) > cut);
+  }
+  const trackAgeH = (c) => { const h = histOf(c); return h ? (Date.now() - h[0]) / 3600000 : Infinity; };
+  // штраф за «вже було»: одразу після — сильний, через 2–3 дні майже нуль; те, що часто звучало, — довше
+  function replayPenalty(c) {
+    const h = histOf(c);
+    if (!h) return 0;
+    const since = playsSince(c);
+    // після repeatGap() пісня може повернутися, але не одразу: штраф сходить ще впродовж півтора таких проміжків
+    const gap = repeatGap();
+    return (3 + Math.min(h[1] - 1, 4) * 0.5) * Math.exp(-Math.max(0, since - gap) / (gap * 1.5));
+  }
+
+  // ==================================================================
+  // Сесія хвилі
+  // ==================================================================
+  const RECENCY = [1, 0.8, 0.65, 0.5, 0.4];
+  const graphScore = new Map(); // artistUri -> до скількох недавніх артистів він «схожий»
+  const S = {
+    active: false, starting: false, restartPending: false,
+    ctx: [], head: -1, navBack: false, rebuildUntil: 0,
+    history: [], played: new Set(), recentArtists: [], recentSet: new Set(), picksFamiliar: [],
+    pool: new Map(), coldSeeds: [],
+    skipArtist: new Map(), seedPenalty: new Map(),
+    progress: new Map(), duration: new Map(),
+    poolBusy: false, poolDirty: false,
+    lastOutcome: "", lastRefresh: {}, lastPicks: [],
+    artistPlays: new Map(), sessionStart: Date.now(), recentHits: [],
+    hearted: new Set(), heartTicks: new Map(), sinceRefresh: 0, playedKeys: new Set(), queued: new Map(), headGen: 0,
+    inSpotifyQueue: new Set(), tierUse: {}, feedMode: true, queueMiss: 0, skipNear: new Map(), skipStreak: 0, courseAt: 0, soundAvoid: new Map(),
+  };
+  function resetSession() {
+    S.active = false; S.ctx = []; S.head = -1; S.navBack = false;
+    S.artistPlays = new Map(); S.sessionStart = Date.now(); S.recentHits = []; S.hearted = new Set(); S.heartTicks = new Map(); S.sinceRefresh = 0; S.likeSeed = null; S.playedKeys = new Set(); S.queued = new Map(); S.inSpotifyQueue = new Set(); S.tierUse = {};
+    S.history = []; S.played = new Set(); S.recentArtists = []; S.recentSet = new Set(); S.picksFamiliar = [];
+    S.pool = new Map(); S.coldSeeds = [];
+    S.skipArtist = new Map(); S.seedPenalty = new Map(); S.skipNear = new Map(); S.skipStreak = 0; S.courseAt = 0; S.soundAvoid = new Map(); S.feedMode = true; S.queueMiss = 0;
+    S.lastOutcome = ""; S.lastRefresh = {}; S.lastPicks = []; S.relaxNotified = {};
+  }
+
+  // Усі артисти треку (з фітами)
+  function artistsOf(c) {
+    const list = c.artistUris && c.artistUris.length ? c.artistUris : (c.artistUri ? [c.artistUri] : []);
+    return list;
+  }
+  // Запам'ятати артистів треку: артист не має звучати частіше ніж раз на 25 треків
+  function noteRecent(uris) {
+    if (!uris || !uris.length) return;
+    S.recentArtists.push(uris);
+    while (S.recentArtists.length > 25) S.recentArtists.shift();
+    S.recentSet = new Set(S.recentArtists.flat());
+  }
+  const isRecentArtist = (c) => artistsOf(c).some((u) => S.recentSet.has(u));
+  // «Втома» від артиста: скільки він уже звучав у цій сесії та в попередні дні.
+  // Це головний механізм різноманітності: повтори рідкісні, бо нові артисти в пріоритеті, а не через ліміт.
+  function fatigue(uri) {
+    let f = (S.artistPlays.get(uri) || 0) * 2.5;
+    // минулі запуски: що менше пісень минуло після артиста, то сильніше (через ~250 пісень — третина, через 600 — майже нуль);
+    // частий гість — довше
+    const v = artistLast[idOf(uri)];
+    if (v && !S.artistPlays.has(uri) && !isSourceArtist(uri)) {
+      const since = Math.max(0, playNo - v[0]);
+      f += 1.5 * Math.exp(-since / 250) + 0.25 * Math.min(Math.max(v[1] - 1, 0), 4) * Math.exp(-since / 800);
+    }
+    return f;
+  }
+
+  // Сіди: останні 5 прослуханих (не скіпнутих) треків, лайкнуті — у пріоритеті
+  function sessionSeeds() {
+    const listened = [];
+    for (let i = S.history.length - 1; i >= 0 && listened.length < 5; i--) {
+      const h = S.history[i];
+      if (S.courseAt && (h.at || 0) < S.courseAt) break; // після зміни курсу старий напрям не тягнемо
+      if (h.outcome !== "skip" && h.outcome !== "dislike") listened.push(h);
+    }
+    listened.sort((x, y) => (y.outcome === "like") - (x.outcome === "like"));
+    const seeds = listened.map((h) => h.uri);
+    if (S.likeSeed && !seeds.includes(S.likeSeed)) seeds.unshift(S.likeSeed); // лайкнутий зараз — головний орієнтир
+    seeds.length = Math.min(seeds.length, 5);
+    for (const u of S.coldSeeds) { if (seeds.length >= 5) break; if (!seeds.includes(u)) seeds.push(u); }
+    return seeds;
+  }
+
+  function addCand(t, source, seed, recency) {
+    if (!t || !t.uri) return false;
+    noteArtistLang(t);
+    if (S.played.has(t.uri)) return false;
+    let c = S.pool.get(t.uri);
+    const isNew = !c;
+    if (!c) { c = { ...t, sources: new Set(), recency: 0, seed: null, addedAt: Date.now() }; S.pool.set(t.uri, c); }
+    c.sources.add(source);
+    if (recency > c.recency) { c.recency = recency; c.seed = seed; }
+    if (seed) markMoodChain(c, seed); // схожий на перевірений трек потрібного настрою
+    if (!c.playcount) c.playcount = t.playcount || knownPlaycount.get(t.uri) || 0;
+    if (!c.listeners && t.listeners) c.listeners = t.listeners;
+    if (!c.artistUri && t.artistUri) { c.artistUri = t.artistUri; c.artistName = t.artistName; }
+    if ((!c.artistUris || !c.artistUris.length) && t.artistUris && t.artistUris.length) c.artistUris = t.artistUris;
+    return isNew;
+  }
+  function prunePool() {
+    for (const u of [...S.pool.keys()]) if (S.played.has(u)) S.pool.delete(u);
+    const seeds = new Set(sessionSeeds());
+    for (const c of S.pool.values()) if (c.seed && !seeds.has(c.seed)) c.recency *= 0.6; // ідемо за свіжим прослуховуванням
+    // вшир, а не вглиб: не більше 3 кандидатів на артиста (найкращі за зв'язком із поточним прослуховуванням)
+    const byArtist = new Map();
+    for (const c of S.pool.values()) {
+      const a = c.artistUri || c.uri;
+      (byArtist.get(a) || byArtist.set(a, []).get(a)).push(c);
+    }
+    for (const list of byArtist.values()) {
+      if (list.length <= 3) continue;
+      list.sort((x, y) => (y.recency + y.sources.size * 0.3) - (x.recency + x.sources.size * 0.3));
+      for (const c of list.slice(3)) S.pool.delete(c.uri);
+    }
+    if (S.pool.size > 900) {
+      const old = [...S.pool.values()].sort((a, b) => a.addedAt - b.addedAt).slice(0, S.pool.size - 900);
+      for (const c of old) S.pool.delete(c.uri);
+    }
+  }
+
+  // ---------------- Селектори кандидатів ----------------
+  // Чи підходить АРТИСТ під налаштування — щоб набирати кандидатів прицільно, а не широко з відсіюванням
+  // (інакше під вузькі налаштування проходить 3–4 артисти й хвиля крутить їх по колу).
+  function artistIsRu(uri, name) {
+    if (isCyrillic(name)) return true;
+    const o = uri && artistLang.get(uri);
+    return !!(o && o.cyr > 0);
+  }
+  function artistFitsLangTags(uri, name) {
+    if (settings.language === "ru" && !artistIsRu(uri, name)) return false;
+    if (settings.language === "foreign" && artistIsRu(uri, name)) return false;
+    for (const p of hardPools()) if (!p.ids.has(idOf(uri)) && !(name && p.names.has(name.toLowerCase()))) return false;
+    return true;
+  }
+  function artistPasses(uri, name) {
+    if (!uri || isArtistBanned(uri) || (settings.blockAI && isAIArtist(uri))) return false;
+    const fam = P.familiarIds.has(idOf(uri)) || (!!name && P.familiarNames.has(name.toLowerCase()));
+    if (settings.character === "favorite" && !fam) return false;
+    if (settings.character === "unfamiliar" && fam) return false;
+    return artistFitsLangTags(uri, name);
+  }
+  // спершу ті, що підходять під налаштування; якщо їх бракує — добираємо рештою
+  function samplePreferring(list, n, ok) {
+    const good = sampleArr(list.filter(ok), n);
+    if (good.length >= n) return good;
+    return good.concat(sampleArr(list.filter((x) => !ok(x)), n - good.length));
+  }
+  const narrow = () => !!(settings.language || settings.character || activeTags().length);
+
+  function pickFavArtists(n) {
+    const base = topArtistsNow().filter((a) => !isArtistBanned(a.uri) && !S.recentSet.has(a.uri));
+    const w = (a) => a.weight + Math.max(0, affinity[a.uri] || 0);
+    const out = weightedSample(base.filter((a) => artistPasses(a.uri, a.name)), n, w);
+    if (out.length < n) out.push(...weightedSample(base.filter((a) => !out.includes(a)), n - out.length, w));
+    return out;
+  }
+  async function relatedSelector(stats) {
+    const base = [];
+    for (let i = S.history.length - 1; i >= 0 && base.length < 3; i--) {
+      const h = S.history[i];
+      if (h.outcome !== "skip" && h.outcome !== "dislike" && h.artistUri && !base.includes(h.artistUri)) base.push(h.artistUri);
+    }
+    if (base.length < 3) { // від твоїх найулюбленіших (за прослуховуваннями), а не випадкових
+      const tops = topArtistsNow().slice(0, 20).filter((x) => !base.includes(x.uri));
+      const ok = tops.filter((x) => artistFitsLangTags(x.uri, x.name));
+      for (const a of weightedSample(ok.length >= 2 ? ok : tops, 3 - base.length, (x) => x.weight)) base.push(a.uri);
+    }
+    const rels = await Promise.all(base.slice(0, 3).map(relatedArtists));
+    const counts = new Map();
+    rels.forEach((list) => list.forEach((u) => counts.set(u, (counts.get(u) || 0) + 1)));
+    for (const [u, n] of counts) graphScore.set(u, Math.max(graphScore.get(u) || 0, n));
+    let pick = [...counts.keys()].filter((u) => !S.recentSet.has(u) && !isArtistBanned(u));
+    if (settings.character === "unfamiliar") pick = pick.filter((u) => !P.familiarIds.has(idOf(u)));
+    // ще не почуті артисти — у пріоритеті
+    // ще не почуті й не зірки (якщо про артиста вже знаємо, скільки в нього слухачів)
+    const fresh = (u) => artistSince(u) >= ARTIST_GAP * 2 && dislikePenalty(u) < 1 && artistPasses(u, "") &&
+      (settings.character === "popular" || (artistFame.get(u) || 0) < 3e6);
+    // у пріоритеті — ще не почуті Й близькі до твого смаку
+    const freshNear = (u) => fresh(u) && (P.taste.get(u) || 0) > 0;
+    const chosen = samplePreferring(pick, 6, (u) => freshNear(u) || (!P.taste.size && fresh(u)));
+    // другий крок за графом схожих — лише всередині околиці твого смаку (вшир, але не в чужі сцени)
+    if (chosen.length) {
+      const hop = await relatedArtists(chosen[(Math.random() * chosen.length) | 0]);
+      let hop2 = hop.filter((u) => !counts.has(u) && !S.recentSet.has(u) && !isArtistBanned(u));
+      if (settings.character === "unfamiliar") hop2 = hop2.filter((u) => !P.familiarIds.has(idOf(u)));
+      if (P.taste.size) hop2 = hop2.filter((u) => (P.taste.get(u) || 0) > 0);
+      chosen.push(...sampleArr(hop2.filter(fresh), 3));
+    }
+    const lists = await Promise.all(chosen.map((u) => artistTracksSample(u, 2)));
+    lists.forEach((list) => list.forEach((t) => { if (addCand(t, "rel", null, 0)) stats.rel++; }));
+  }
+  // 1–2 випадкові треки з топу артиста (а не всі його хіти поспіль)
+  function artistTracksSample(uri, n) { return artistOverviewTracks(uri).then((list) => sampleArr(list, n)); }
+
+  // ---------------- Хвиля за плейлистом / артистом ----------------
+  // Хвиля за джерелом працює ТАК САМО, як звичайна, — лише замість твого профілю джерело:
+  // улюблені артисти → артисти джерела, найбільш слухані треки (якорі) → треки джерела,
+  // околиця смаку → схожі на артистів джерела (тим самим способом, що ensureTaste). Лише Pro.
+  async function loadSource(type, uri) { return { type, uri, name: "", tracks: [], topArtists: [], taste: new Map() }; }
+  const topArtistsNow = () => (waveSource ? waveSource.topArtists : P.topArtists);
+
+  // quick — швидкий набір для старту: лише схоже на сіди, настрій і розмітка (без треків артистів)
+  async function refreshPoolOnce(opts) {
+    const quick = !!(opts && opts.quick);
+    const stats = { sim: 0, anchor: 0, fav: 0, rel: 0, tag: 0, liked: 0, mood: 0 };
+    await Promise.all(oppositeKeys().map(loadTagPool)); // розмітка протилежного настрою — для відсікання
+    const seeds = sessionSeeds();
+    const pools = await Promise.all(activeTags().map(loadTagPool));
+    const jobs = [];
+    // 1) схоже на останні прослухані — головний селектор, тримає плавні переходи
+    seeds.forEach((u, i) => jobs.push(recommendByTrack(u).then((list) =>
+      list.forEach((t) => { if (addCand(t, "sim", u, RECENCY[i] || 0.3)) stats.sim++; }))));
+    const fits = (t) => hardFilter(t, { cooldown: true });
+    // настрій/заняття: схоже на випадкові ПЕРЕВІРЕНІ треки цього настрою (не мегахіти) — постійна підживка
+    for (const k of moodKeysSel()) {
+      const p = tagPools.get(k);
+      if (!p || !p.tracks.length) continue;
+      const exact = [...p.tracks, ...comboPools().filter((cp) => cp.key.startsWith("combo:" + k + "|")).flatMap((cp) => cp.tracks)];
+      samplePreferring(exact, 3, (t) => fits(t) && (t.playcount || 0) < 3e8).forEach((t) =>
+        jobs.push(recommendByTrack(t.uri).then((list) =>
+          list.forEach((x) => { if (addCand(x, "mood", t.uri, 0.4)) stats.mood++; }))));
+    }
+    if (quick) {
+      pools.forEach((pool) => samplePreferring(pool.tracks, 40, fits).forEach((t) => { if (addCand(t, "tag", null, 0)) stats.tag++; }));
+      if (settings.character === "favorite") sampleLikesPreferring(P.likedItems, 30, fits).forEach((t) => addCand(t, "liked", null, 0));
+      await Promise.all(jobs);
+      if (settings.language === "instrumental") {
+        const toCheck = [...S.pool.values()].filter((c) => !lyricsKnown.has(c.uri) && hardFilter(c, { cooldown: true, lang: true }))
+          .sort((a, b) => b.recency - a.recency).slice(0, 5).map((c) => c.uri);
+        await Promise.all(toCheck.map((u) => checkLyrics(u)));
+      }
+      S.lastRefresh = { ...stats, быстрый: true, пул: S.pool.size };
+      return;
+    }
+    // 2) якорі смаку — твої треки, за можливості під мову/жанр
+    // якорі — твої НАЙБІЛЬШ СЛУХАНІ треки (історія Spotify), а не випадкові лайки
+    // хвиля за джерелом — твої особисті якорі й улюблених артистів не підмішуємо
+    const anchorBase = (waveSource || P.topTracks.length) ? topTracksForLang() : (P.likedItems.length ? P.likedItems : langSeedBase().map((uri) => ({ uri })));
+    const anchorOk = (t) => !t.artistUri || artistFitsLangTags(t.artistUri, t.artistName);
+    samplePreferring(anchorBase, 2, anchorOk).forEach((t) =>
+      jobs.push(recommendByTrack(t.uri).then((list) =>
+        list.forEach((x) => { if (addCand(x, "anchor", t.uri, 0.25)) stats.anchor++; }))));
+    // якір зі свіжих лайків (нові — імовірніше): лайк впливає на хвилю і в наступні дні
+    const likes = waveSource ? [] : recentLikes(100);
+    const likeOk = likes.filter(anchorOk);
+    weightedSample(likeOk.length ? likeOk : likes, 1, likeWeightOf).forEach((t) =>
+      jobs.push(recommendByTrack(t.uri).then((list) =>
+        list.forEach((x) => { if (addCand(x, "like", t.uri, 0.35)) stats.anchor++; }))));
+    // 3) треки улюблених артистів (не в «Незнайомому»), прицільно під налаштування
+    if (settings.character !== "unfamiliar") {
+      pickFavArtists(narrow() ? 3 : 2).forEach((a) => jobs.push(artistTracksSample(a.uri, 2).then((list) =>
+        list.forEach((t) => { if (addCand(t, "fav", null, 0)) stats.fav++; }))));
+    }
+    // 4) схожі артисти (вшир, два кроки за графом)
+    jobs.push(relatedSelector(stats));
+    // 5) розмітка тегів: по одному треку на артиста + треки ще не почутих артистів розмітки
+    pools.forEach((pool) => {
+      const seenArt = new Set();
+      for (const t of samplePreferring(pool.tracks, 120, fits)) {
+        const a = t.artistUri || t.uri;
+        if (seenArt.has(a)) continue;
+        seenArt.add(a);
+        if (addCand(t, "tag", null, 0)) stats.tag++;
+        if (seenArt.size >= 15) break;
+      }
+      const arts = pool.artists.filter((a) => !S.recentSet.has(a.uri) && artistPasses(a.uri, a.name));
+      samplePreferring(arts, 5, (a) => artistSince(a.uri) >= ARTIST_GAP * 2 && (a.core || !pool.key.startsWith("genre:"))).forEach((a) =>
+        jobs.push(artistTracksSample(a.uri, 2).then((list) =>
+          list.forEach((t) => { if (addCand(t, "tag", null, 0)) stats.tag++; }))));
+    });
+    // 6) «Улюблене»: самі улюблені треки, що підходять під налаштування
+    if (settings.character === "favorite") {
+      sampleLikesPreferring(P.likedItems, 30, fits).forEach((t) => { if (addCand(t, "liked", null, 0)) stats.liked++; });
+    }
+    await Promise.all(jobs);
+    // мову вибрано — уточнюємо мову артистів, про яких знаємо мало (за їхніми топ-треками)
+    if (settings.language === "ru" || settings.language === "foreign") {
+      const unknown = [...new Set([...S.pool.values()]
+        .filter((c) => c.artistUri && !isRuTrack(c) && !langChecked.has(c.artistUri))
+        .sort((a, b) => (b.recency + b.sources.size * 0.3) - (a.recency + a.sources.size * 0.3))
+        .map((c) => c.artistUri))].slice(0, 30);
+      await Promise.all(unknown.map((a) => artistOverviewTracks(a))); // перевірка мови за топ-треками
+    }
+    // «Без слів»: заздалегідь перевіряємо, чи є в кандидатів текст (спершу найімовірніших)
+    if (settings.language === "instrumental") {
+      const pool = tagPools.get("lang:instrumental");
+      const rank = (c) => (pool && pool.uris.has(c.uri) ? 3 : 0) +
+        (pool && artistsOf(c).some((u) => pool.ids.has(idOf(u))) ? 1.5 : 0) + c.recency;
+      // перевіряємо лише тих, хто проходить усі інші умови, і найкращих із них
+      const toCheck = [...S.pool.values()].filter((c) => !lyricsKnown.has(c.uri) && hardFilter(c, { cooldown: true, lang: true }))
+        .sort((a, b) => rank(b) - rank(a)).slice(0, quick ? 5 : 12).map((c) => c.uri);
+      await Promise.all(toCheck.map((u) => checkLyrics(u)));
+    }
+    // Популярність треків із плейлистів невідома — підтягуємо топ їхніх артистів (там є прослуховування
+    // і місячні слухачі), інакше мегахіти з Happy Hits/Good Vibes проходять без штрафу.
+    if (settings.character !== "popular") {
+      const unknownPc = [...S.pool.values()].filter((c) => !c.playcount && c.artistUri && !ovCache.has(c.artistUri));
+      const arts = [...new Set(unknownPc.sort((a, b) => (b.sources.has("tag") ? 1 : 0) - (a.sources.has("tag") ? 1 : 0))
+        .map((c) => c.artistUri))].slice(0, 25);
+      await Promise.all(arts.map((a) => artistOverviewTracks(a)));
+      for (const c of S.pool.values()) {
+        if (!c.playcount) c.playcount = knownPlaycount.get(c.uri) || 0;
+        if (!c.listeners && c.artistUri) c.listeners = artistFame.get(c.artistUri) || 0;
+      }
+    }
+    // Голод: під налаштування проходить мало кандидатів — розширюємося ВІД уже відповідних треків
+    // (схоже на них і їхні схожі артисти) + більше з розмітки тегу.
+    const passing = [...S.pool.values()].filter((c) => hardFilter(c, { cooldown: true }));
+    if (passing.length < 12) {
+      let added = 0;
+      const jobs2 = [];
+      sampleArr(passing.map((c) => c.uri), 4).forEach((u) => jobs2.push(recommendByTrack(u).then((list) =>
+        list.forEach((t) => { if (addCand(t, "walk", u, 0.5)) added++; }))));
+      sampleArr([...new Set(passing.map((c) => c.artistUri).filter(Boolean))], 3).forEach((a) => jobs2.push(
+        relatedArtists(a).then((rel) => {
+          const ok = rel.filter((r) => settings.character !== "unfamiliar" || !P.familiarIds.has(idOf(r)));
+          return Promise.all(sampleArr(ok, 2).map((u) => artistTracksSample(u, 2)));
+        }).then((lists) => lists.flat().forEach((t) => { if (addCand(t, "walk", null, 0.3)) added++; }))));
+      activePools().forEach((p) => sampleArr(p.tracks, 150).forEach((t) => { if (addCand(t, "tag", null, 0)) added++; }));
+      await Promise.all(jobs2);
+      stats.расширение = added;
+      logEvent("Мало подходящих (" + passing.length + ") — расширил", added);
+    }
+    prunePool();
+    S.lastRefresh = { ...stats, пул: S.pool.size, сиды: seeds.length };
+    logEvent("Кандидаты", S.lastRefresh);
+  }
+  // Аварійний добір, коли кандидатів бракує: топ-артисти, рекомендації від лайків, уся розмітка
+  async function emergencyFill() {
+    const jobs = [];
+    samplePreferring(topArtistsNow(), 6, (a) => artistPasses(a.uri, a.name)).forEach((a) =>
+      jobs.push(artistOverviewTracks(a.uri).then((l) => l.forEach((t) => addCand(t, "fav", null, 0)))));
+    sampleArr(P.likedItems, 6).forEach((t) =>
+      jobs.push(recommendByTrack(t.uri).then((l) => l.forEach((x) => addCand(x, "anchor", t.uri, 0.2)))));
+    activePools().forEach((p) => p.tracks.forEach((t) => addCand(t, "tag", null, 0)));
+    sampleArr(P.likedItems, 40).forEach((t) => addCand(t, "liked", null, 0));
+    await Promise.all(jobs);
+    logEvent("Аварийный добор", { пул: S.pool.size });
+  }
+
+  // Пул на диск (~200 найкращих кандидатів) — наступний запуск почне грати одразу, не чекаючи мережі
+  function saveLastPool() {
+    const items = [...S.pool.values()].sort((a, b) => (b.recency + b.sources.size * 0.3) - (a.recency + a.sources.size * 0.3))
+      .slice(0, 200).map((c) => [idOf(c.uri), c.name || "", (artistsOf(c)).map(idOf).join(","), c.artistName || "",
+        c.explicit ? 1 : 0, c.playcount || 0, c.listeners || 0]);
+    lsSet(K.lastPool, JSON.stringify({ t: Date.now(), items }));
+  }
+  function loadLastPool() {
+    try {
+      const d = JSON.parse(lsGet(K.lastPool) || "null");
+      if (!d || Date.now() - d.t > 2 * 86400000) return [];
+      return d.items.map(([id, name, arts, an, ex, pc, li]) => {
+        const uris = arts ? arts.split(",").map(AU) : [];
+        return { uri: TU(id), name, artistUri: uris[0], artistName: an, artistUris: uris, explicit: !!ex, playcount: pc, listeners: li };
+      });
+    } catch { return []; }
+  }
+  async function refreshPool() {
+    if (S.poolBusy) { S.poolDirty = true; return; }
+    S.poolBusy = true;
+    try {
+      do { S.poolDirty = false; await refreshPoolOnce(); } while (S.poolDirty);
+      saveLater("lastPool", saveLastPool);
+    } catch (e) { logEvent("кандидаты: ошибка", String(e && e.stack || e)); }
+    finally { S.poolBusy = false; }
+  }
+
+  // ---------------- Фільтри ----------------
+  function hardFilter(c, relax) {
+    if (!c.uri || S.played.has(c.uri)) return false;
+    { const k = songKey(c); if (k && (S.playedKeys.has(k) || bannedTracks.has(k))) return false; } // та сама пісня під іншим ID вже звучала / дизлайкнута
+    if (bannedTracks.has(c.uri)) return false;
+    if (c.artistUri && isArtistBanned(c.artistUri)) return false;
+    if (settings.blockAI && isAIArtist(c.artistUri)) return false;
+    if (settings.explicitFilter && c.explicit) return false;
+    const fam = isFamiliar(c);
+    if (settings.character === "favorite") {
+      if (!relax.character && !fam && !P.likedTracks.has(c.uri)) return false;
+    } else if (!relax.liked && P.likedTracks.has(c.uri)) return false; // лайкнуте не крутимо (крім «Улюбленого»)
+    // «Незнайоме»: те, що хвиля тобі вже грала, — теж «почуте»
+    if (settings.character === "unfamiliar" && !relax.character && (fam || P.heard.has(c.uri) || histOf(c))) return false;
+    if (!relax.cooldown && isRecentArtist(c)) return false; // артист (включно з фітами) — не частіше ніж раз на 25 треків
+    // і між запусками: не раніше ніж через ARTIST_GAP пісень після нього (перша поступка — лише якщо інакше бракує)
+    if (!relax.cooldown && !relax.artistGap && artistsOf(c).some((a) => artistSince(a) < ARTIST_GAP && !isSourceArtist(a))) return false;
+    if (!relax.character && artistSkippedOut(c.artistUri)) return false; // скіпав/дизлайкав його 3+ рази — поки не ставимо
+    if (!relax.replay && artistDislikedOut(c.artistUri)) return false;    // 2 дизлайки за місяць — 2 тижні не ставимо (крім крайнього випадку)
+    // звучав у минулих запусках за останні 12 год (в «Улюбленому» — 4 год: там вибір і так вузький) — поки є інші, не беремо
+    // повтор: в «Улюбленому» — не раніше ніж за 4 год (там вибір — лише твої лайки), інакше — не раніше ніж через repeatGap() інших пісень
+    if (!relax.replay && (settings.character === "favorite" ? trackAgeH(c) < 4 : playsSince(c) < repeatGap())) return false;
+    if (!relax.replay && quickSkipped(c)) return false; // скіпнув його одразу за останні 7 днів
+    if (!relax.lang) {
+      const ru = isRuTrack(c);
+      if (settings.language === "ru" && !ru) return false;
+      if (settings.language === "foreign") {
+        if (ru) return false;
+        if (!c.artistUri || !langChecked.has(c.artistUri)) return false; // мову не підтверджено за топ-треками артиста
+      }
+    }
+    // «Без слів» — властивість ТРЕКУ: перевіряємо за розміткою і за наявністю тексту пісні
+    // «Без слів» не вимикається на жодному щаблі: на поступці досить «тексту точно немає»
+    if (settings.language === "instrumental" && !instrumentalOk(c, !!relax.lang)) return false;
+    if (relax.tags !== true) {
+      // жанр — жорстко: трек із розмітки, артист із кураторських плейлистів жанру або схожий на трек звідти.
+      // Артист, що потрапив «у жанр» лише як схожий, — тільки на поступці.
+      const genre = hardPools().filter((p) => p.key.startsWith("genre:"));
+      if (genre.length) {
+        if (relax.tags === "any") { if (!genre.some((p) => inPool(p, c))) return false; }
+        else if (!genre.every((p) => genreLevel(p, c) >= 1)) return false;
+      }
+      // настрій/заняття без жанру — головна умова, за ТРЕКОМ: сам із розмітки або схожий на трек звідти
+      if (moodIsHard()) {
+        if (!relax.tags && moodLevelAll(c) < 1) return false;
+        if (relax.tags === "any" && moodLevelAll(c) < 1 && !moodArtistAny(c)) return false;
+      }
+    }
+    // протилежний настрій (бадьоре при «Спокійному» тощо) — не беремо
+    if (!relax.liked && isOppositeTrack(c)) return false;
+    return true;
+  }
+
+  // інструментальна розмітка: загальна + «настрій × без слів»
+  function instrPools() { return [...tagPools.values()].filter((p) => p.key === "lang:instrumental" || p.key.endsWith("|instrumental")); }
+  const inInstrMarkup = (uri) => instrPools().some((p) => p.uris.has(uri));
+  function instrumentalOk(c, loose) {
+    const known = lyricsKnown.get(c.uri);
+    if (known === true) return false;                     // є текст — є вокал
+    if (inInstrMarkup(c.uri)) return true;                // трек із кураторської інструментальної розмітки
+    if (known !== false) return false;                     // не перевірений — не беремо (навіть на поступках: вокал гірше за все)
+    if (loose) return true;                                // поступка: тексту точно немає — досить
+    // тексту точно немає + пов'язаний з інструментальною розміткою (артист звідти або схожий на трек звідти)
+    return instrPools().some((p) => artistsOf(c).some((u) => p.ids.has(idOf(u))) || (c.seed && p.uris.has(c.seed)));
+  }
+
+  // ---------------- Ранжування ----------------
+  function popularityScore(c) {
+    const pc = c.playcount || 0, li = c.listeners || 0;
+    const base = pc > 0 ? pc : (li > 0 ? li * 20 : 0);
+    if (base <= 0) return 0.45;
+    return Math.max(0, Math.min(1, Math.log10(base) / 7));
+  }
+  function nicheScore(c) {
+    let s = 0;
+    const pc = c.playcount || 0;
+    // золота середина: не чарти, але й не прохідняк із парою тисяч прослуховувань
+    if (pc) {
+      if (pc < 15000) s -= 1.5;          // мертвий ноунейм
+      else if (pc < 100000) s -= 0.3;    // зовсім маловідоме — частіше прохідняк
+      else if (pc < 5e6) s += 0.5;       // середина — найкращі знахідки
+      else if (pc < 3e7) s -= 0.2;       // хіти
+      else if (pc < 1e8) s -= 0.5;       // великі хіти
+      else if (pc < 3e8) s -= 0.6;       // величезні хіти (частку тримає pickNext: ~1 із 6)
+      else s -= 0.9;                     // 300 млн+ — не заборонені, але й не кожен трек
+      // «Незнайоме» = те, чого ти не чув; пісню на сотні мільйонів ти, найімовірніше, чув
+      if (settings.character === "unfamiliar" && pc > 1.5e8) s -= 0.5;
+    }
+    const li = c.listeners || artistFame.get(c.artistUri) || 0;
+    if (pc) { if (li > 1e7) s -= 0.4; } // зірки, яких знають усі
+    else if (li > 3e7) s -= 1.0;        // прослуховування треку невідомі, але артист — суперзірка: майже напевно хіт
+    else if (li > 1e7) s -= 0.6;
+    return s;
+  }
+  function score(c) {
+    let s = c.recency * 2;                                       // ідемо за тим, що слухаєш зараз
+    s += Math.max(0, c.sources.size - 1) * 0.6;                  // згода кількох селекторів
+    s += Math.max(-6, Math.min(affinity[c.artistUri] || 0, 8)) * 0.2; // вивчена симпатія (легка — щоб не тягнути до тих самих)
+    s -= (S.skipArtist.get(c.artistUri) || 0) * 1.5;             // скіп = «зараз не те»
+    s -= S.skipNear.get(c.artistUri) || 0;                       // схожий на скіпнутого — той самий напрям
+    s -= S.soundAvoid.get(c.uri) || 0;                           // звучить як дизлайкнутий (рекомендації Spotify до нього)
+    s -= dislikePenalty(c.artistUri);                            // дизлайкав артиста або схожих (Pro, надовго)
+    s -= Math.min(skipLoad(c.artistUri), 4) * 0.8;               // скіпав артиста (за ~3–4 дні; 2 свіжі скіпи ≈ −1.6)
+    if (c.seed) s -= (S.seedPenalty.get(c.seed) || 0) * 1.2;     // напрям, від якого скіпали
+    // РІЗНОМАНІТНІСТЬ: нові артисти в пріоритеті, ті, що вже звучали, — нижче (з урахуванням минулих днів)
+    const arts = artistsOf(c);
+    const fat = arts.length ? Math.max(...arts.map(fatigue)) : 0;
+    s -= fat * 1.5;
+    // давно (або ніколи) не почутий артист — але лише поруч із твоїм смаком, інакше хвилю відносить у випадкове
+    if (arts.length && arts.every((a) => artistSince(a) > 400) && (tasteOf(c) > 0 || (graphScore.get(c.artistUri) || 0) > 0)) s += 1.2;
+    s -= replayPenalty(c);                                       // уже звучав у минулих запусках (або його двійник)
+    // нахил у «знахідки»: мегахіти й зірки вниз, середній/маловідомий рівень угору, мертвий ноунейм вниз.
+    // У «Популярному» — навпаки.
+    if (settings.character === "popular") s += popularityScore(c) * 2.5; // популярне, але не ціною настрою
+    else {
+      s += nicheScore(c);
+      // хіти 100 млн+ — іноді, але не поспіль: якщо за останні ~5 треків уже був хіт, наступний значно нижче
+      if (isMegaHit(c) && hitRecently()) s -= 2.5;
+    }
+    // СМАК: близькість до твоїх улюблених артистів (околиця смаку + схожі на нещодавно прослуханих)
+    const taste = tasteOf(c);
+    const near = Math.min(graphScore.get(c.artistUri) || 0, 4);
+    const fam = isFamiliar(c);
+    if (settings.character === "favorite") s += P.likedTracks.has(c.uri) ? 1.5 : 1;
+    else if (settings.character === "unfamiliar") {
+      // нове, але поруч із твоїм смаком: не йдемо в чужі сцени
+      s += taste * 1.0 + near * 0.3;
+      if (!taste && c.recency < 0.3) s -= 1.0;             // ні до смаку, ні до поточного прослуховування — дрейф
+    } else s += taste * (settings.character === "popular" ? 0.5 : 0.7) + near * 0.3;
+    if (!settings.character) { // звичайна хвиля: баланс знайомого й нового
+      const famRecent = S.picksFamiliar.slice(-5).filter(Boolean).length;
+      if (fam) s += famRecent >= 2 ? -2 : 0.6;
+    }
+    for (const p of hardPools()) if (p.key.startsWith("genre:")) s += [0, 0.5, 1.0][genreLevel(p, c)]; // ближче до жанру — вище
+    // Настрій/заняття — за ТРЕКОМ: сам із розмітки — значно вище («грустный рэп» — ще вище),
+    // схожий на трек звідти — вище, просто артист звідти — трішки; артист із протилежного — нижче.
+    for (const k of moodKeysSel()) {
+      const p = tagPools.get(k);
+      if (!p || !p.tracks.length) continue;
+      const lvl = moodLevel(c, k);
+      if (lvl === 2) s += moodComboExact(c.uri, k) ? 4.0 : 3.5;
+      else if (lvl === 1) s += 1.8;
+      else if (inPool(p, c)) s += 0.3;
+    }
+    if (oppositeArtistOnly(c)) s -= 1.0;
+    s += Math.random() * 1.2;
+    return s;
+  }
+  // Поступки по черзі (добираємо до потрібної кількості треків щабель за щаблем):
+  // артист раніше ніж через ARTIST_GAP пісень → повтор артиста раніше ніж через 25 треків → характер → жанр/настрій → той самий артист поруч → і лише наприкінці мова.
+  const RELAX_TIERS = [
+    {}, { artistGap: true }, { cooldown: true }, { cooldown: true, tags: "any" },
+    { cooldown: true, tags: "any", character: true }, { cooldown: true, tags: true, character: true },
+    { cooldown: true, tags: true, character: true, adjacent: true },
+    { cooldown: true, tags: true, character: true, adjacent: true, replay: true },        // те, що нещодавно звучало, — лише якщо інакше нічого
+    { cooldown: true, tags: true, character: true, adjacent: true, replay: true, lang: true },
+    { cooldown: true, tags: true, character: true, adjacent: true, replay: true, lang: true, liked: true }, // тиші не буде
+  ];
+  const RELAX_NOTES = { character: L("характер", "character"), tags: L("жанр/настроение", "genre/mood"), lang: L("язык", "language") };
+  // Мегахіт (100 млн+ або зірка без даних про трек) — допустимо, але не частіше ~1 із 6
+  function isMegaHit(c) {
+    const pc = c.playcount || 0;
+    if (pc) return pc > 1e8;
+    return (c.listeners || artistFame.get(c.artistUri) || 0) > 3e7;
+  }
+  const hitRecently = () => S.recentHits.slice(-5).some(Boolean);
+
+  // okFn — додаткова умова (наприклад, «текст уже перевірено»), щоб вибрати без очікування мережі
+  function pickNext(k, exclude, avoidArtists, maxTier, okFn) {
+    const out = [];
+    const deferred = []; // хіти, відкладені заради частки: беремо, лише якщо інакше бракує
+    const hitsOff = settings.character !== "popular";
+    const taken = new Set(exclude || []);
+    const arts = new Set(avoidArtists || []); // не ставити артиста (і фіти) поруч із тим самим
+    const lastTier = Math.min(RELAX_TIERS.length - 1, maxTier == null ? 99 : maxTier);
+    for (let ti = 0; ti <= lastTier && out.length < k; ti++) {
+      const relax = RELAX_TIERS[ti];
+      const cands = [...S.pool.values()].filter((c) => !taken.has(c.uri) && hardFilter(c, relax) && (!okFn || okFn(c)));
+      if (!cands.length) continue;
+      cands.forEach((c) => (c._s = score(c)));
+      cands.sort((a, b) => b._s - a._s);
+      const before = out.length;
+      for (const c of cands) {
+        if (out.length >= k) break;
+        const as = artistsOf(c);
+        if (!relax.adjacent && as.some((u) => arts.has(u))) continue;
+        if (hitsOff && isMegaHit(c) && (hitRecently() || out.some(isMegaHit))) { deferred.push(c); continue; }
+        as.forEach((u) => arts.add(u));
+        taken.add(c.uri);
+        out.push(c);
+      }
+      // не вистачило без хітів на цьому щаблі — краще хіт, ніж послаблювати умови далі
+      for (const c of deferred.splice(0)) {
+        if (out.length >= k) break;
+        if (taken.has(c.uri)) continue;
+        taken.add(c.uri); out.push(c);
+      }
+      if (out.length > before) S.tierUse[ti] = (S.tierUse[ti] || 0) + out.length - before; // для діагностики: з якого щабля беремо
+      if (out.length > before && ti > 0) {
+        logEvent("Добрал с уступкой", relax);
+        S.relaxNotified = S.relaxNotified || {};
+        for (const key of ["character", "tags", "lang"]) {
+          if (relax[key] === true && !S.relaxNotified[key]) {
+            S.relaxNotified[key] = true;
+          }
+        }
+      }
+    }
+    return out;
+  }
+
+  // «Без слів»: фінальна звірка вибраних треків — якщо знайшовся текст, замінюємо
+  async function verifyInstrumental(picks, k, exclude, avoid) {
+    if (settings.language !== "instrumental") return picks;
+    // заміни теж перевіряються; на останньому колі замін уже немає — краще на трек менше, ніж трек із вокалом
+    for (let round = 0; picks.length; round++) {
+      await Promise.all(picks.map((c) => checkLyrics(c.uri, 0)));
+      const good = picks.filter((c) => instrumentalOk(c, true)); // «не знаю» = не можна (крім кураторської розмітки)
+      if (good.length === picks.length || round === 3) return good;
+      const taken = new Set([...(exclude || []), ...picks.map((c) => c.uri)]);
+      picks = good.concat(pickNext(k - good.length, taken, avoid));
+    }
+    return picks;
+  }
+
+  // ---------------- Відтворення ----------------
+  // Контекст = [зіграна історія…, поточний, наступні]. «Назад» ходить історією,
+  // наступні треки перераховуються після кожної твоєї дії.
+  // ВАЖЛИВО: uri контексту — внутрішній, як у самого Spotify для списків рекомендацій.
+  // Якщо підставити uri треку, Spotify викидає наш список і вмикає своє радіо від треку.
+  const CTX_URI = "spotify:internal:recs:track-ilr";
+  // seekMs — продовжити поточний трек із тієї самої секунди (так робить і сам Spotify), без рестарту й перемотування
+  // guard — остання перевірка прямо перед надсиланням (поки чистили чергу, могли перемкнути трек)
+  async function playCtx(index, seekMs, guard) {
+    S.rebuildUntil = Date.now() + 3000;
+    await dropOurQueue();
+    if (guard && !guard()) { S.rebuildUntil = 0; return; }
+    for (const c of S.ctx) S.queued.set(c.uri, c); // усе, що віддали Spotify, — «наше», навіть якщо список уже змінили
+    const opts = { skipTo: { index } };
+    if (seekMs > 1200) opts.seekTo = Math.floor(seekMs);
+    await Spicetify.Platform.PlayerAPI.play(
+      { uri: CTX_URI, pages: [{ items: S.ctx.map((c) => ({ uri: c.uri, uid: null, type: "track", provider: null })) }] },
+      { featureIdentifier: "volna", referrerIdentifier: "volna" },
+      opts
+    );
+    verifyQueue();
+  }
+  // Перевірка: наступний трек у Spotify має бути нашим
+  function verifyQueue() {
+    setTimeout(() => {
+      try {
+        const next = (Spicetify.Queue && Spicetify.Queue.nextTracks) || [];
+        const nextUri = next[0]?.contextTrack?.uri || next[0]?.uri;
+        const curUri = Spicetify.Player.data?.item?.uri;
+        const at = S.ctx.findIndex((c) => c.uri === curUri);
+        if (at === -1) return;
+        const expected = S.ctx[at + 1]?.uri;
+        if (!expected || !nextUri) return;
+        S.queueOk = nextUri === expected;
+        if (S.queueOk) { S.queueMiss = 0; return; }
+        // режим черги: наступним у Spotify стоїть НАШ трек (поставлений просто перед перемиканням) — просто звіряємо план
+        const ours = S.queued.get(nextUri);
+        if (S.feedMode && ours && !S.played.has(nextUri)) {
+          S.ctx = [...S.ctx.slice(0, S.head + 1), ours, ...S.ctx.slice(S.head + 1).filter((c) => c.uri !== nextUri)];
+          S.inSpotifyQueue.add(nextUri);
+          S.queueOk = true;
+          logEvent("План сверен с очередью Spotify", { следующий: nextUri });
+          return;
+        }
+        logEvent("ВНИМАНИЕ: Spotify играет не наш список", { ждали: expected, уSpotify: nextUri });
+        // режим черги двічі розійшовся зі Spotify — до кінця запуску повертаємося до перезбирання списку
+        // (та сама розбіжність, помічена двома перевірками одразу, рахується один раз)
+        const sig = expected + ">" + nextUri;
+        if (sig !== S.lastMissSig) { S.lastMissSig = sig; S.queueMiss = (S.queueMiss || 0) + 1; }
+        if (S.feedMode && S.queueMiss >= 2) {
+          S.feedMode = false;
+          logEvent("Очередь Spotify ведёт себя не так — перехожу на пересборку списка");
+          rebuildAhead().catch(() => {});
+        }
+      } catch {}
+    }, 1500);
+  }
+  async function beginTrack(c) {
+    S.played.add(c.uri);
+    { const k = songKey(c); if (k) S.playedKeys.add(k); }
+    S.pool.delete(c.uri);
+    noteRecent(artistsOf(c));
+    for (const a of artistsOf(c)) S.artistPlays.set(a, (S.artistPlays.get(a) || 0) + 1);
+    S.picksFamiliar.push(isFamiliar(c)); if (S.picksFamiliar.length > 20) S.picksFamiliar.shift();
+    noteTrackPlayed(c);
+    noteDiscovery(c);
+    for (const a of artistsOf(c)) noteArtistPlayed(a, playNo, true);
+    saveLater("artistLast", saveArtistHist);
+    S.recentHits.push(isMegaHit(c)); if (S.recentHits.length > 20) S.recentHits.shift();
+    c.wasLiked = P.likedTracks.has(c.uri) || (!heartApi && await isLiked(c.uri));
+  }
+  function explainPick(c) {
+    return `${c.artistName || "?"} — ${c.name || idOf(c.uri)} [${[...(c.sources || [])].join("+")}] ${c._s != null ? c._s.toFixed(2) : ""}`;
+  }
+
+  // Наслідки лайка — один раз на трек (одразу при натисканні або, якщо не встигли помітити, наприкінці треку)
+  function applyLike(c) {
+    if (c._likeApplied) return;
+    c._likeApplied = true;
+    const a = c.artistUri;
+    bumpAffinity(a, 2); saveAffinity(); P.likedTracks.add(c.uri);
+    rememberLike(c); forgiveSkips(a, true); forgiveDislikes(a);
+    P.heard.add(c.uri); if (a) P.familiarIds.add(idOf(a));
+    learnTasteFromLike(a).catch(() => {}); // лайк розширює смак: цей артист і його схожі ближчі
+  }
+  // Лайк під час треку — хвиля змінюється одразу, як у Яндексі: схоже на лайкнутий — у кандидати,
+  // наступні треки перезбираються від нього (поточний продовжує грати з тієї самої секунди).
+  // Поточний трек при цьому НЕ чіпаємо (жодних перезапусків): 2 схожі додаємо в чергу Spotify — вони
+  // грають одразу після поточного; попередній план хвиля замінить на стику треків.
+  // Миттєва реакція на лайк — Pro. У Free лайк враховується на зміні треку (recordOutcome).
+  // Блок із міткою @pro у Free-збірці замінюється заглушкою з коментаря @free (tools/build.js).
+  async function onLikeNow() {}
+  async function queueSimilarNext() { return []; }
+  // Наші треки, поставлені в чергу Spotify, прибираємо перед заміною списку — інакше порядок роз'їдеться
+  async function dropOurQueue() {
+    if (!S.inSpotifyQueue.size) return;
+    try { await Spicetify.Platform.PlayerAPI.clearQueue(); } catch (e) { logEvent("очистка очереди: ошибка", String(e)); }
+    S.inSpotifyQueue.clear();
+  }
+
+  async function recordOutcome(c) {
+    c._recorded = true;
+    const prog = S.progress.get(c.uri) || 0;
+    const dur = S.duration.get(c.uri) || 0;
+    const ratio = dur ? prog / dur : 0;
+    let outcome;
+    if (c._disliked) outcome = "dislike";
+    else if (ratio >= 0.8 || (dur && dur - prog < 15000)) outcome = "finished";
+    else if (dur ? ratio < 0.5 : prog < 30000) outcome = "skip"; // перемкнув до середини — «не те»
+    else outcome = "partial";
+    if (outcome !== "dislike" && !c.wasLiked && (heartApi ? S.hearted.has(c.uri) : await isLiked(c.uri))) outcome = "like";
+    S.lastOutcome = outcome;
+    const a = c.artistUri;
+    if (outcome === "finished") { bumpAffinity(a, 0.3); forgiveSkips(a, false); }
+    else if (outcome === "partial") bumpAffinity(a, 0.05);
+    else if (outcome === "skip") {
+      // вага скіпу — за тим, коли перемкнув: до 10 с — «точно не моє», до 30 с — «не те», далі — «не зараз»
+      const w = prog < 10000 ? 2.5 : prog < 30000 ? 1.5 : 0.8;
+      if (a) S.skipArtist.set(a, (S.skipArtist.get(a) || 0) + w);
+      if (c.seed) S.seedPenalty.set(c.seed, (S.seedPenalty.get(c.seed) || 0) + w);
+      bumpAffinity(a, -0.1 * w);
+      noteSkip(a);
+      if (prog < 30000) noteQuickSkip(c); // скіпнув одразу — цей трек тиждень не ставимо
+      await penalizeDirection(c, w);
+    } else if (outcome === "like") applyLike(c);
+    else if (outcome === "dislike") {
+      bumpAffinity(a, -2); noteSkip(a); noteDislike(c);
+      if (a) S.skipArtist.set(a, (S.skipArtist.get(a) || 0) + 2.5);
+      await Promise.all([penalizeDirection(c, 2.5), avoidSound(c)]);
+    }
+    // дослухав/лайкнув — цей артист більше не «поруч зі скіпнутим»
+    if (outcome === "finished" || outcome === "like") for (const u of artistsOf(c)) S.skipNear.delete(u);
+    // серія скіпів: 2 поспіль (і далі кожні 2) — не подобається весь напрям, змінюємо курс
+    S.skipStreak = outcome === "skip" || outcome === "dislike" ? S.skipStreak + 1 : 0;
+    if (S.skipStreak >= 2 && S.skipStreak % 2 === 0) changeCourse();
+    // «не зараз» поступово забувається
+    for (const m of [S.skipArtist, S.seedPenalty, S.skipNear, S.soundAvoid]) {
+      for (const [k, v] of [...m]) { const nv = v * 0.85; if (nv < 0.1) m.delete(k); else m.set(k, nv); }
+    }
+    saveAffinity();
+    S.history.push({ uri: c.uri, artistUri: a, artistName: c.artistName, name: c.name, outcome, seed: c.seed,
+      sources: [...(c.sources || [])].join("+"), at: Date.now() });
+    if (S.history.length > 200) S.history.shift();
+    noteStats(c, outcome, dur ? Math.min(prog, dur) : prog);
+  }
+  // Скіп згортає НАПРЯМ, а не лише артиста: схожі на нього теж тимчасово нижче (слабше, ніж він сам).
+  // Артистів плейлиста/артиста, за яким запущено хвилю, не чіпаємо — їх ти вибрав сам.
+  // Чекаємо не довше 0,3 с (схожі зазвичай уже в кеші), щоб не затримувати наступні треки; не встигли — штраф наздожене.
+  function penalizeDirection(c, w) {
+    const arts = artistsOf(c).filter((u) => !isSourceArtist(u));
+    if (!arts.length) return Promise.resolve();
+    const apply = (rel) => {
+      for (const u of (rel || []).slice(0, 20)) {
+        if (arts.includes(u) || isSourceArtist(u)) continue;
+        S.skipNear.set(u, Math.min((S.skipNear.get(u) || 0) + 0.4 * w, 3));
+      }
+    };
+    const job = relatedArtists(arts[0]).then(apply).catch(() => {});
+    return Promise.race([job, new Promise((r) => setTimeout(r, 300))]);
+  }
+  // Дизлайк відводить і від «того самого звучання»: треки, які Spotify рекомендує до дизлайкнутого, у цьому запуску нижче.
+  // Як і зі схожими артистами — чекаємо не довше 0,3 с, інакше штраф наздожене у фоні.
+  function avoidSound(c) {
+    const job = recommendByTrack(c.uri).then((list) => {
+      for (const t of list || []) if (t && t.uri && !isSourceArtist(t.artistUri)) S.soundAvoid.set(t.uri, Math.max(S.soundAvoid.get(t.uri) || 0, 2.5));
+    }).catch(() => {});
+    return Promise.race([job, new Promise((r) => setTimeout(r, 300))]);
+  }
+  // Курс змінюється без перезапуску поточного треку: сіди — уже не останні пісні, а перевірене улюблене
+  // (як «струснути»), кандидати «по слідах» останніх пісень втрачають перевагу.
+  function changeCourse() {
+    S.courseAt = Date.now(); // сіди — лише те, що дослухано після зміни курсу
+    S.likeSeed = null;
+    for (const c of S.pool.values()) c.recency *= 0.3;
+    // нові сіди й кандидати від них — у фоні (поточний трек і найближчі не чекають)
+    coldStartSeeds(true).then((seeds) => { if (seeds && seeds.length) { S.coldSeeds = seeds; refreshPool(); } }).catch(() => {});
+    logEvent("Серия скипов — меняю направление", { подряд: S.skipStreak });
+  }
+
+  // Вибрати want треків після head і ahead (із добором, якщо кандидатів мало, і звіркою «Без слів»)
+  async function choosePicks(head, ahead, want, exclude) {
+    const need = Math.min(2, ahead.length + want); // стільки має бути попереду, щоб не ввімкнувся автоплей Spotify
+    const avoid = new Set([head, ...ahead].flatMap(artistsOf));
+    let picks = pickNext(want, new Set([...ahead.map((c) => c.uri), ...(exclude || [])]), avoid);
+    if (ahead.length + picks.length < need) { // попереду майже порожньо — добираємо
+      await refreshPool();
+      const taken = new Set([...ahead, ...picks].map((c) => c.uri));
+      picks = picks.concat(pickNext(want - picks.length, taken, avoid));
+      if (ahead.length + picks.length < need) {
+        await emergencyFill();
+        picks = picks.concat(pickNext(want - picks.length, new Set([...ahead, ...picks].map((c) => c.uri)), avoid));
+      }
+    }
+    picks = await verifyInstrumental(picks, want, new Set(ahead.map((c) => c.uri)), avoid);
+    if (ahead.length + picks.length < need) { // звірка відбракувала майже все — добираємо ще раз
+      await refreshPool(); await emergencyFill();
+      const taken = new Set([...ahead, ...picks].map((c) => c.uri));
+      picks = picks.concat(await verifyInstrumental(pickNext(want - picks.length, taken, avoid), want - picks.length, taken, avoid));
+    }
+    return picks;
+  }
+
+  // Що далі — БЕЗ ПАУЗ: список Spotify після старту не перезапускаємо (play() заново вантажить поточну пісню —
+  // звідси мікропауза). Наступний трек підкладаємо в чергу Spotify (addToQueue — як «Додати в чергу»):
+  // попереду завжди рівно один наш. Скіп/лайк/дизлайк враховуються у виборі цього наступного треку.
+  // Попередній список Spotify (зі старту) — запас на випадок, якщо перемкнув швидше, ніж трек устиг стати в чергу.
+  const RESERVE_SIZE = 5; // невеликий — його видно в «Next up» у Spotify
+  // чи грає Spotify поточний трек хвилі (а не гортаєш історію «назад»)
+  const atFrontier = () => !!S.ctx[S.head] && Spicetify.Player.data?.item?.uri === S.ctx[S.head].uri;
+  // один підбір за раз; трек змінився посеред підбору — підбираємо знову вже для нового
+  let feedBusy = false, feedAgain = false, feedTriedAt = 0;
+  async function feedQueue() {
+    feedTriedAt = Date.now();
+    if (feedBusy) { feedAgain = true; return; }
+    feedBusy = true;
+    try { do { feedAgain = false; await feedOnce(); } while (feedAgain && S.active && S.feedMode); }
+    catch (e) { logEvent("подбор следующего: ошибка", String(e && e.stack || e)); }
+    finally { feedBusy = false; }
+  }
+  // підстраховка під час пісні: якщо наш наступний так і не став у чергу — ставимо
+  function feedIfEmpty() {
+    if (!S.active || S.starting || !S.feedMode || feedBusy || Date.now() - feedTriedAt < 4000 || !atFrontier()) return;
+    if (S.ctx.slice(S.head + 1).some((c) => S.inSpotifyQueue.has(c.uri))) return;
+    feedQueue();
+  }
+  async function feedOnce() {
+    const head = S.ctx[S.head];
+    if (!head || !atFrontier()) return; // гортаєш історію — нове в чергу не ставимо, інакше «вперед» піде не туди
+    const gen = S.headGen;
+    const stale = () => gen !== S.headGen || S.ctx[S.head] !== head;
+    const { queued: qList, nextUp } = await spotifyQueueState();
+    if (stale()) { feedAgain = true; return; }
+    // наше, що вже стоїть у черзі Spotify (схоже після лайка або трек, поставлений просто перед перемиканням), —
+    // воно й зіграє наступним. Беремо його із самої черги Spotify і в її порядку, а не зі своїх записів — так не розійдемося
+    const ahead = qList.filter((u) => u !== head.uri && S.queued.has(u) && !S.played.has(u)).map((u) => S.queued.get(u));
+    S.inSpotifyQueue = new Set(ahead.map((c) => c.uri));
+    const tail = S.ctx.slice(Math.max(0, S.head - 30), S.head);
+    if (ahead.length) { S.ctx = [...tail, head, ...ahead]; S.head = tail.length; return; }
+    // запас зі стартового списку Spotify може ще зіграти — його треки в чергу не ставимо (інакше прозвучать двічі)
+    const reserve = [...S.queued.keys()].filter((u) => !S.played.has(u));
+    let picks = null;
+    S.urgentPick = true;
+    try {
+      const careful = choosePicks(head, [], 1, reserve);
+      // «Без слів»: перевірка тексту може затриматися — чекаємо не довше 1,5 с, інакше найкращий із уже перевірених
+      // (текст перевірено і його немає), щоб наступний трек точно встиг стати в чергу
+      if (settings.language === "instrumental") {
+        picks = await Promise.race([careful, new Promise((r) => setTimeout(() => r(null), 1500))]);
+        if (!picks) picks = pickNext(1, new Set(reserve), new Set(artistsOf(head)), undefined, (c) => lyricsKnown.get(c.uri) === false && instrumentalOk(c, true));
+        if (!picks.length) picks = await careful;
+      } else picks = await careful;
+    } finally { S.urgentPick = false; }
+    if (stale()) { feedAgain = true; return; }
+    if (!picks.length) return;
+    // запас стартового списку майже скінчився (багато подвійних натискань) — поповнюємо його, але лише на самому початку треку:
+    // перезапуск списку тоді зливається зі зміною пісні. Буває рідко.
+    if (nextUp >= 0 && nextUp < 2 && (Spicetify.Player.getProgress?.() || 0) < 2500) {
+      const ex = new Set([...reserve, ...picks.map((c) => c.uri)]);
+      const spare = pickNext(RESERVE_SIZE, ex, new Set([head, ...picks].flatMap(artistsOf)), 3,
+        settings.language === "instrumental" ? (c) => lyricsKnown.get(c.uri) === false && instrumentalOk(c, true) : null);
+      const t3 = S.ctx.slice(Math.max(0, S.head - 30), S.head);
+      S.ctx = [...t3, head, ...picks, ...spare]; S.head = t3.length;
+      S.lastPicks = picks.map(explainPick);
+      logEvent("Запас списка пополнен", { треков: spare.length });
+      try { await playCtx(S.head, Spicetify.Player.getProgress?.() || 0, () => !stale() && atFrontier()); } catch (e) { logEvent("пополнение запаса не удалось", String(e)); }
+      return;
+    }
+    try {
+      // поки вибирали, могли поставити лайк — тоді схоже вже в черзі, зайвого не додаємо
+      if (S.ctx.slice(S.head + 1).some((c) => S.inSpotifyQueue.has(c.uri))) return;
+      if (picks.some((x) => S.queued.has(x.uri))) { feedAgain = true; return; } // цей трек уже поставив лайк — підберемо інший
+      await enqueue(picks);
+      // поки ставили, трек змінився: план не переписуємо старим — наступний прохід візьме поставлене з черги Spotify
+      if (stale()) { feedAgain = true; return; }
+      const t2 = S.ctx.slice(Math.max(0, S.head - 30), S.head);
+      S.ctx = [...t2, head, ...picks]; S.head = t2.length;
+      S.lastPicks = picks.map(explainPick);
+      verifyQueue();
+      precheckLyrics();
+    } catch (e) { logEvent("очередь Spotify не приняла трек — перехожу на пересборку списка", String(e)); S.feedMode = false; }
+  }
+  // «Без слів»: поки грає трек, заздалегідь перевіряємо текст у найімовірніших наступних — підбір потім не чекає мережі
+  function precheckLyrics() {
+    if (settings.language !== "instrumental") return;
+    const top = [...S.pool.values()].filter((c) => !lyricsKnown.has(c.uri) && hardFilter(c, { artistGap: true, lang: true }))
+      .map((c) => [c, score(c)]).sort((a, b) => b[1] - a[1]).slice(0, 6);
+    for (const [c] of top) checkLyrics(c.uri, 1).catch(() => {});
+  }
+  // Поставити в чергу Spotify. Трек позначаємо «нашим» ДО відповіді Spotify (він відповідає не миттєво): інакше лайк і підбір,
+  // що спрацювали в цю частку секунди, виберуть той самий трек — і він стане в чергу двічі.
+  async function enqueue(picks) {
+    for (const x of picks) { S.queued.set(x.uri, x); S.inSpotifyQueue.add(x.uri); }
+    // внутрішня черга Spotify — те саме «Додати в чергу», але без спливашки «Added to queue» на кожен трек хвилі
+    // (публічний addToQueue її показує); немає внутрішньої — звичайний спосіб
+    const items = picks.map((x) => ({ uri: x.uri, uid: null }));
+    const PA = Spicetify.Platform.PlayerAPI, inner = PA && PA._queue;
+    try { if (inner && typeof inner.addToQueue === "function") await inner.addToQueue(items); else await PA.addToQueue(items); }
+    catch (e) { for (const x of picks) { S.queued.delete(x.uri); S.inSpotifyQueue.delete(x.uri); } throw e; }
+  }
+  // черга Spotify: queued — «Next in queue» по порядку; nextUp — скільки нашого запасу лишилося в списку («Next up»), −1 — невідомо
+  async function spotifyQueueState() {
+    try {
+      const q = await Spicetify.Platform.PlayerAPI.getQueue();
+      const uriOf = (x) => x && (x.uri || x.contextTrack?.uri);
+      // у «Next up» рахуємо лише наш запас (туди Spotify може підмішати й свій автоплей)
+      const ups = Array.isArray(q && q.nextUp) ? q.nextUp.map(uriOf).filter((u) => u && S.queued.has(u) && !S.played.has(u)).length : -1;
+      return { queued: ((q && q.queued) || []).map(uriOf).filter(Boolean), nextUp: ups };
+    } catch { return { queued: S.ctx.slice(S.head + 1).filter((c) => S.inSpotifyQueue.has(c.uri)).map((c) => c.uri), nextUp: -1 }; }
+  }
+
+  // Запасний спосіб (якщо черга Spotify повелася не так): перезібрати список цілком — із мікропаузою
+  async function rebuildAhead() {
+    const head = S.ctx[S.head];
+    const gen = S.headGen; // якщо за час перезбирання трек змінився — це перезбирання застаріло, нічого не чіпаємо
+    const stale = () => gen !== S.headGen || S.ctx[S.head] !== head;
+    let ahead = S.ctx.slice(S.head + 1).filter((c) => hardFilter(c, { cooldown: true }));
+    const signal = ["skip", "dislike", "like"].includes(S.lastOutcome);
+    if (!signal && ahead.length >= 2) return;
+    if (signal) ahead = [];
+    const picks = await choosePicks(head, ahead, 3 - ahead.length);
+    if (stale()) { logEvent("пересборка устарела — пропускаю"); return; }
+    const tail = S.ctx.slice(Math.max(0, S.head - 30), S.head);
+    S.ctx = [...tail, head, ...ahead, ...picks];
+    S.head = tail.length;
+    S.lastPicks = picks.map(explainPick);
+    const prog = Spicetify.Player.getProgress?.() || 0;
+    try {
+      await playCtx(S.head, prog + 250); // +час на перезбирання, щоб не повторити шматочок
+      // поки надсилали, ти встиг перемкнути — Spotify міг повернутися до минулого треку; ставимо правильний
+      if (stale() && S.ctx[S.head] && Spicetify.Player.data?.item?.uri !== S.ctx[S.head].uri) await playCtx(S.head);
+    } catch (e) { logEvent("пересборка очереди не удалась", String(e)); }
+  }
+
+  async function coldStartSeeds(shake) {
+    if (waveSource && waveSource.tracks.length) {
+      const langOk = (t) => settings.language === "ru" ? isRuTrack(t) : settings.language === "foreign" ? !isRuTrack(t) : true;
+      const base = waveSource.tracks.filter(langOk);
+      return sampleArr(base.length >= 3 ? base : waveSource.tracks, 5).map((t) => t.uri);
+    }
+    const tags = activeTags();
+    if (tags.length) {
+      await Promise.all(tags.map(loadTagPool));
+      const hard = hardPools(), soft = softPools();
+      const main = hard[0];
+      if (main) {
+        // сіди — з жанру; якщо вибрано настрій — самі треки «жанр × настрій» (їхні схожі теж будуть у настрої)
+        const hardOk = (t) => hard.every((p) => inPool(p, t));
+        const langOk = (t) => settings.language === "ru" ? isRuTrack(t) : settings.language === "foreign" ? !isRuTrack(t) : true;
+        let base = main.tracks.filter(hardOk);
+        if (!base.length) base = main.tracks;
+        const exact = [...comboPools(), ...soft].flatMap((p) => p.tracks).filter(hardOk);
+        if (exact.length >= 3) base = exact;
+        const inLang = base.filter(langOk);
+        if (inLang.length >= 3) base = inLang;
+        const mine = base.filter((t) => isFamiliar(t)); // за можливості — з твого «всесвіту»
+        const picked = sampleArr(mine.length >= 3 && !shake ? mine : base, 5);
+        picked.forEach((t) => noteRecent(artistsOf(t))); // самі сіди не граємо — і їхніх артистів одразу не повторюємо
+        return picked.map((t) => t.uri);
+      }
+    }
+    if (shake) return weightedSample(langSeedBase(), 5, likeWeightOf); // свіжі лайки — частіше
+    let recent = [];
+    try { recent = (await fetchTop("SHORT_TERM", "LAST_PLAYED", "SHORT_TERM", "LAST_PLAYED", 20)).tracks; } catch {}
+    recent.forEach(noteArtistLang);
+    if (settings.language === "ru") recent = recent.filter(isRuTrack);
+    else if (settings.language === "foreign") recent = recent.filter((t) => !isRuTrack(t));
+    recent.slice(0, 3).forEach((t) => noteRecent(artistsOf(t))); // ти їх щойно слухав — хвиля стартує з інших
+    const seeds = recent.slice(0, 3).map((t) => t.uri);
+    // добираємо сіди твоїми найбільш слуханими треками (а якщо історії немає — лайками)
+    const filler = P.topTracks.length ? topTracksForLang().slice(0, 30).map((t) => t.uri) : langSeedBase();
+    const langOk = (t) => settings.language === "ru" ? isRuTrack(t) : settings.language === "foreign" ? !isRuTrack(t) : true;
+    for (const t of weightedSample(recentLikes(40).filter(langOk), 2, likeWeightOf)) { if (seeds.length >= 4) break; if (!seeds.includes(t.uri)) seeds.push(t.uri); }
+    for (const u of sampleArr(filler, 6)) { if (seeds.length >= 5) break; if (!seeds.includes(u)) seeds.push(u); }
+    return seeds;
+  }
+
+  async function startWave(opts) {
+    if (S.starting) { S.restartPending = true; return; }
+    S.starting = true;
+    const t0 = Date.now();
+    try {
+      // що грало до запуску (або до зміни налаштувань) — його артистів одразу не повторюємо
+      const before = (Spicetify.Player.data?.item?.artists || []).map((a) => a?.uri).filter(Boolean);
+      const prevPool = [...S.pool.values()];
+      const shake = !!(opts && opts.shake);
+      resetSession();
+      noteRecent(before);
+      updateButton();
+      await buildProfile(false);
+      if (P.taste.size) ensureTaste().catch(() => {}); else await ensureTaste(); // оновлення смаку — у фоні
+      [S.coldSeeds] = await Promise.all([coldStartSeeds(shake), syncRecentLikes(true), markRecentlyPlayed(true), syncWaveLikes()]);
+      await Promise.all(oppositeKeys().map(loadTagPool));
+      // Швидкий старт: кандидати минулого запуску + схоже на сіди (одне коло запитів) — і одразу граємо,
+      // без поступок за характером/жанром/мовою. Повний набір кандидатів довантажується у фоні.
+      if (!shake) (prevPool.length >= 30 ? prevPool : loadLastPool()).forEach((t) => addCand(t, "carry", null, 0));
+      // етапи: швидкий набір → повний → аварійний; на кожному — звірка «Без слів»
+      let picks = [], fast = true;
+      const ALL = RELAX_TIERS.length - 1;
+      const stages = [
+        // швидкий набір: можна поступитися лише «характером» (знайомі в «Незнайомому»), жанром/настроєм/мовою — ні
+        async () => { await refreshPoolOnce({ quick: true }); return 4; },
+        async () => { fast = false; await refreshPool(); return ALL; },
+        async () => { await emergencyFill(); return ALL; },
+      ];
+      for (const stage of stages) {
+        const maxTier = await stage();
+        const taken = new Set(picks.map((c) => c.uri)), avoid = new Set(picks.flatMap(artistsOf));
+        const more = pickNext(3 - picks.length, taken, avoid, maxTier);
+        picks = picks.concat(await verifyInstrumental(more, 3 - picks.length, taken, avoid));
+        if (picks.length >= (fast ? 2 : 3)) break;
+      }
+      if (!picks.length) {
+        Spicetify.showNotification(L("Drift for Spotify: Spotify не отдаёт треки — проверь интернет (подробности в Диагностике)",
+          "Drift for Spotify: Spotify isn't returning tracks — check your connection (see Diagnostics)"), true);
+        return;
+      }
+      // запас: стартовий список Spotify — підстраховка, якщо перемикаєш швидше, ніж наступний трек стає в чергу
+      // (на подвійному натисканні «далі»). Список віддається один раз на старті — запас нічого не коштує
+      const spare = pickNext(RESERVE_SIZE, new Set(picks.map((c) => c.uri)), new Set(picks.flatMap(artistsOf)), 3,
+        settings.language === "instrumental" ? (c) => lyricsKnown.get(c.uri) === false && instrumentalOk(c, true) : null);
+      S.ctx = [...picks, ...spare]; S.head = 0; S.headGen = (S.headGen || 0) + 1;
+      S.lastPicks = picks.map(explainPick);
+      // чужі треки в черзі Spotify грають раніше за контекст — прибираємо
+      try { await Spicetify.Platform.PlayerAPI.clearQueue(); } catch (e) { logEvent("очистка очереди: ошибка", String(e)); }
+      await playCtx(0);
+      S.active = true;
+      await beginTrack(S.ctx[0]);
+      updateButton();
+      logEvent("Старт", { быстрый: fast, мс: Date.now() - t0 });
+      refreshPool();
+    } catch (e) {
+      logEvent("ОШИБКА старта", String(e && e.stack || e));
+      Spicetify.showNotification(L("Drift for Spotify: ошибка (см. Диагностику)", "Drift for Spotify: something went wrong (see Diagnostics)"), true);
+    } finally {
+      S.starting = false;
+      if (S.restartPending) { S.restartPending = false; startWave(); }
+    }
+  }
+  function stopWave() {
+    S.active = false; updateButton();
+  }
+  function toggleWave() { if (S.active) stopWave(); else { waveSource = null; startWave(); } }
+  async function startSourceWave(type, uri) {
+    if (!proActive()) { showUpsell(type === "artist" ? L("Drift по артисту", "Drift from an artist") : L("Drift по плейлисту", "Drift from a playlist")); return; }
+    try {
+      const src = await loadSource(type, uri);
+      if (!src.tracks.length) { Spicetify.showNotification(L("Drift for Spotify: не получилось прочитать треки", "Drift for Spotify: couldn't read the tracks"), true); return; }
+      waveSource = src;
+      logEvent("Волна по источнику", { type, name: src.name, треков: src.tracks.length });
+      await startWave();
+    } catch (e) { logEvent("волна по источнику: ошибка", String(e)); Spicetify.showNotification(L("Drift for Spotify: ошибка (см. Диагностику)", "Drift for Spotify: something went wrong (see Diagnostics)"), true); }
+  }
+  function clearSource() { waveSource = null; updateButton(); if (S.active) startWave(); }
+  function shakeWave() { startWave({ shake: true }); }
+
+  // «Назад» у режимі черги. Зігране йшло через чергу Spotify, а його власне «назад» веде стартовим
+  // списком — грала б інша пісня. Spotify перед «назад» надсилає подію action, яку можна скасувати:
+  // скасовуємо й вмикаємо справжню попередню пісню; далі «вперед» іде справжньою історією.
+  // Після 3 с треку «назад» — як у Spotify: на початок цієї ж пісні.
+  function onPlayerAction(e) {
+    if (!e || !e.data || e.data.action !== "skipToPrevious") return;
+    if (!S.active || S.starting || !S.feedMode) return;
+    if ((Spicetify.Player.getProgress?.() || 0) > 3000) return;
+    const at = S.ctx.findIndex((c) => c.uri === Spicetify.Player.data?.item?.uri);
+    if (at <= 0) return; // раніше за історію хвилі — хай вирішує Spotify
+    e.preventDefault();
+    // у список — уся історія, план і запас (запас — підстраховка на швидкі «вперед»)
+    const extra = [...S.queued.values()].filter((c) => !S.played.has(c.uri) && !S.ctx.includes(c)).slice(0, RESERVE_SIZE);
+    S.ctx = [...S.ctx, ...extra];
+    playCtx(at - 1).catch((err) => logEvent("назад: не получилось", String(err)));
+  }
+  async function onSongChange() {
+    const cur = Spicetify.Player.data?.item?.uri;
+    // хвиля на паузі, а Spotify дограє її список — однаково пам'ятаємо, що трек звучав (інакше він повернеться)
+    if (!S.active && cur && S.queued.has(cur) && !S.played.has(cur)) { S.played.add(cur); noteTrackPlayed(S.queued.get(cur)); }
+    if (!S.active || S.starting) return;
+    if (!cur) return;
+    let idx = S.ctx.findIndex((c) => c.uri === cur);
+    if (idx === S.head) return;                         // той самий трек (наше перезбирання)
+    if (idx === -1) {
+      // швидкі натискання: Spotify ще йшов нашим ПОПЕРЕДНІМ списком — це однаково хвиля, вбудовуємо трек
+      const ours = S.queued.get(cur);
+      if (ours && !S.played.has(cur)) { S.ctx.splice(S.head + 1, 0, ours); idx = S.head + 1; }
+      // Spotify дійшов до треку із запасу, який уже звучав (через чергу), — повтор: тихо далі, хвиля не зупиняється
+      else if (ours && S.feedMode) { logEvent("повтор из запаса — пропускаю", { трек: cur }); Spicetify.Player.next(); return; }
+      else if (Date.now() < S.rebuildUntil) return;
+      else {
+        S.active = false; updateButton();
+        return;
+      }
+    }
+    if (idx < S.head) { S.navBack = true; return; }     // «назад» історією
+    S.inSpotifyQueue.delete(cur);
+    const prev = S.ctx[S.head], wasBack = S.navBack, head = S.ctx[idx];
+    S.navBack = false;
+    S.head = idx; S.headGen++;                          // одразу: поточні перезбирання мають зрозуміти, що застаріли
+    if (!wasBack && prev && !prev._recorded) await recordOutcome(prev);
+    else S.lastOutcome = "";
+    if (prev && prev._likeHandled && S.lastOutcome === "like") S.lastOutcome = ""; // уже врахували під час треку
+    if (!head) return;
+    const isCurrent = () => S.ctx[S.head] === head;
+    if (isCurrent() && settings.blockAI && isAIArtist(head.artistUri)) { Spicetify.Player.next(); return; }
+    await beginTrack(head);                              // зіграним позначаємо завжди, навіть якщо вже перемкнули далі
+    if (!isCurrent()) return;                            // трек уже змінився — перезбере наступний виклик
+    if (S.feedMode) await feedQueue(); else await rebuildAhead();
+    maybeRefresh();
+  }
+  // Пул перезбираємо не на кожен трек: після твого сигналу (лайк/скіп/дизлайк), раз на 2 треки
+  // або коли відповідних кандидатів лишилося мало.
+  function maybeRefresh() {
+    S.sinceRefresh++;
+    const signal = ["skip", "dislike", "like"].includes(S.lastOutcome);
+    syncRecentLikes().catch(() => {});
+    markRecentlyPlayed().catch(() => {});
+    if (!signal && S.sinceRefresh < 2 && passingCount() >= 25) return;
+    S.sinceRefresh = 0;
+    refreshPool();
+  }
+  function passingCount() {
+    let n = 0;
+    for (const c of S.pool.values()) if (hardFilter(c, { cooldown: true })) n++;
+    return n;
+  }
+
+  // ---------------- Дії користувача ----------------
+  function current() {
+    const it = Spicetify.Player?.data?.item;
+    if (!it) return null;
+    return { uri: it.uri, artistUri: it.artists?.[0]?.uri, artistName: it.artists?.[0]?.name, name: it.metadata?.title || it.name };
+  }
+  // Дизлайк: цей трек більше ніколи, і хвиля одразу йде від нього
+  let lastDislikeAt = 0;
+  function dislikeCurrent() {
+    const cur = current(); if (!cur) return;
+    if (Date.now() - lastDislikeAt < 700) return; // подвійне натискання не повинно забанити й наступний трек
+    lastDislikeAt = Date.now();
+    bannedTracks.add(cur.uri);
+    { const k = songKey(cur); if (k) bannedTracks.add(k); } // і та сама пісня в інших версіях (sped up, remaster, сингл/альбом)
+    saveBannedTracks();
+    const c = S.ctx[S.head];
+    if (S.active && c && c.uri === cur.uri) c._disliked = true;
+    else if (cur.artistUri) { bumpAffinity(cur.artistUri, -2); saveAffinity(); noteDislike(cur); }
+    // у хвилі — наступний із НАШОГО списку (у Spotify при швидких натисканнях список може бути застарілим)
+    // (у режимі черги наступний наш уже стоїть у черзі Spotify — просто «далі», без перезапуску списку)
+    if (S.active && !S.feedMode && c && c.uri === cur.uri && S.ctx[S.head + 1]) playCtx(S.head + 1).catch(() => Spicetify.Player.next());
+    else Spicetify.Player.next();
+  }
+  function banArtistCurrent() {
+    const cur = current(); if (!cur || !cur.artistUri) return;
+    bannedArtists.set(cur.artistUri, Date.now() + settings.dislikeBanMin * 60000);
+    bumpAffinity(cur.artistUri, -8); saveAffinity();
+    Spicetify.showNotification(L(`🚫 ${cur.artistName || "Артист"} убран из Drift for Spotify на ${Math.round(settings.dislikeBanMin / 60)} ч`,
+      `🚫 ${cur.artistName || "Artist"} removed from Drift for Spotify for ${Math.round(settings.dislikeBanMin / 60)} h`));
+    Spicetify.Player.next();
+  }
+
+  window.Volna = {
+    startWave, stopWave, toggleWave, shakeWave, dislikeCurrent, banArtistCurrent,
+    rebuildProfile: () => buildProfile(true), getProfile: () => profile, session: S, journal,
+    loadTagPool, inPool, blockerOf, getSettings: () => settings, getTaste: () => P.taste,
+    clearBannedTracks: () => { bannedTracks.clear(); saveBannedTracks(); },
+    startSourceWave, clearSource, getSource: () => waveSource,
+    genreLevel, isPro: proActive,
+    banTracks: (uris) => { (uris || []).forEach((u) => bannedTracks.add(u)); saveBannedTracks(); return bannedTracks.size; },
+    bannedCount: bannedTrackCount,
+    flushSaves,
+    lyricsOf: (u) => lyricsKnown.get(u),
+    openRecap, getStats: () => stats, getPresets: () => presets,
+  };
+
+  // ==================================================================
+  // UI
+  // ==================================================================
+  // Логотип Drift for Spotify — «Течія»: яскрава хвиля і її слід з боків
+  const WAVE_SVG =
+    '<svg height="18" width="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">' +
+    '<path d="M3 15c3-5 6-5 9-2s6 3 9-2"/><path d="M3 20c3-5 6-5 9-2s6 3 9-2" stroke-opacity="0.5"/>' +
+    '<path d="M3 10c3-5 6-5 9-2s6 3 9-2" stroke-opacity="0.5"/></svg>';
+  // для меню Spotify: значок кладеться в рамку 16×16 (так Spicetify вставляє і свої) — інакше обрізається
+  const WAVE_ICON_16 = WAVE_SVG.replace('height="18" width="18"', 'height="16" width="16"');
+  const DISLIKE_SVG =
+    '<svg height="16" width="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/></svg>';
+
+  function q(sel) { try { return document.querySelector(sel); } catch { return null; } }
+  // onPress — спрацьовує на НАТИСКАННЯ: якщо Spotify перемалює панель між натисканням і відпусканням
+  // (так буває в перші секунди треку), звичайний click губиться.
+  // Значки кнопок панелі — векторні, кольору тексту (емодзі Spotify малює кольоровими картинками)
+  const ICON_PLAY = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5.2v13.6a1 1 0 0 0 1.5.86l11.2-6.8a1 1 0 0 0 0-1.72L8.5 4.34A1 1 0 0 0 7 5.2z"/></svg>';
+  const ICON_STOP = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="5.5" y="5" width="14" height="14" rx="2.2"/></svg>';
+  const ICON_SHAKE = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg>';
+  function setStartLabel(btn) {
+    btn.innerHTML = (S.active ? ICON_STOP : ICON_PLAY) + "<span></span>";
+    btn.lastChild.textContent = S.active ? L("Остановить Drift for Spotify", "Stop Drift for Spotify") : L("Запустить Drift for Spotify", "Start Drift for Spotify");
+  }
+  function makeCtrlBtn(id, svg, title, onClick, onPress) {
+    const b = document.createElement("button");
+    b.id = id; b.className = "volna-ctrl-btn"; b.innerHTML = svg; b.title = title;
+    if (onPress) {
+      b.addEventListener("pointerdown", (e) => { if (e.button !== 0) return; e.preventDefault(); e.stopPropagation(); onPress(e); });
+      b.addEventListener("click", (e) => { e.stopPropagation(); if (e.detail === 0) onPress(e); }); // клавіатура (Enter/Space)
+    } else b.addEventListener("click", (e) => { e.stopPropagation(); onClick(e); });
+    return b;
+  }
+  function findShuffle() {
+    const bar = playBar() || document;
+    return bar.querySelector('[data-testid="control-button-shuffle"]') ||
+      [...bar.querySelectorAll("button")].find((b) => /shuffl|перемеш/i.test(b.getAttribute("aria-label") || "")) || null;
+  }
+  // Лише нижня панель плеєра: на сторінці (артист, плейлист) і в правій панелі теж є кнопки «Add to…»,
+  // раніше дизлайк іноді з'їжджав туди. Назву блоку Spotify змінює (now-playing-widget → -v2) — шукаємо за початком.
+  function playBar() { return q('[data-testid="now-playing-bar"]') || q('footer') || q('.Root__now-playing-bar'); }
+  function findLike() {
+    const bar = playBar();
+    if (!bar) return null;
+    const widget = bar.querySelector('[data-testid^="now-playing-widget"]') || bar;
+    const re = /liked songs|add to|save to|remove from|playlist|медиатек|любим|плейлист|сохран/i;
+    return [...widget.querySelectorAll("button")].find((b) => !b.id && b.getAttribute("data-testid") !== "cover-art-button" &&
+      (b.getAttribute("data-testid") === "add-button" || re.test(b.getAttribute("aria-label") || ""))) || null;
+  }
+  function ensureWaveBtn() {
+    const cur = document.getElementById("volna-wave-btn"), bar = playBar();
+    if (cur && (!bar || bar.contains(cur))) return true;
+    if (cur) cur.remove();
+    const shuffle = findShuffle();
+    if (!shuffle || !shuffle.parentNode) return false;
+    shuffle.parentNode.insertBefore(makeCtrlBtn("volna-wave-btn", WAVE_SVG, "Drift for Spotify", (e) => togglePanel(e.currentTarget)), shuffle);
+    updateButton();
+    return true;
+  }
+  function ensureDislikeBtn() {
+    const bar = playBar();
+    const existing = [...document.querySelectorAll("#volna-dislike-btn")];
+    // зайві або ті, що опинилися не в нижній панелі, — прибираємо
+    existing.forEach((b, i) => { if (i > 0 || !bar || !bar.contains(b)) b.remove(); });
+    const like = findLike();
+    const cur = document.getElementById("volna-dislike-btn");
+    if (cur && (!like || cur.previousElementSibling === like)) return true;
+    if (cur) cur.remove();
+    const btn = makeCtrlBtn("volna-dislike-btn", DISLIKE_SVG, L("Не нравится этот трек", "Don't like this track"), null, () => dislikeCurrent());
+    if (like && like.parentNode) { like.parentNode.insertBefore(btn, like.nextSibling); return true; }
+    // кнопки лайка в панелі немає (вузьке вікно) — ставимо поруч із кнопкою хвилі
+    const wave = document.getElementById("volna-wave-btn");
+    if (wave && wave.parentNode) { wave.parentNode.insertBefore(btn, wave); return true; }
+    return false;
+  }
+  // Дизлайк і в правій панелі «Зараз грає» — поруч із її лайком (своя кнопка, нижня лишається)
+  function npvPanel() { return q('aside[aria-label*="Now playing view" i]') || q('#Desktop_PanelContainer_Id'); }
+  function ensureNpvDislikeBtn() {
+    const panel = npvPanel();
+    const cur = document.getElementById("volna-dislike-npv");
+    if (!panel) { if (cur) cur.remove(); return false; }
+    const re = /liked songs|add to|save to|remove from|playlist|медиатек|любим|плейлист|сохран/i;
+    // перша така кнопка панелі — біля самого треку (нижче бувають картки черги зі своїми кнопками)
+    const like = [...panel.querySelectorAll("button")].find((b) => !b.id && re.test(b.getAttribute("aria-label") || "") &&
+      !/copy|share|more|ссылк|ещё|поделит/i.test(b.getAttribute("aria-label") || ""));
+    if (cur && like && cur.previousElementSibling === like) return true;
+    if (cur) cur.remove();
+    if (!like || !like.parentNode) return false;
+    like.parentNode.insertBefore(makeCtrlBtn("volna-dislike-npv", DISLIKE_SVG, L("Не нравится этот трек", "Don't like this track"), null, () => dislikeCurrent()), like.nextSibling);
+    return true;
+  }
+  // Spotify перемальовує блок треку при зміні пісні й викидає наші кнопки. Стежимо лише за нижньою
+  // і правою панеллю (не за всією сторінкою — то лагало) і повертаємо кнопки в тому ж кадрі.
+  const panelObs = new Map(); let injectQueued = false;
+  function queueInject() {
+    if (injectQueued) return;
+    injectQueued = true;
+    requestAnimationFrame(() => { injectQueued = false; injectButtons(); });
+  }
+  function watchPanels() {
+    setInterval(() => {
+      for (const el of [playBar(), npvPanel()]) {
+        if (!el || panelObs.has(el)) continue;
+        // панелі змінюються постійно (час треку, рядки тексту) — реагуємо, лише якщо зникла наша кнопка
+        const mo = new MutationObserver(() => {
+          if (!document.getElementById("volna-dislike-btn") || !document.getElementById("volna-wave-btn") ||
+            (npvPanel() && !document.getElementById("volna-dislike-npv"))) queueInject();
+        });
+        mo.observe(el, { childList: true, subtree: true });
+        panelObs.set(el, mo);
+      }
+      for (const [el, mo] of panelObs) if (!el.isConnected) { mo.disconnect(); panelObs.delete(el); }
+    }, 1000);
+  }
+  function injectButtons() { try { ensureWaveBtn(); ensureDislikeBtn(); ensureNpvDislikeBtn(); } catch (e) { logEvent("кнопки: ошибка", String(e)); } }
+  let fallbackTried = false;
+  function addPlaybarFallback() {
+    if (fallbackTried) return; fallbackTried = true;
+    try {
+      if (!document.getElementById("volna-wave-btn") && Spicetify.Playbar && Spicetify.Playbar.Button) {
+        const wb = new Spicetify.Playbar.Button("Drift for Spotify", WAVE_SVG, () => togglePanel(wb.element), false, false);
+        wb.element.id = "volna-wave-btn"; wb.element.classList.add("volna-ctrl-btn");
+        updateButton();
+      }
+    } catch (e) { logEvent("запасная кнопка: ошибка", String(e)); }
+  }
+  function updateButton() {
+    document.querySelectorAll("#volna-wave-btn").forEach((el) => el.classList.toggle("volna-on", S.active));
+    const start = document.getElementById("volna-start");
+    if (start) setStartLabel(start);
+    const st = document.getElementById("volna-status");
+    if (st) st.textContent = (S.active ? L("Играет: ", "Playing: ") : L("Выключен · ", "Off · ")) + waveLabel(true);
+  }
+
+  // ---------------- Панель налаштувань ----------------
+  let panelEl = null;
+  function closePanel() {
+    if (panelEl) { panelEl.remove(); panelEl = null; document.removeEventListener("mousedown", onDocDown, true); }
+  }
+  function onDocDown(e) {
+    if (panelEl && !panelEl.contains(e.target) && !e.target.closest?.("#volna-wave-btn")) closePanel();
+  }
+  function togglePanel(anchor) {
+    if (panelEl) { closePanel(); return; }
+    panelEl = buildPanel();
+    document.body.appendChild(panelEl);
+    const r = anchor.getBoundingClientRect();
+    const pw = panelEl.offsetWidth, ph = panelEl.offsetHeight;
+    const left = Math.max(8, Math.min(Math.round(r.left + r.width / 2 - pw / 2), window.innerWidth - pw - 8));
+    panelEl.style.left = left + "px";
+    panelEl.style.top = Math.max(8, Math.round(r.top - ph - 10)) + "px";
+    setTimeout(() => document.addEventListener("mousedown", onDocDown, true), 0);
+  }
+  function section(t) { const s = document.createElement("div"); s.className = "volna-sec"; s.textContent = t; return s; }
+  function chip(label, active, onClick) {
+    const c = document.createElement("button");
+    c.className = "volna-chip" + (active ? " on" : "");
+    c.textContent = label;
+    c.addEventListener("click", (e) => { e.stopPropagation(); onClick(); });
+    return c;
+  }
+  function selectInGroup(groupEl, val) {
+    [...groupEl.children].forEach((c) => c.classList.toggle("on", c.dataset.val === String(val)));
+  }
+  // зміна налаштувань застосовується одразу — хвиля перезапускається з новими умовами
+  function applyLive() { saveSettings(); updateButton(); if (S.active) startWave(); }
+  // усі кнопки панелі — щоб оновлювати «вибрано» і «не поєднується» без перемальовування
+  let chipRegistry = [];
+  function labelFor(key, val) {
+    const lists = { character: CHARACTERS, mood: MOODS, language: LANGS, activity: ACTIVITIES, genre: GENRES };
+    return labelOf(lists[key] || [], val);
+  }
+  function refreshChipStates() {
+    for (const r of chipRegistry) {
+      const on = settings[r.key] === r.val;
+      const blocker = on ? null : blockerOf(r.key, r.val);
+      r.el.classList.toggle("on", on);
+      r.el.classList.toggle("blocked", !!blocker);
+      r.el.title = blocker ? L(`Не сочетается с «${labelFor(blocker[0], blocker[1])}»`, `Doesn't go with “${labelFor(blocker[0], blocker[1])}”`) : "";
+    }
+  }
+  // ---------------- Free / Pro ----------------
+  const isLocked = (key) => PRO_KEYS.includes(key) && !proActive();
+  let upsellAt = 0;
+  // безкоштовна версія — кличемо спробувати Pro безкоштовно; ключ, що скінчився (пробний чи підписка), — лише підписка
+  const canTrial = () => !(EDITION === "pro" && BUILD.key);
+  function showUpsell(what) {
+    const ended = !canTrial();
+    Spicetify.showNotification(ended
+      ? (remote.trial
+        ? L("Пробный Drift Pro закончился — подписка на Boosty, потом /key боту (переустанавливать не нужно)", "Your Drift Pro trial has ended — subscribe on Boosty to keep Pro")
+        : L("Подписка Drift Pro закончилась — продли её на Boosty и напиши боту /key", "Your Drift Pro subscription has ended — renew it on Boosty"))
+      : L(`🔒 ${what} — в Drift Pro. Попробуй ${TRIAL_DAYS} дней бесплатно`, `🔒 ${what} is a Drift Pro feature. Try it free for ${TRIAL_DAYS} days`));
+    // сторінку відкриваємо не частіше ніж раз на хвилину — щоб випадкові кліки не плодили вкладки
+    if (Date.now() - upsellAt > 60000) { upsellAt = Date.now(); setTimeout(() => openLink(ended ? UPGRADE_URL : TRIAL_URL), 900); }
+  }
+  function openLink(url) { try { window.open(url, "_blank"); } catch {} }
+  // «Я підписався — перевірити»: одразу питаємо сервер
+  async function checkSubscription() {
+    Spicetify.showNotification(L("Проверяю подписку…", "Checking your subscription…"));
+    await refreshRemoteConfig(true).catch(() => {});
+    Spicetify.showNotification(proActive() ? L("✅ Drift Pro включён", "✅ Drift Pro is on")
+      : L("Подписка пока не найдена — если только что оформил, напиши боту /key и проверь ещё раз", "No subscription found yet — message the bot /key and check again"));
+  }
+
+  // ---------------- «Pro закінчився»: що перестає працювати — чесно й із цифрами ----------------
+  function modalBox() { const box = document.createElement("div"); box.className = "volna-box volna-end"; return box; }
+  function modalPara(box, text, bold) {
+    const e = document.createElement("p");
+    if (bold) { const b = document.createElement("b"); b.textContent = text; e.appendChild(b); } else e.textContent = text;
+    box.appendChild(e);
+  }
+  function modalButtons(box, list) {
+    const row = document.createElement("div"); row.className = "volna-end-btns";
+    for (const [label, fn, second] of list) {
+      const b = document.createElement("button"); b.textContent = label; if (second) b.className = "volna-btn2";
+      b.addEventListener("click", fn); row.appendChild(b);
+    }
+    box.appendChild(row);
+  }
+  function showProEndedModal() {
+    const box = modalBox();
+    const nA = Object.keys(artistLast).length, nD = Object.keys(dislikes).length;
+    modalPara(box, L(`Drift запомнил ${fmtN(nA)} артистов и 2 000 песен — во Free память сократится до 200, песни начнут повторяться чаще.`,
+      `Drift remembered ${fmtN(nA)} artists and 2,000 songs — Free keeps only 200, so songs will repeat more often.`));
+    if (nD) modalPara(box, L(`${fmtN(nD)} дизлайкнутых артистов снова могут попадаться.`, `${fmtN(nD)} artists you disliked may come back.`));
+    const kept = proStash ? Object.entries(proStash).map(([k, v]) => labelFor(k, v)).filter(Boolean).join(" · ") : "";
+    if (kept) modalPara(box, L(`Твои настройки «${kept}» сохранены.`, `Your settings “${kept}” are saved.`));
+    if (presets.length) modalPara(box, L(`Сохранённые волны (${presets.length}) ждут тебя.`, `Your ${presets.length} saved waves are waiting.`));
+    modalPara(box, L("Всё вернётся сразу после продления.", "Everything comes back as soon as you renew."), true);
+    modalButtons(box, [
+      [L("Продлить на Boosty", "Renew on Boosty"), () => openLink(UPGRADE_URL)],
+      [L("Я подписался — проверить", "I subscribed — check"), () => checkSubscription(), true],
+      [L("Остаться на Free", "Stay on Free"), () => Spicetify.PopupModal.hide(), true],
+    ]);
+    Spicetify.PopupModal.display({ title: remote.trial ? L("Пробный Drift Pro закончился", "Your Drift Pro trial has ended") : L("Drift Pro закончился", "Drift Pro has ended"), content: box });
+  }
+  // за добу до кінця пробного — один раз нагадати, що накопичено за тиждень
+  function trialReminder() {
+    if (!remote.trial || !proActive() || remote.until - Date.now() > 86400000) return;
+    if (lsGet(K.trialRemind) === String(remote.until)) return;
+    lsSet(K.trialRemind, String(remote.until));
+    Spicetify.showNotification(L(`Завтра пробный Drift Pro закончится. За это время Drift запомнил ${fmtN(Object.keys(artistLast).length)} артистов — подписка на Boosty сохранит Pro`,
+      `Your Drift Pro trial ends tomorrow. Drift has learned ${fmtN(Object.keys(artistLast).length)} artists — subscribe on Boosty to keep Pro`));
+  }
+
+  // ---------------- Підсумок місяця: сторіс як Spotify Wrapped (лише Pro; у безкоштовній збірці цього коду немає) ----------------
+  function openRecap() {}
+  function recapNotice() {}
+  function recapAvailable() { return false; }
+  function recapBanner() { return null; }
+  function syncRecapMenu() {}
+  // ---------------- Нова версія ----------------
+  // «1.2.3» > «1.2»? — за числами зліва направо
+  function newerVersion(a, b) {
+    const x = String(a).split(".").map(Number), y = String(b).split(".").map(Number);
+    for (let i = 0; i < Math.max(x.length, y.length); i++) { const d = (x[i] || 0) - (y[i] || 0); if (d) return d > 0; }
+    return false;
+  }
+  let latestVersion = null;
+  // про нову версію кажемо один раз; посилання «Оновити» в панелі лишається, поки не оновишся
+  function noteLatest(v, note) {
+    if (!/^\d+(\.\d+){0,2}$/.test(String(v)) || !newerVersion(v, VERSION)) return;
+    latestVersion = String(v);
+    if (lsGet(K.updateSeen) === latestVersion) return;
+    lsSet(K.updateSeen, latestVersion);
+    const how = EDITION === "free" ? L("скачай её с GitHub", "get it from GitHub") : L("напиши боту /key", "send /key to the bot");
+    setTimeout(() => Spicetify.showNotification(L(`🆕 Вышла версия Drift ${latestVersion} — ${how}`, `🆕 Drift ${latestVersion} is out — ${how}`)), 6000);
+  }
+  // Free: раз на добу дивимося номер версії в manifest.json на GitHub
+  async function checkFreeUpdate() {
+    if (EDITION !== "free" || !UPDATE_URL) return;
+    if (Date.now() - (parseInt(lsGet(K.updateAt) || "0", 10) || 0) < 20 * 3600000) return;
+    lsSet(K.updateAt, String(Date.now()));
+    try {
+      const m = await (await fetch(UPDATE_URL, { cache: "no-store" })).json();
+      const v = Array.isArray(m) ? m[0] && m[0].version : m && m.version;
+      if (v) noteLatest(v);
+    } catch {}
+  }
+  // Pro відкрився або закрився (відповідь сервера / скінчився строк) — налаштування й панель приводимо у відповідність
+  let lastPro = null;
+  function onProChanged() {
+    const pro = proActive();
+    if (pro === lastPro) return;
+    const first = lastPro === null;
+    lastPro = pro;
+    gateSettings();
+    if (EDITION === "pro" && !pro) dropServerMarkup();
+    if (EDITION === "pro") {
+      const was = lsGet(K.proWas);
+      lsSet(K.proWas, pro ? "1" : "0");
+      if (!pro && was === "1") { if (remoteChecked || !CONFIG_URL) setTimeout(showProEndedModal, 500); else endModalPending = true; }
+    }
+    if (first) return;
+    logEvent(pro ? "Pro включён" : "Pro выключен");
+    if (panelEl) { closePanel(); }
+    updateButton();
+    if (S.active) startWave();
+  }
+  function proBadge() { const b = document.createElement("span"); b.className = "volna-pro"; b.textContent = "PRO"; return b; }
+  function toggleGroup(p, title, options, key, after) {
+    const sec = section(title);
+    if (isLocked(key)) sec.appendChild(proBadge());
+    p.appendChild(sec);
+    const g = document.createElement("div"); g.className = "volna-chips";
+    // третій елемент — своє налаштування в кнопки (наприклад «Instrumental» у ряду Mood вмикає мову)
+    options.forEach(([v, l, ownKey]) => {
+      const k = ownKey || key;
+      if (isLocked(k)) { // Pro-кнопка без Pro (зараз ряди Pro без Pro не показуються — лишено про запас): видна, але веде на Pro
+        const c = chip(l, false, () => showUpsell(title));
+        c.classList.add("locked"); c.dataset.val = v; c.title = L("Доступно в Drift Pro", "Available in Drift Pro");
+        g.appendChild(c);
+        return;
+      }
+      const c = chip(l, settings[k] === v, () => {
+        const blocker = settings[k] === v ? null : blockerOf(k, v);
+        if (blocker) {
+          Spicetify.showNotification(L(`«${l}» не сочетается с «${labelFor(blocker[0], blocker[1])}» — сначала сними его`,
+          `“${l}” doesn't go with “${labelFor(blocker[0], blocker[1])}” — turn that off first`));
+          return;
+        }
+        settings[k] = settings[k] === v ? "" : v; // повторний тап — зняти
+        if (after) after();
+        refreshChipStates();
+        applyLive();
+      });
+      c.dataset.val = v; g.appendChild(c);
+      chipRegistry.push({ key: k, val: v, el: c });
+    });
+    p.appendChild(g);
+    return g;
+  }
+  // «Мої хвилі»: своє поєднання налаштувань (і плейлист/артист) однією кнопкою — Pro
+  function presetName() {
+    const parts = PRESET_KEYS.filter((k) => settings[k]).map((k) => labelFor(k, settings[k]));
+    if (waveSource && waveSource.name) parts.unshift(waveSource.name);
+    return (parts.join(" · ") || L("Моя волна", "My wave")).slice(0, 40);
+  }
+  function applyPreset(pr) {
+    if (!proActive()) { showUpsell(L("Сохранённые волны", "Saved waves")); return; }
+    for (const k of PRESET_KEYS) settings[k] = pr.s[k] || "";
+    sanitizeSettings(); saveSettings(); closePanel();
+    if (pr.src && pr.src.uri) startSourceWave(pr.src.type, pr.src.uri);
+    else { waveSource = null; startWave(); }
+  }
+  function presetsBlock(p) {
+    const pro = proActive();
+    const sec = section(L("Мои волны", "My waves"));
+    if (!pro) sec.appendChild(proBadge());
+    p.appendChild(sec);
+    const g = document.createElement("div"); g.className = "volna-chips";
+    presets.forEach((pr) => {
+      const c = chip(pr.name, false, () => applyPreset(pr));
+      if (!pro) c.classList.add("locked");
+      const x = document.createElement("span"); x.className = "volna-chip-x"; x.textContent = "✕"; x.title = L("Удалить", "Delete");
+      x.addEventListener("click", (e) => { e.stopPropagation(); presets = presets.filter((q) => q !== pr); savePresets(); c.remove(); });
+      c.appendChild(x); g.appendChild(c);
+    });
+    if (presets.length < 6) {
+      const add = chip("＋ " + L("Сохранить текущую", "Save current"), false, () => {
+        if (!proActive()) { showUpsell(L("Сохранённые волны", "Saved waves")); return; }
+        if (g.nextSibling && g.nextSibling.classList?.contains("volna-preset-name")) return;
+        const inp = document.createElement("input"); inp.className = "volna-input volna-preset-name"; inp.value = presetName(); inp.maxLength = 40;
+        inp.placeholder = L("Название (Enter — сохранить)", "Name (Enter to save)");
+        inp.addEventListener("keydown", (e) => {
+          e.stopPropagation();
+          if (e.key === "Escape") inp.remove();
+          if (e.key !== "Enter" || !inp.value.trim()) return;
+          presets.push({ name: inp.value.trim(), s: Object.fromEntries(PRESET_KEYS.map((k) => [k, settings[k] || ""])),
+            src: waveSource ? { type: waveSource.type, uri: waveSource.uri, name: waveSource.name } : null });
+          savePresets(); closePanel(); openSettings();
+          Spicetify.showNotification(L("Волна сохранена", "Wave saved"));
+        });
+        g.after(inp); inp.focus(); inp.select();
+      });
+      add.classList.add("volna-chip-add"); if (!pro) add.classList.add("locked");
+      g.appendChild(add);
+    }
+    p.appendChild(g);
+  }
+  function buildPanel() {
+    chipRegistry = [];
+    // без Pro панель показує лише те, що працює: Pro-ряди не видно взагалі (жодних замочків) — про Pro один рядок унизу
+    const pro = proActive();
+    const p = document.createElement("div");
+    p.className = "volna-panel";
+    p.addEventListener("click", (e) => e.stopPropagation());
+
+    const st = document.createElement("div"); st.id = "volna-status"; st.className = "volna-status";
+    st.textContent = (S.active ? L("Играет: ", "Playing: ") : L("Выключен · ", "Off · ")) + waveLabel(true);
+    p.appendChild(st);
+    if (waveSource) {
+      const sr = document.createElement("div"); sr.className = "volna-src";
+      const lab = document.createElement("span"); lab.className = "volna-src-name";
+      lab.textContent = (waveSource.type === "artist" ? L("Артист: ", "Artist: ") : L("Плейлист: ", "Playlist: ")) + (waveSource.name || "…");
+      lab.title = waveSource.name || "";
+      const x = document.createElement("button"); x.className = "volna-src-x"; x.textContent = "✕"; x.title = L("Вернуть обычный Drift for Spotify", "Back to regular Drift for Spotify");
+      x.addEventListener("click", () => { clearSource(); closePanel(); });
+      sr.appendChild(lab); sr.appendChild(x); p.appendChild(sr);
+    }
+
+    const banner = recapBanner();
+    if (banner) p.appendChild(banner);
+
+    const row = document.createElement("div"); row.className = "volna-row";
+    const start = document.createElement("button");
+    start.id = "volna-start"; start.className = "volna-start";
+    setStartLabel(start);
+    start.addEventListener("click", () => toggleWave());
+    const shake = document.createElement("button");
+    shake.className = "volna-shake"; shake.innerHTML = ICON_SHAKE; shake.title = L("Встряхнуть — новое направление", "Shake up — new direction");
+    shake.addEventListener("click", () => shakeWave());
+    row.appendChild(start); row.appendChild(shake);
+    p.appendChild(row);
+    if (pro) presetsBlock(p);
+
+    if (pro) toggleGroup(p, L("По занятию", "Activity"), ACTIVITIES, "activity");
+    toggleGroup(p, L("По характеру", "Character"), CHARACTERS, "character");
+    if (pro) {
+      if (UI_RU) {
+        toggleGroup(p, "Под настроение", MOODS, "mood");
+        toggleGroup(p, "По языку", LANGS, "language");
+      } else {
+        // не з СНД: «російська / неросійська» не потрібні — лише «Instrumental», у ряду Mood
+        toggleGroup(p, "Mood", [...MOODS, ["instrumental", "Instrumental", "language"]], "mood");
+      }
+
+      let gi = null;
+      const genreGroup = toggleGroup(p, L("Жанр", "Genre"), GENRES, "genre", () => { if (gi) gi.value = ""; });
+      gi = document.createElement("input");
+      gi.className = "volna-input"; gi.placeholder = L("Свой жанр… (Enter)", "Custom genre… (Enter)");
+      gi.value = settings.genre && !GENRES.some((g) => g[0] === settings.genre) ? settings.genre : "";
+      gi.addEventListener("keydown", (e) => {
+        e.stopPropagation();
+        if (e.key === "Enter") { settings.genre = gi.value.trim(); selectInGroup(genreGroup, settings.genre); refreshChipStates(); applyLive(); }
+      });
+      p.appendChild(gi);
+    }
+    refreshChipStates();
+
+    const check = (label, key) => {
+      const r2 = document.createElement("label"); r2.className = "volna-exrow";
+      const box = document.createElement("input"); box.type = "checkbox"; box.checked = !!settings[key];
+      box.addEventListener("change", () => { settings[key] = box.checked; applyLive(); });
+      r2.appendChild(box); r2.appendChild(document.createTextNode(" " + label));
+      p.appendChild(r2);
+    };
+    check(L("Без ИИ-треков", "No AI tracks"), "blockAI");
+    check(L("Пропускать explicit", "Skip explicit"), "explicitFilter");
+
+    const foot = document.createElement("div"); foot.className = "volna-foot";
+    if (latestVersion) {
+      const upd = document.createElement("button"); upd.className = "volna-link volna-up";
+      upd.textContent = L(`🆕 Обновить до ${latestVersion} →`, `🆕 Update to ${latestVersion} →`);
+      upd.title = EDITION === "free" ? L("Новая версия — на странице Drift на GitHub", "The new version is on the Drift GitHub page") : L("Бот пришлёт новый файл", "The bot will send you the new file");
+      upd.addEventListener("click", () => openLink(EDITION === "free" ? (REPO_URL || "https://spicetify.app") : BOT_KEY_URL));
+      foot.appendChild(upd);
+    }
+    // діагностика — не для панелі: вона в меню профілю Spotify («Drift for Spotify — діагностика»), щоб надіслати звіт
+    const rb = document.createElement("button"); rb.className = "volna-link"; rb.textContent = L("Пересобрать вкус", "Rebuild taste");
+    rb.addEventListener("click", async () => { try { await buildProfile(true); Spicetify.showNotification(L("Вкус пересобран", "Taste rebuilt")); } catch {} });
+    foot.appendChild(rb);
+    if (!pro) {
+      const up = document.createElement("button"); up.className = "volna-link";
+      up.textContent = canTrial() ? L("Drift Pro — настроение, жанры и ещё кое-что →", "Drift Pro — moods, genres and more →") : L("Продлить Drift Pro →", "Renew Drift Pro →");
+      up.title = L("Настроение, занятие, язык, жанр, волна по плейлисту и артисту, мгновенный лайк, память на 2000 песен, сохранённые волны, итог месяца. " + TRIAL_DAYS + " дней бесплатно",
+        "Mood, activity, genre, Drift from a playlist or artist, instant likes, 2000-song memory, saved waves, monthly recap. Free for " + TRIAL_DAYS + " days");
+      up.addEventListener("click", () => openLink(canTrial() ? TRIAL_URL : UPGRADE_URL));
+      foot.appendChild(up);
+      if (canTrial()) {
+        const tip = document.createElement("button"); tip.className = "volna-link"; tip.textContent = L("☕ Поддержать автора", "☕ Support the author");
+        tip.addEventListener("click", () => openLink(UPGRADE_URL));
+        foot.appendChild(tip);
+      } else {
+        const ck = document.createElement("button"); ck.className = "volna-link"; ck.textContent = L("Я подписался — проверить", "I subscribed — check");
+        ck.addEventListener("click", () => checkSubscription());
+        foot.appendChild(ck);
+      }
+    }
+    p.appendChild(foot);
+    return p;
+  }
+  function openSettings() {
+    const a = document.getElementById("volna-wave-btn");
+    if (a) togglePanel(a); else Spicetify.showNotification(L("Кнопка Drift for Spotify ещё не появилась — перезапусти Spotify", "Drift for Spotify button isn't ready yet — restart Spotify"), true);
+  }
+
+  // ---------------- Діагностика ----------------
+  function openDiagnostics() {
+    const wrap = document.createElement("div"); wrap.className = "volna-box";
+    const report = {
+      version: VERSION,
+      сборка: EDITION + (proActive() ? " · Pro активен" : "") + (remote.until ? " · ключ до " + new Date(remote.until).toLocaleDateString() : "") + (remote.reason ? " · сервер: " + remote.reason : ""),
+      настройки: settings,
+      волна: S.active ? "играет" : "выключена",
+      очередьНаша: S.queueOk === undefined ? "ещё не проверено" : (S.queueOk ? "да" : "НЕТ — Spotify подменяет список"),
+      профиль: profile ? {
+        собран: new Date(profile.builtAt).toLocaleString(),
+        лайков: P.likedTracks.size, знакомыхАртистов: P.familiarIds.size, услышанныхТреков: P.heard.size,
+        историяSpotify: !!profile.historyOk,
+        самыхСлушаемыхТреков: P.topTracks.length, окрестностьВкуса: P.taste.size,
+        топАртисты: P.topArtists.slice(0, 12).map((a) => a.name || idOf(a.uri)),
+      } : "ещё не собран",
+      разметка: [...tagPools.values()].map((p) => `${p.key}: ${p.tracks.length} треков из ${p.playlists} плейлистов`),
+      кандидаты: S.lastRefresh,
+      последниеВыборы: S.lastPicks,
+      сессия: S.history.slice(-15).map((h) => `${h.outcome} · ${h.artistName || "?"} — ${h.name || ""} [${h.sources}]`),
+      graphql: gqlStats,
+      забаненоТреков: bannedTrackCount(), дизлайкнутыхАртистов: Object.keys(dislikes).length, ИИартистов: aiArtists.size,
+      память: storageUsage(),
+      сборка: { pro: !!BUILD.key, покупатель: BUILD.buyer || "—", сервер: CONFIG_URL ? (remote.ok ? "настройки получены " + new Date(remote.at).toLocaleString() : "нет ответа: " + remote.reason) : "не задан" },
+      кэш: { артистов: Object.keys(artistDisk).length, текстов: Object.keys(lyricsDisk).length,
+        размерКБ: Math.round([K.artists, K.lyrics, K.lastPool, K.trackHist].reduce((n, k) => n + (lsGet(k) || "").length, 0) / 1024) },
+      сеть: { одновременно: netActive, вОчереди: netQ[0].length + netQ[1].length },
+    };
+    const text = "== ОТЧЁТ ==\n" + JSON.stringify(report, null, 2) + "\n\n== ЖУРНАЛ ==\n" + (journal.join("\n") || "(пусто)");
+    wrap.innerHTML = '<button id="v-copy">📋 ' + L("Копировать", "Copy") + '</button><button id="v-tags">♻ ' + L("Обновить разметку", "Refresh tags") +
+      '</button><button id="v-cache">🧹 ' + L("Очистить кэш", "Clear cache") + '</button><pre id="v-rep"></pre>';
+    wrap.querySelector("#v-rep").textContent = text;
+    wrap.querySelector("#v-copy").addEventListener("click", async () => {
+      try { await Spicetify.Platform.ClipboardAPI.copy(text); Spicetify.showNotification(L("Скопировано", "Copied")); }
+      catch { try { await navigator.clipboard.writeText(text); Spicetify.showNotification(L("Скопировано", "Copied")); } catch { Spicetify.showNotification(L("Выдели текст вручную", "Select the text manually"), true); } }
+    });
+    wrap.querySelector("#v-tags").addEventListener("click", () => {
+      for (const k of Object.keys(TAG_QUERIES)) lsSet(K.tagPrefix + k, "");
+      tagPools.clear();
+      Spicetify.showNotification(L("Разметка сброшена — загрузится при следующем запуске", "Tags reset — they'll reload on next start"));
+    });
+    // кеш (артисти, тексти, пул минулого запуску) — налаштування, лайки-навчання й історія не чіпаються
+    wrap.querySelector("#v-cache").addEventListener("click", () => {
+      pendingSaves.delete("artists"); pendingSaves.delete("lyrics"); pendingSaves.delete("lastPool");
+      artistDisk = {}; lyricsDisk = {};
+      for (const k of [K.artists, K.lyrics, K.lastPool]) lsSet(k, "");
+      ovCache.clear(); relCache.clear(); lyricsReq.clear(); lyricsKnown.clear();
+      Spicetify.showNotification(L("Кэш очищен — данные подтянутся заново", "Cache cleared — data will reload"));
+    });
+    Spicetify.PopupModal.display({ title: L("Drift for Spotify — диагностика", "Drift for Spotify — Diagnostics"), content: wrap, isLarge: true });
+  }
+
+  // «…» у плейлиста / артиста → «Хвиля за цим плейлистом / артистом»
+  function registerSourceMenu() {
+    const CM = Spicetify.ContextMenu;
+    if (!CM || !CM.Item) { logEvent("контекстное меню недоступно"); return; }
+    if (EDITION === "free") return; // хвиля за плейлистом/артистом — Pro: у Free пунктів меню немає зовсім
+    const typeOf = (uri) => {
+      const U = Spicetify.URI;
+      try {
+        if (U.isPlaylistV1OrV2 ? U.isPlaylistV1OrV2(uri) : /:playlist:/.test(uri)) return "playlist";
+        if (U.isArtist ? U.isArtist(uri) : /:artist:/.test(uri)) return "artist";
+      } catch {}
+      return /:playlist:/.test(uri) ? "playlist" : /:artist:/.test(uri) ? "artist" : null;
+    };
+    const one = (uris) => uris && uris.length === 1 ? typeOf(uris[0]) : null;
+    new CM.Item(L("Drift по плейлисту", "Start Drift"), (uris) => startSourceWave("playlist", uris[0]), (uris) => one(uris) === "playlist", WAVE_ICON_16).register();
+    new CM.Item(L("Drift по артисту", "Start Drift"), (uris) => startSourceWave("artist", uris[0]), (uris) => one(uris) === "artist", WAVE_ICON_16).register();
+  }
+
+  let diagMenu = null, diagMenuOn = false;
+  function initUI() {
+    injectButtons();
+    // легка перевірка замість MutationObserver (той лагав увесь клієнт)
+    setInterval(injectButtons, 1500); // запасна перевірка
+    watchPanels();
+    setTimeout(addPlaybarFallback, 4000);
+    try {
+      // «Налаштування» в меню профілю не потрібні — панель відкривається кнопкою Drift. Підсумок місяця (1–3 число) — вище діагностики.
+      syncRecapMenu();
+      diagMenu = new Spicetify.Menu.Item(L("Drift for Spotify — диагностика", "Drift for Spotify — Diagnostics"), false, openDiagnostics);
+      diagMenu.register(); diagMenuOn = true;
+    } catch (e) { logEvent("меню: ошибка", String(e)); }
+    try { registerSourceMenu(); } catch (e) { logEvent("контекстное меню: ошибка", String(e)); }
+    try {
+      Spicetify.Keyboard?.registerShortcut?.({ key: "j", ctrl: true, alt: true }, () => dislikeCurrent());
+      Spicetify.Keyboard?.registerShortcut?.({ key: "k", ctrl: true, alt: true }, () => banArtistCurrent());
+    } catch {}
+    const style = document.createElement("style");
+    style.textContent = `
+      .volna-ctrl-btn{background:transparent;border:none;color:var(--spice-subtext,#b3b3b3);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0;border-radius:50%;flex:none;}
+      .volna-ctrl-btn:hover{color:var(--spice-text,#fff);}
+      .volna-ctrl-btn.volna-on{color:#1ed760;}
+      .volna-panel{position:fixed;z-index:9999;width:340px;max-width:92vw;max-height:80vh;overflow-y:auto;background:#181818;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px;box-shadow:0 16px 48px rgba(0,0,0,.6);color:#fff;font-size:13px;box-sizing:border-box;}
+      .volna-status{font-size:12px;opacity:.7;margin-bottom:10px;line-height:1.4;overflow-wrap:anywhere;}
+      .volna-src{display:flex;align-items:center;gap:8px;margin:-4px 0 10px;padding:6px 6px 6px 10px;border-radius:8px;background:rgba(255,255,255,.07);}
+      .volna-src-name{flex:1;min-width:0;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+      .volna-src-x{flex:none;width:24px;height:24px;border:none;border-radius:50%;background:transparent;color:#fff;opacity:.7;cursor:pointer;font-size:12px;}
+      .volna-src-x:hover{opacity:1;background:rgba(255,255,255,.12);}
+      .volna-row{display:flex;gap:8px;}
+      .volna-start{flex:1;padding:10px;border:none;border-radius:999px;background:#1ed760;color:#000;font-weight:700;cursor:pointer;font-size:14px;}
+      .volna-shake{width:44px;border:1px solid rgba(255,255,255,.25);border-radius:999px;background:transparent;color:#fff;cursor:pointer;font-size:16px;display:inline-flex;align-items:center;justify-content:center;}
+      .volna-shake:hover{border-color:#fff;}
+      .volna-start{display:inline-flex;align-items:center;justify-content:center;gap:8px;}
+      .volna-start svg{display:block;flex:none;}
+      .volna-sec{margin:14px 0 6px;font-weight:700;opacity:.7;font-size:11px;text-transform:uppercase;letter-spacing:.05em;}
+      .volna-chips{display:flex;flex-wrap:wrap;gap:6px;}
+      .volna-chip{padding:6px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:transparent;color:#fff;cursor:pointer;font-size:12px;}
+      .volna-chip:hover{border-color:#fff;}
+      .volna-chip.on{background:#1ed760;color:#000;border-color:#1ed760;font-weight:700;}
+      .volna-chip.blocked{opacity:.3;cursor:not-allowed;}
+      .volna-chip.blocked:hover{border-color:rgba(255,255,255,.18);}
+      .volna-chip.locked{opacity:.45;}
+      .volna-chip.locked:hover{opacity:.8;border-color:#1ed760;}
+      .volna-pro{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:999px;background:#1ed760;color:#000;font-size:9px;letter-spacing:.04em;vertical-align:1px;opacity:1;}
+      .volna-up{margin-left:auto;font-weight:700;}
+      .volna-input{width:100%;margin-top:8px;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.18);background:#121212;color:#fff;box-sizing:border-box;}
+      .volna-exrow{display:flex;align-items:center;gap:8px;margin-top:12px;cursor:pointer;}
+      .volna-foot{display:flex;gap:14px;margin-top:14px;border-top:1px solid rgba(255,255,255,.1);padding-top:10px;}
+      .volna-link{background:none;border:none;color:#1ed760;cursor:pointer;font-size:12px;padding:0;}
+      .volna-box pre{white-space:pre-wrap;word-break:break-word;background:#0a0a0a;border:1px solid #333;border-radius:8px;padding:12px;max-height:48vh;overflow:auto;font-size:11px;line-height:1.5;}
+      .volna-box button{padding:7px 16px;border-radius:999px;border:none;background:#1ed760;color:#000;font-weight:700;cursor:pointer;margin-right:8px;}
+      .volna-box button.volna-btn2{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3);}
+      .volna-end p{margin:0 0 10px;line-height:1.5;font-size:14px;}
+      .volna-end-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+      .volna-chip-x{margin-left:7px;opacity:.5;font-size:10px;}
+      .volna-chip-x:hover{opacity:1;}
+      .volna-chip-add{border-style:dashed;}
+      .volna-foot{flex-wrap:wrap;row-gap:6px;}
+      .drw-ov{position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.86);display:flex;align-items:center;justify-content:center;}
+      .drw-frame{position:relative;height:min(88vh,860px);aspect-ratio:9/16;border-radius:18px;overflow:hidden;color:#fff;cursor:pointer;user-select:none;box-shadow:0 30px 80px rgba(0,0,0,.6);transition:background .4s;}
+      .drw-bars{position:absolute;top:12px;left:12px;right:12px;display:flex;gap:4px;z-index:2;}
+      .drw-bar{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.35);overflow:hidden;}
+      .drw-bar i{display:block;height:100%;width:0;background:#fff;}
+      @keyframes drw-fill{from{width:0}to{width:100%}}
+      .drw-x{position:absolute;top:24px;right:14px;z-index:3;width:32px;height:32px;border:none;border-radius:50%;background:rgba(0,0,0,.25);color:#fff;font-size:14px;cursor:pointer;}
+      .drw-demo{position:absolute;top:30px;left:16px;z-index:3;font-size:11px;padding:2px 8px;border-radius:999px;background:rgba(0,0,0,.35);}
+      .drw-stage{position:absolute;inset:0;}
+      .drw-slide{position:absolute;inset:0;padding:70px 28px 36px;display:flex;flex-direction:column;justify-content:center;gap:6px;animation:drw-in .5s ease-out;}
+      .drw-center{align-items:center;text-align:center;}
+      @keyframes drw-in{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+      .drw-kicker{font-size:15px;font-weight:700;letter-spacing:.02em;opacity:.9;}
+      .drw-big{font-size:96px;font-weight:900;line-height:1;letter-spacing:-.03em;}
+      .drw-h1{font-size:40px;font-weight:900;line-height:1.05;letter-spacing:-.02em;}
+      .drw-h2{font-size:26px;font-weight:800;}
+      .drw-sub{font-size:15px;font-weight:600;opacity:.9;margin-top:8px;line-height:1.4;}
+      .drw-logo svg{color:#fff;margin-bottom:10px;}
+      .drw-emoji{font-size:84px;line-height:1.1;margin:6px 0;}
+      .drw-list{margin-top:18px;display:flex;flex-direction:column;gap:10px;}
+      .drw-row{display:flex;align-items:center;gap:12px;font-weight:700;font-size:17px;}
+      .drw-num{width:18px;opacity:.8;}
+      .drw-ava{width:46px;height:46px;border-radius:50%;object-fit:cover;background:rgba(255,255,255,.2);}
+      .drw-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+      .drw-hero{width:62%;aspect-ratio:1;border-radius:50%;object-fit:cover;margin:14px 0;box-shadow:0 18px 50px rgba(0,0,0,.35);}
+      .drw-curve{width:100%;height:auto;margin:22px 0 6px;overflow:visible;}
+      .drw-split{margin:26px 0 10px;}
+      .drw-banner{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;margin:0 0 10px;padding:10px 14px;border:none;border-radius:12px;cursor:pointer;color:#fff;text-align:left;
+        background:linear-gradient(110deg,#1a0b4d,#4100f5 45%,#0d72ea 80%,#4100f5);background-size:200% 100%;animation:drw-shine 6s ease-in-out infinite;box-shadow:0 6px 22px rgba(65,0,245,.4);}
+      .drw-banner:hover{filter:brightness(1.08);}
+      .drw-banner-t{font-size:15px;font-weight:800;}
+      .drw-banner-s{font-size:12px;font-weight:600;opacity:.9;}
+      .drw-banner{position:relative;}
+      .drw-banner-x{position:absolute;top:6px;right:6px;width:22px;height:22px;border:none;border-radius:50%;background:rgba(0,0,0,.25);color:#fff;font-size:11px;line-height:22px;padding:0;cursor:pointer;opacity:.75;}
+      .drw-banner-x:hover{opacity:1;background:rgba(0,0,0,.45);}
+      @keyframes drw-shine{0%,100%{background-position:0 0}50%{background-position:100% 0}}
+      .drw-split-bar{display:flex;height:22px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.12);}
+      .drw-split-bar i{display:block;height:100%;transform-origin:left;transform:scaleX(0);animation:drw-grow .7s ease-out forwards;}
+      @keyframes drw-grow{to{transform:scaleX(1)}}
+      .drw-split-legend{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;font-size:14px;font-weight:700;}
+      .drw-split-row{display:flex;align-items:center;gap:8px;}
+      .drw-split-row b{width:12px;height:12px;border-radius:50%;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.35);}
+      .drw-line{stroke-dasharray:1000;stroke-dashoffset:1000;animation:drw-draw 1.6s ease-out .15s forwards;}
+      .drw-area{opacity:0;animation:drw-fade .8s ease-out 1.1s forwards;}
+      .drw-dot,.drw-lbl{opacity:0;animation:drw-fade .4s ease-out forwards;}
+      .drw-lbl{fill:#fff;font-size:17px;font-weight:800;}
+      @keyframes drw-draw{to{stroke-dashoffset:0}}
+      @keyframes drw-fade{to{opacity:1}}
+      .drw-card{height:62%;border-radius:12px;margin:12px 0;box-shadow:0 12px 40px rgba(0,0,0,.5);}
+      .drw-actions{display:flex;gap:10px;}
+      .drw-btn{padding:10px 18px;border-radius:999px;border:none;background:#1ed760;color:#000;font-weight:800;cursor:pointer;font-size:14px;}
+      .drw-btn2{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);}`;
+    document.head.appendChild(style);
+  }
+
+  // ==================================================================
+  // Старт
+  // ==================================================================
+  cleanupStorage();
+  loadCachedRemote(); // до всіх запитів: свіжі хеші й строк Pro
+  onProChanged();     // Free / Pro: Pro-налаштування без Pro відкладаються
+  loadWaveLikes();
+  loadQuickSkips();
+  loadBannedTracks(); loadDislikes(); loadStats(); loadPresets();
+  loadAffinity();
+  loadTrackHist(); loadArtistHist();
+  loadArtistDisk(); loadLyricsDisk(); loadSkipHist();
+  try { window.addEventListener("beforeunload", flushSaves); } catch {}
+  loadAICache();
+  refreshAIList(false);
+  try { const c = JSON.parse(lsGet(K.profile) || "null"); if (c) applyProfile(c); } catch {}
+  initUI();
+  try { Spicetify.Platform.PlayerAPI.getEvents().addListener("action", onPlayerAction); } catch (e) { logEvent("«назад»: событие недоступно", String(e)); }
+  Spicetify.Player.addEventListener("songchange", () => {
+    onSongChange().catch((e) => logEvent("смена трека: ошибка", String(e && e.stack || e)));
+  });
+  Spicetify.Player.addEventListener("onprogress", (e) => {
+    const u = Spicetify.Player.data?.item?.uri;
+    if (!u) return;
+    S.progress.set(u, typeof e?.data === "number" ? e.data : (Spicetify.Player.getProgress?.() || 0));
+    const d = Spicetify.Player.getDuration?.();
+    if (d) S.duration.set(u, d);
+    feedIfEmpty();
+    // лайк зараховуємо, якщо сердечко горить кілька відліків поспіль (на зміні треку воно може блимнути від минулого)
+    if (S.active && probeHeart()) {
+      const n = (S.heartTicks.get(u) || 0) + 1; S.heartTicks.set(u, n);
+      // на зміні треку сердечко може блимнути від минулої пісні — рахуємо лише після 2 с треку
+      if (n >= 3 && (S.progress.get(u) || 0) >= 2000 && !S.hearted.has(u)) {
+        S.hearted.add(u);
+        const c = S.ctx[S.head];
+        if (c && c.uri === u) isLiked(u).then((ok) => { // підтверджуємо за медіатекою
+          if (ok) onLikeNow(c).catch((e) => logEvent("лайк: ошибка", String(e)));
+          else S.hearted.delete(u);
+        });
+      }
+    }
+  });
+  setTimeout(() => { markRecentlyPlayed(true); syncWaveLikes(); }, 3000); // історія Spotify і зняті лайки — одразу під час завантаження
+  refreshRemoteConfig().catch(() => {});
+  // перевірка раз на 10 хв; запит до сервера — раз на добу, а поки Pro вимкнений — раз на 15 хв
+  setInterval(() => { refreshRemoteConfig().catch(() => {}); onProChanged(); trialReminder(); recapNotice(); }, 10 * 60000);
+  setTimeout(() => { trialReminder(); recapNotice(); checkFreeUpdate(); }, 8000);
+  logEvent("Загружено v" + VERSION);
+  Spicetify.showNotification(L("Drift for Spotify загружен", "Drift for Spotify loaded") + " (v" + VERSION + ")");
+})();

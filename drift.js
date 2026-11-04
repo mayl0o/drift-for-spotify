@@ -1,15 +1,15 @@
-// Drift for Spotify 1.1 (Free) — © bayok. Код відкритий для читання; поширювати змінені копії заборонено — див. LICENSE.
+// Drift for Spotify 1.1.1 (Free) — © bayok. Код відкритий для читання; поширювати змінені копії заборонено — див. LICENSE.
 // Pro: https://t.me/Spotify_drift_bot
 // NAME: Drift for Spotify
 // AUTHOR: bayok
 // DESCRIPTION: An endless personal wave that learns from your likes and skips and almost never repeats. Free edition.
-// VERSION: 1.1
+// VERSION: 1.1.1
 
 /* eslint-disable no-console */
 (function Volna() {
   "use strict";
 
-  const VERSION = "1.1";
+  const VERSION = "1.1.1";
   const TAG = "[Волна]";
 
   // Особиста збірка Pro: бот підставляє сюди ключ і номер покупця (водяний знак). Порожньо — безкоштовна версія.
@@ -2844,12 +2844,27 @@
     S.ctx = [...S.ctx, ...extra];
     playCtx(at - 1).catch((err) => logEvent("назад: не получилось", String(err)));
   }
+  // Той самий трек під іншим ID: збігається основний артист і назва (без регістру, дужок і розділових знаків)
+  function findTwin(item) {
+    if (!item || !item.name) return -1;
+    const norm = (n) => String(n || "").toLowerCase().replace(/\([^)]*\)|\[[^\]]*\]/g, " ").replace(/[\s\p{P}\p{S}]+/gu, "");
+    const name = norm(item.name), art = item.artists && item.artists[0] && item.artists[0].uri;
+    if (!name) return -1;
+    for (let i = Math.max(0, S.head); i < Math.min(S.ctx.length, S.head + 8); i++) {
+      const c = S.ctx[i];
+      if (c && norm(c.name) === name && (!art || !c.artistUri || artistsOf(c).includes(art))) return i;
+    }
+    return -1;
+  }
   async function onSongChange() {
     const cur = Spicetify.Player.data?.item?.uri;
     // хвиля на паузі, а Spotify дограє її список — однаково пам'ятаємо, що трек звучав (інакше він повернеться)
     if (!S.active && cur && S.queued.has(cur) && !S.played.has(cur)) { S.played.add(cur); noteTrackPlayed(S.queued.get(cur)); }
     if (!S.active || S.starting) return;
     if (!cur) return;
+    // реклама в безкоштовному Spotify — не «чужий трек»: хвилю не вимикаємо, після реклами піде наш наступний
+    const it = Spicetify.Player.data?.item;
+    if (cur.startsWith("spotify:ad:") || it?.type === "ad" || it?.provider === "ad" || it?.metadata?.is_advertisement === "true") return;
     let idx = S.ctx.findIndex((c) => c.uri === cur);
     if (idx === S.head) return;                         // той самий трек (наше перезбирання)
     if (idx === -1) {
@@ -2860,8 +2875,20 @@
       else if (ours && S.feedMode) { logEvent("повтор из запаса — пропускаю", { трек: cur }); Spicetify.Player.next(); return; }
       else if (Date.now() < S.rebuildUntil) return;
       else {
-        S.active = false; updateButton();
-        return;
+        // Spotify у деяких країнах підміняє трек тим самим, але з іншим ID (регіональні права) — шукаємо його в плані за піснею
+        const item = Spicetify.Player.data?.item, twin = findTwin(item);
+        if (twin >= 0) {
+          logEvent("Spotify подменил трек тем же другим ID — продолжаю", { было: S.ctx[twin].uri, стало: cur });
+          S.ctx[twin] = { ...S.ctx[twin], uri: cur };
+          idx = twin;
+        } else {
+          logEvent("Spotify включил не наш трек — волна выключена", { трек: cur, название: item?.name || "", ждали: S.ctx[S.head + 1]?.uri || "" });
+          // сразу после старта это почти наверняка не ты сам: подсказываем, где искать причину
+          if (Date.now() - S.sessionStart < 60000) Spicetify.showNotification(L("Drift остановлен: Spotify включил другой трек (подробности — в Диагностике)",
+            "Drift stopped: Spotify switched to another track (details in Diagnostics)"), true);
+          S.active = false; updateButton();
+          return;
+        }
       }
     }
     if (idx < S.head) { S.navBack = true; return; }     // «назад» історією

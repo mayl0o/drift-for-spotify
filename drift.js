@@ -1,15 +1,15 @@
-// Drift for Spotify 1.1.2 (Free) — © bayok. Код відкритий для читання; поширювати змінені копії заборонено — див. LICENSE.
+// Drift for Spotify 1.1.3 (Free) — © bayok. Код відкритий для читання; поширювати змінені копії заборонено — див. LICENSE.
 // Pro: https://t.me/Spotify_drift_bot
 // NAME: Drift for Spotify
 // AUTHOR: bayok
 // DESCRIPTION: An endless personal wave that learns from your likes and skips and almost never repeats. Free edition.
-// VERSION: 1.1.2
+// VERSION: 1.1.3
 
 /* eslint-disable no-console */
 (function Volna() {
   "use strict";
 
-  const VERSION = "1.1.2";
+  const VERSION = "1.1.3";
   const TAG = "[Волна]";
 
   // Особиста збірка Pro: бот підставляє сюди ключ і номер покупця (водяний знак). Порожньо — безкоштовна версія.
@@ -2746,10 +2746,18 @@
   async function startWave(opts) {
     if (S.starting) { S.restartPending = true; return; }
     S.starting = true;
+    shuffleOff();
     const t0 = Date.now();
     try {
       // що грало до запуску (або до зміни налаштувань) — його артистів одразу не повторюємо
       const before = (Spicetify.Player.data?.item?.artists || []).map((a) => a?.uri).filter(Boolean);
+      // Як у «Моїй хвилі»: увімкнув пісню й натиснув Drift — вона грає далі з тієї ж секунди й стає першою в хвилі
+      // (і її затравкою). Не для «струснути», хвилі за джерелом і не для треку, який і так був у хвилі.
+      const nowItem = Spicetify.Player.data?.item, nowMs = Spicetify.Player.getProgress?.() || 0;
+      const keepNow = !(opts && opts.shake) && !waveSource && nowItem && typeof nowItem.uri === "string" && nowItem.uri.startsWith("spotify:track:") &&
+        !S.queued.has(nowItem.uri) && nowMs > 0 && Spicetify.Player.isPlaying?.() !== false ? {
+          uri: nowItem.uri, name: nowItem.name || "", artistUri: nowItem.artists?.[0]?.uri, artistName: nowItem.artists?.[0]?.name || "",
+          artistUris: (nowItem.artists || []).map((a) => a?.uri).filter(Boolean), explicit: nowItem.metadata?.is_explicit === "true" } : null;
       const prevPool = [...S.pool.values()];
       const shake = !!(opts && opts.shake);
       resetSession();
@@ -2758,6 +2766,7 @@
       await buildProfile(false);
       if (P.taste.size) ensureTaste().catch(() => {}); else await ensureTaste(); // оновлення смаку — у фоні
       [S.coldSeeds] = await Promise.all([coldStartSeeds(shake), syncRecentLikes(true), markRecentlyPlayed(true), syncWaveLikes()]);
+      if (keepNow) S.coldSeeds = [keepNow.uri, ...(S.coldSeeds || []).filter((u) => u !== keepNow.uri)].slice(0, 5); // хвиля — від цієї пісні
       await Promise.all(oppositeKeys().map(loadTagPool));
       // Швидкий старт: кандидати минулого запуску + схоже на сіди (одне коло запитів) — і одразу граємо,
       // без поступок за характером/жанром/мовою. Повний набір кандидатів довантажується у фоні.
@@ -2793,11 +2802,14 @@
       // (на подвійному натисканні «далі»). Список віддається один раз на старті — запас нічого не коштує
       const spare = pickNext(RESERVE_SIZE, new Set(picks.map((c) => c.uri)), new Set(picks.flatMap(artistsOf)), RESERVE_TIER(),
         both(settings.language === "instrumental" ? (c) => lyricsKnown.get(c.uri) === false && instrumentalOk(c, true) : null, genreSafe));
-      S.ctx = [...picks, ...spare]; S.head = 0; S.headGen = (S.headGen || 0) + 1;
+      let now = null;
+      if (keepNow) { addCand(keepNow, "current", null, 1); now = S.pool.get(keepNow.uri); }
+      S.ctx = [...(now ? [now] : []), ...picks.filter((c) => c !== now), ...spare.filter((c) => c !== now)]; S.head = 0; S.headGen = (S.headGen || 0) + 1;
       S.lastPicks = picks.map(explainPick);
       // чужі треки в черзі Spotify грають раніше за контекст — прибираємо
       try { await Spicetify.Platform.PlayerAPI.clearQueue(); } catch (e) { logEvent("очистка очереди: ошибка", String(e)); }
-      await playCtx(0);
+      // поточна пісня — з тієї ж секунди (позицію беремо свіжу: поки збирали хвилю, вона грала далі)
+      await playCtx(0, now ? (Spicetify.Player.getProgress?.() || nowMs) : 0);
       S.active = true;
       await beginTrack(S.ctx[0]);
       updateButton();
@@ -2813,6 +2825,20 @@
   }
   function stopWave() {
     S.active = false; updateButton();
+    restoreShuffle();
+  }
+  // Перемішування Spotify тасує список хвилі (а «розумне» ще й вставляє свої треки) — на час хвилі вимикаємо
+  let shuffleWas = null;
+  function shuffleOff() {
+    try {
+      const on = typeof Spicetify.Player.getShuffle === "function" ? Spicetify.Player.getShuffle() : false;
+      if (on) { shuffleWas = true; Spicetify.Player.setShuffle(false); logEvent("Перемешивание выключено на время волны"); }
+    } catch (e) { logEvent("перемешивание: ошибка", String(e)); }
+  }
+  function restoreShuffle() {
+    if (!shuffleWas) return;
+    shuffleWas = null;
+    try { Spicetify.Player.setShuffle(true); } catch {}
   }
   function toggleWave() { if (S.active) stopWave(); else { waveSource = null; startWave(); } }
   async function startSourceWave(type, uri) {
@@ -2843,6 +2869,17 @@
     const extra = [...S.queued.values()].filter((c) => !S.played.has(c.uri) && !S.ctx.includes(c)).slice(0, RESERVE_SIZE);
     S.ctx = [...S.ctx, ...extra];
     playCtx(at - 1).catch((err) => logEvent("назад: не получилось", String(err)));
+  }
+  // тип акаунта Spotify (free / premium) — для діагностики
+  let accountProduct = "";
+  setTimeout(() => { try { Spicetify.Platform.ProductStateAPI.getValues().then((v) => { accountProduct = (v && (v.product || v.type)) || ""; }).catch(() => {}); } catch {} }, 3000);
+  // Звідки трек: Spotify позначає, що він з автоплею, а контекст (плейлист / альбом, що грає) — наш чи ні.
+  // Автоплей або наш контекст із чужим треком — це вставив Spotify; інший контекст — ти сам увімкнув інше.
+  const playingContext = () => String(Spicetify.Player.data?.context?.uri || Spicetify.Player.data?.context_uri || "");
+  function insertedBySpotify(item) {
+    if (item && /autoplay/i.test(String(item.provider || ""))) return true;
+    const ctx = playingContext();
+    return !!ctx && ctx === CTX_URI;
   }
   // Попередній трек хвилі дограв до кінця (лишалося < 6 с) — тоді «чужий» трек поставив сам Spotify, а не ти
   function endedNaturally() {
@@ -2888,15 +2925,24 @@
           logEvent("Spotify подменил трек тем же другим ID — продолжаю", { было: S.ctx[twin].uri, стало: cur });
           S.ctx[twin] = { ...S.ctx[twin], uri: cur };
           idx = twin;
-        } else if (endedNaturally() && S.ctx[S.head + 1]) {
-          // наш трек доиграл до конца, а Spotify поставил своё (у части людей он не держит список хвилі й вмикає автоплей) —
+        } else if ((endedNaturally() || insertedBySpotify(item)) && S.ctx[S.head + 1]) {
+          // наш трек доиграв до кінця або трек поставив сам Spotify (автоплей, «розумне перемішування», а контекст лишився наш) —
           // це не ти перемкнув: повертаємо хвилю на наш наступний трек
           S.steered = (S.steered || 0) + 1;
-          logEvent("Spotify подставил свой трек на стыке — возвращаю волну", { трек: cur, название: item?.name || "", раз: S.steered });
+          // Spotify знову й знову ставить своє — керувати відтворенням він не дає: зупиняємося, а не крутимося в циклі
+          S.steerTimes = (S.steerTimes || []).filter((t) => Date.now() - t < 30000).concat(Date.now());
+          if (S.steerTimes.length > 3) {
+            logEvent("Spotify не даёт управлять воспроизведением — волна выключена", { раз: S.steerTimes.length, откуда: item?.provider || "", контекст: playingContext() });
+            Spicetify.showNotification(L("Drift остановлен: Spotify раз за разом включает своё (подробности — в Диагностике)",
+              "Drift stopped: Spotify keeps switching to its own tracks (details in Diagnostics)"), true);
+            S.active = false; updateButton(); restoreShuffle();
+            return;
+          }
+          logEvent("Spotify подставил свой трек — возвращаю волну", { трек: cur, название: item?.name || "", откуда: item?.provider || "", контекст: playingContext(), раз: S.steered });
           try { await playCtx(S.head + 1, 0, () => S.active); } catch (e) { logEvent("возврат волны не удался", String(e)); S.active = false; updateButton(); }
           return;
         } else {
-          logEvent("Spotify включил не наш трек — волна выключена", { трек: cur, название: item?.name || "", ждали: S.ctx[S.head + 1]?.uri || "" });
+          logEvent("Spotify включил не наш трек — волна выключена", { трек: cur, название: item?.name || "", откуда: item?.provider || "", контекст: playingContext(), ждали: S.ctx[S.head + 1]?.uri || "" });
           // сразу после старта это почти наверняка не ты сам: подсказываем, где искать причину
           if (Date.now() - S.sessionStart < 60000) Spicetify.showNotification(L("Drift остановлен: Spotify включил другой трек (подробности — в Диагностике)",
             "Drift stopped: Spotify switched to another track (details in Diagnostics)"), true);
@@ -3484,6 +3530,9 @@
     const wrap = document.createElement("div"); wrap.className = "volna-box";
     const report = {
       version: VERSION,
+      окружение: (() => { try { return { spotify: Spicetify.Platform?.version || "?", spicetify: Spicetify.Config?.version || "?",
+        аккаунт: accountProduct || "?", перемешивание: typeof Spicetify.Player.getShuffle === "function" ? Spicetify.Player.getShuffle() : "?",
+        контекст: playingContext() || "—", расширения: (Spicetify.Config?.extensions || []).join(", ") || "—" }; } catch { return "?"; } })(),
       сборка: EDITION + (proActive() ? " · Pro активен" : "") + (remote.until ? " · ключ до " + new Date(remote.until).toLocaleDateString() : "") + (remote.reason ? " · сервер: " + remote.reason : ""),
       настройки: settings,
       волна: S.active ? "играет" : "выключена",

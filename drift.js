@@ -1,15 +1,15 @@
-// Drift for Spotify 1.1.1 (Free) — © bayok. Код відкритий для читання; поширювати змінені копії заборонено — див. LICENSE.
+// Drift for Spotify 1.1.2 (Free) — © bayok. Код відкритий для читання; поширювати змінені копії заборонено — див. LICENSE.
 // Pro: https://t.me/Spotify_drift_bot
 // NAME: Drift for Spotify
 // AUTHOR: bayok
 // DESCRIPTION: An endless personal wave that learns from your likes and skips and almost never repeats. Free edition.
-// VERSION: 1.1.1
+// VERSION: 1.1.2
 
 /* eslint-disable no-console */
 (function Volna() {
   "use strict";
 
-  const VERSION = "1.1.1";
+  const VERSION = "1.1.2";
   const TAG = "[Волна]";
 
   // Особиста збірка Pro: бот підставляє сюди ключ і номер покупця (водяний знак). Порожньо — безкоштовна версія.
@@ -2844,6 +2844,13 @@
     S.ctx = [...S.ctx, ...extra];
     playCtx(at - 1).catch((err) => logEvent("назад: не получилось", String(err)));
   }
+  // Попередній трек хвилі дограв до кінця (лишалося < 6 с) — тоді «чужий» трек поставив сам Spotify, а не ти
+  function endedNaturally() {
+    const prev = S.ctx[S.head];
+    if (!prev) return false;
+    const pp = S.progress.get(prev.uri) || 0, pd = S.duration.get(prev.uri) || 0;
+    return pd > 0 && pd - pp < 6000;
+  }
   // Той самий трек під іншим ID: збігається основний артист і назва (без регістру, дужок і розділових знаків)
   function findTwin(item) {
     if (!item || !item.name) return -1;
@@ -2881,6 +2888,13 @@
           logEvent("Spotify подменил трек тем же другим ID — продолжаю", { было: S.ctx[twin].uri, стало: cur });
           S.ctx[twin] = { ...S.ctx[twin], uri: cur };
           idx = twin;
+        } else if (endedNaturally() && S.ctx[S.head + 1]) {
+          // наш трек доиграл до конца, а Spotify поставил своё (у части людей он не держит список хвилі й вмикає автоплей) —
+          // це не ти перемкнув: повертаємо хвилю на наш наступний трек
+          S.steered = (S.steered || 0) + 1;
+          logEvent("Spotify подставил свой трек на стыке — возвращаю волну", { трек: cur, название: item?.name || "", раз: S.steered });
+          try { await playCtx(S.head + 1, 0, () => S.active); } catch (e) { logEvent("возврат волны не удался", String(e)); S.active = false; updateButton(); }
+          return;
         } else {
           logEvent("Spotify включил не наш трек — волна выключена", { трек: cur, название: item?.name || "", ждали: S.ctx[S.head + 1]?.uri || "" });
           // сразу после старта это почти наверняка не ты сам: подсказываем, где искать причину

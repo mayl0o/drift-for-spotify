@@ -1,15 +1,15 @@
-// Drift for Spotify 1.0 (Free) — © bayok. Код відкритий для читання; поширювати змінені копії заборонено — див. LICENSE.
+// Drift for Spotify 1.1 (Free) — © bayok. Код відкритий для читання; поширювати змінені копії заборонено — див. LICENSE.
 // Pro: https://t.me/Spotify_drift_bot
 // NAME: Drift for Spotify
 // AUTHOR: bayok
 // DESCRIPTION: An endless personal wave that learns from your likes and skips and almost never repeats. Free edition.
-// VERSION: 1.0
+// VERSION: 1.1
 
 /* eslint-disable no-console */
 (function Volna() {
   "use strict";
 
-  const VERSION = "1.0";
+  const VERSION = "1.1";
   const TAG = "[Волна]";
 
   // Особиста збірка Pro: бот підставляє сюди ключ і номер покупця (водяний знак). Порожньо — безкоштовна версія.
@@ -818,7 +818,7 @@
   // Розмітка тегів (жанр / настрій / заняття / без слів)
   // ==================================================================
   const tagPools = new Map();
-  function makePool(key, tracks, playlists, extra) {
+  function makePool(key, tracks, playlists, extra, own) {
     const uris = new Set(), ids = new Set(), names = new Set(), artists = new Map();
     for (const t of tracks) {
       noteArtistLang(t);
@@ -829,7 +829,9 @@
     const coreIds = new Set(ids); // артисти із самих кураторських плейлистів
     // сусіди за графом схожих артистів — «біля жанру» (андеграунд, якого немає в редакторських плейлистах)
     for (const u of extra || []) { ids.add(idOf(u)); if (!artists.has(u)) artists.set(u, ""); }
-    return { key, tracks, uris, ids, coreIds, names, playlists, extraCount: (extra || []).length,
+    // твоя сцена в жанрі (expandTagByTaste): у ядрі, як артисти з кураторських плейлистів
+    for (const u of own || []) { ids.add(idOf(u)); coreIds.add(idOf(u)); if (!artists.has(u)) artists.set(u, ""); }
+    return { key, tracks, uris, ids, coreIds, names, playlists, extraCount: (extra || []).length, ownCount: (own || []).length,
       artists: [...artists.entries()].map(([uri, name]) => ({ uri, name, core: coreIds.has(idOf(uri)) })) };
   }
   function genreLevel(pool, c) {
@@ -861,16 +863,34 @@
     const minHits = key.startsWith("genre:") ? 1 : 2;
     return [...cnt.entries()].filter(([u, n]) => n >= minHits && !freq.has(u)).map(([u]) => u);
   }
+  // Жанр очима твого смаку: твої артисти й уся околиця смаку (там і незнайомі — для «Незнайомого»), здебільшого схожі
+  // на артистів жанру, — теж цей жанр. Порівнюємо з усім колом жанру (ядро + схожі на нього), а не лише з ядром:
+  // андеграунд схожий не на мейнстрим із редакторських плейлистів, а на інший андеграунд того ж жанру.
+  async function expandTagByTaste(pool) {
+    if (!pool.key.startsWith("genre:")) return [];
+    const taste = waveSource ? waveSource.taste : P.taste;
+    const near = [...taste.entries()].sort((a, b) => b[1] - a[1]).slice(0, 300).map(([u]) => u);
+    const cand = [...new Set([...topArtistsNow().slice(0, 40).map((a) => a.uri), ...near])].filter((u) => u && !pool.coreIds.has(idOf(u)));
+    const own = [];
+    await Promise.all(cand.map(async (u) => {
+      const rel = await relatedArtists(u);
+      // щонайменше 4 артисти з кола жанру (≥40% його схожих) і хоч один — із самого ядра: щоб у «Рок» не затягнуло твій реп
+      const hits = rel.filter((r) => pool.ids.has(idOf(r))).length, core = rel.filter((r) => pool.coreIds.has(idOf(r))).length;
+      if (hits >= 4 && hits >= rel.length * 0.4 && core >= 1) own.push(u);
+    }));
+    return own;
+  }
   async function loadTagPool(key) {
     if (tagPools.has(key)) return tagPools.get(key);
     try {
       const c = JSON.parse(lsGet(K.tagPrefix + key) || "null");
-      if (c && Date.now() - c.ts < 3 * 86400000 && c.tracks && c.tracks.length) {
+      if (c && Date.now() - c.ts < 3 * 86400000 && c.tracks && c.tracks.length &&
+        (!key.startsWith("genre:") || Array.isArray(c.own))) { // старий кеш жанру без «твоєї сцени» — перезбираємо
         const tracks = c.tracks.map(([id, name, arts, an, ex]) => {
           const uris = arts ? arts.split(",").map(AU) : [];
           return { uri: TU(id), name, artistUri: uris[0], artistName: an, artistUris: uris, explicit: !!ex };
         });
-        const pool = makePool(key, tracks, c.playlists, (c.extra || []).map(AU));
+        const pool = makePool(key, tracks, c.playlists, (c.extra || []).map(AU), (c.own || []).map(AU));
         tagPools.set(key, pool);
         return pool;
       }
@@ -889,22 +909,27 @@
     for (const l of lists) for (const t of l) if (!seen.has(t.uri)) { seen.add(t.uri); tracks.push(t); }
     const compact = tracks.slice(0, cap);
     compact.forEach(noteArtistLang);
-    const save = (extra) => {
+    let extraNow = [], ownNow = [];
+    const save = () => {
       if (!compact.length) return;
-      lsSet(K.tagPrefix + key, JSON.stringify({ ts: Date.now(), playlists: chosen.length, extra: extra.map(idOf),
+      lsSet(K.tagPrefix + key, JSON.stringify({ ts: Date.now(), playlists: chosen.length, extra: extraNow.map(idOf), own: ownNow.map(idOf),
         tracks: compact.map((t) => [idOf(t.uri), t.name || "", artistsOf(t).map(idOf).join(","), t.artistName || "", t.explicit ? 1 : 0]) }));
       trimTagCaches(TAG_CACHE_BUDGET, new Set([K.tagPrefix + key]));
     };
-    save([]);
+    save();
     const pool = makePool(key, compact, chosen.length, []);
     tagPools.set(key, pool);
+    // фонові доповнення (схожі, твоя сцена) перезбирають розмітку з усім, що вже відомо
+    let current = pool;
+    const rebuild = () => { if (tagPools.get(key) !== current) return false; current = makePool(key, compact, chosen.length, extraNow, ownNow); tagPools.set(key, current); save(); return true; };
     logEvent("Разметка «" + key + "»", { плейлистов: chosen.length, треков: compact.length, артистов: pool.artists.length });
     // розширення схожими артистами — у фоні (до 50 запитів): хвиля стартує, не чекаючи його
-    if (compact.length && key.startsWith("genre:")) expandTag(key, compact).then((extra) => {
-      if (!extra.length || tagPools.get(key) !== pool) return;
-      tagPools.set(key, makePool(key, compact, chosen.length, extra));
-      save(extra);
-      logEvent("Разметка «" + key + "» расширена похожими", extra.length);
+    if (compact.length && key.startsWith("genre:")) expandTag(key, compact).then(async (extra) => {
+      if (extra.length) { extraNow = extra; if (rebuild()) logEvent("Разметка «" + key + "» расширена похожими", extra.length); }
+      const own = await expandTagByTaste(current);
+      if (!own.length) return;
+      ownNow = own;
+      if (rebuild()) logEvent("Разметка «" + key + "»: твоя сцена в жанре", own.length);
     }).catch(() => {});
     return pool;
   }
@@ -1354,6 +1379,11 @@
     if (!waveSource.artistSet) waveSource.artistSet = new Set(waveSource.topArtists.map((a) => a.uri));
     return waveSource.artistSet.has(uri);
   }
+  // «Незнайоме»: артист, що вже прозвучав KNOWN_PLAYS+ разів (у хвилі чи повз неї), — уже не незнайомий,
+  // інакше хвиля крутить по колу ту саму сцену «нових» артистів
+  const KNOWN_PLAYS = 3;
+  function knownArtist(uri) { const v = artistLast[idOf(uri || "")]; return !!v && v[1] >= KNOWN_PLAYS && !isSourceArtist(uri); }
+  const notForDiscover = (uri) => P.familiarIds.has(idOf(uri)) || knownArtist(uri);
 
   // Пам'ять про зіграні хвилею ТРЕКИ (між запусками і зміною налаштувань): uri -> [останній ts, скільки разів].
   // Не заборона назавжди: ~12 год трек не беремо, поки є інші; далі штраф згасає за пару днів.
@@ -1366,7 +1396,7 @@
   const repeatGap = () => (proActive() ? 2000 : 200); // Free пам'ятає ~200 пісень, Pro — ~2000 (записується все — для переходу на Pro)
   function loadTrackHist() {
     try { trackHist = JSON.parse(lsGet(K.trackHist) || "{}") || {}; } catch { trackHist = {}; }
-    playNo = parseInt(lsGet(K.playNo) || "0", 10) || 0;
+    playNo = parseFloat(lsGet(K.playNo) || "0") || 0; // дробовий: швидкий скіп — пів пісні
     const cut = Date.now() - 120 * 86400000;
     let rows = Object.entries(trackHist).filter(([, v]) => Array.isArray(v) && v[0] > cut);
     // старий формат (повний uri) — переводимо в короткий "t:"+id
@@ -1575,7 +1605,7 @@
   };
   function resetSession() {
     S.active = false; S.ctx = []; S.head = -1; S.navBack = false;
-    S.artistPlays = new Map(); S.sessionStart = Date.now(); S.recentHits = []; S.hearted = new Set(); S.heartTicks = new Map(); S.sinceRefresh = 0; S.likeSeed = null; S.playedKeys = new Set(); S.queued = new Map(); S.inSpotifyQueue = new Set(); S.tierUse = {};
+    S.artistPlays = new Map(); S.genreFavs = null; S.sessionStart = Date.now(); S.recentHits = []; S.hearted = new Set(); S.heartTicks = new Map(); S.sinceRefresh = 0; S.likeSeed = null; S.playedKeys = new Set(); S.queued = new Map(); S.inSpotifyQueue = new Set(); S.tierUse = {};
     S.history = []; S.played = new Set(); S.recentArtists = []; S.recentSet = new Set(); S.picksFamiliar = [];
     S.pool = new Map(); S.coldSeeds = [];
     S.skipArtist = new Map(); S.seedPenalty = new Map(); S.skipNear = new Map(); S.skipStreak = 0; S.courseAt = 0; S.soundAvoid = new Map(); S.feedMode = true; S.queueMiss = 0;
@@ -1698,40 +1728,185 @@
     if (out.length < n) out.push(...weightedSample(base.filter((a) => !out.includes(a)), n - out.length, w));
     return out;
   }
+  // вшир: схожі від REL_BASE останніх (чи улюблених) артистів, за раз беремо REL_PICK із них
+  const REL_BASE = 5, REL_PICK = 10;
   async function relatedSelector(stats) {
     const base = [];
-    for (let i = S.history.length - 1; i >= 0 && base.length < 3; i--) {
+    for (let i = S.history.length - 1; i >= 0 && base.length < REL_BASE; i--) {
       const h = S.history[i];
       if (h.outcome !== "skip" && h.outcome !== "dislike" && h.artistUri && !base.includes(h.artistUri)) base.push(h.artistUri);
     }
-    if (base.length < 3) { // від твоїх найулюбленіших (за прослуховуваннями), а не випадкових
+    if (base.length < REL_BASE) { // від твоїх найулюбленіших (за прослуховуваннями), а не випадкових
       const tops = topArtistsNow().slice(0, 20).filter((x) => !base.includes(x.uri));
       const ok = tops.filter((x) => artistFitsLangTags(x.uri, x.name));
-      for (const a of weightedSample(ok.length >= 2 ? ok : tops, 3 - base.length, (x) => x.weight)) base.push(a.uri);
+      for (const a of weightedSample(ok.length >= 2 ? ok : tops, REL_BASE - base.length, (x) => x.weight)) base.push(a.uri);
     }
-    const rels = await Promise.all(base.slice(0, 3).map(relatedArtists));
+    const rels = await Promise.all(base.slice(0, REL_BASE).map(relatedArtists));
     const counts = new Map();
     rels.forEach((list) => list.forEach((u) => counts.set(u, (counts.get(u) || 0) + 1)));
     for (const [u, n] of counts) graphScore.set(u, Math.max(graphScore.get(u) || 0, n));
     let pick = [...counts.keys()].filter((u) => !S.recentSet.has(u) && !isArtistBanned(u));
-    if (settings.character === "unfamiliar") pick = pick.filter((u) => !P.familiarIds.has(idOf(u)));
+    if (settings.character === "unfamiliar") pick = pick.filter((u) => !notForDiscover(u));
     // ще не почуті артисти — у пріоритеті
     // ще не почуті й не зірки (якщо про артиста вже знаємо, скільки в нього слухачів)
     const fresh = (u) => artistSince(u) >= ARTIST_GAP * 2 && dislikePenalty(u) < 1 && artistPasses(u, "") &&
       (settings.character === "popular" || (artistFame.get(u) || 0) < 3e6);
     // у пріоритеті — ще не почуті Й близькі до твого смаку
     const freshNear = (u) => fresh(u) && (P.taste.get(u) || 0) > 0;
-    const chosen = samplePreferring(pick, 6, (u) => freshNear(u) || (!P.taste.size && fresh(u)));
+    const chosen = samplePreferring(pick, REL_PICK, (u) => freshNear(u) || (!P.taste.size && fresh(u)));
     // другий крок за графом схожих — лише всередині околиці твого смаку (вшир, але не в чужі сцени)
     if (chosen.length) {
       const hop = await relatedArtists(chosen[(Math.random() * chosen.length) | 0]);
       let hop2 = hop.filter((u) => !counts.has(u) && !S.recentSet.has(u) && !isArtistBanned(u));
-      if (settings.character === "unfamiliar") hop2 = hop2.filter((u) => !P.familiarIds.has(idOf(u)));
-      if (P.taste.size) hop2 = hop2.filter((u) => (P.taste.get(u) || 0) > 0);
-      chosen.push(...sampleArr(hop2.filter(fresh), 3));
+      if (settings.character === "unfamiliar") hop2 = hop2.filter((u) => !notForDiscover(u));
+      // «Незнайоме» — на крок далі: другий крок і за межами околиці смаку (зв'язок із поточним прослуховуванням — graphScore 1)
+      if (settings.character === "unfamiliar" && !activeTags().length && !settings.language) {
+        const far = sampleArr(hop2.filter(fresh), 3);
+        far.forEach((u) => graphScore.set(u, Math.max(graphScore.get(u) || 0, 1)));
+        chosen.push(...far);
+      } else {
+        if (P.taste.size) hop2 = hop2.filter((u) => (P.taste.get(u) || 0) > 0);
+        chosen.push(...sampleArr(hop2.filter(fresh), 3));
+      }
     }
     const lists = await Promise.all(chosen.map((u) => artistTracksSample(u, 2)));
     lists.forEach((list) => list.forEach((t) => { if (addCand(t, "rel", null, 0)) stats.rel++; }));
+  }
+  // ---------------- Жанр від твоїх улюблених ----------------
+  // Улюблені артисти, що підходять під мову й хоч трохи стосуються жанру (самі в колі жанру або хтось із їхніх схожих),
+  // — затравка. Від них беремо схожих, а від частини схожих — ще схожих. Точність трохи нижча, зате все росте з твого смаку,
+  // а не з редакторських плейлистів жанру (там мейнстрим).
+  async function genreFavorites(pool) {
+    const memo = S.genreFavs || (S.genreFavs = new Map());
+    if (memo.has(pool.key)) return memo.get(pool.key);
+    const favs = topArtistsNow().slice(0, 30).filter((a) => a.uri && !isArtistBanned(a.uri) &&
+      !(settings.language === "ru" && !artistIsRu(a.uri, a.name)) && !(settings.language === "foreign" && artistIsRu(a.uri, a.name)));
+    const rels = await Promise.all(favs.map((a) => relatedArtists(a.uri)));
+    const out = favs.filter((a, i) => pool.ids.has(idOf(a.uri)) || rels[i].filter((r) => pool.ids.has(idOf(r))).length >= 1);
+    memo.set(pool.key, out);
+    return out;
+  }
+  // Дерево від улюблених: улюблений → схожі → схожі на схожих… У жанрі — 2 кроки (тримаємо жанр), у «Незнайомому» — 4
+  // (deep: 5): далі від улюблених — більше нових імен, точність трохи нижча, зате розмаїття. Знайомих і тих, хто вже
+  // приївся, у «Незнайомому» не беремо на жодному кроці.
+  async function tasteWalkSelector(stats, deep) {
+    if (waveSource) return;
+    const pool = hardPools().find((p) => p.key.startsWith("genre:"));
+    const discover = settings.character === "unfamiliar";
+    if (!pool && !discover) return;
+    const langFit = (a) => !(settings.language === "ru" && !artistIsRu(a.uri, a.name)) && !(settings.language === "foreign" && artistIsRu(a.uri, a.name));
+    const favs = pool ? await genreFavorites(pool) : topArtistsNow().slice(0, 30).filter((a) => a.uri && !isArtistBanned(a.uri) && langFit(a));
+    if (!favs.length) return;
+    const okArtist = (u) => u && !isArtistBanned(u) && !S.recentSet.has(u) && !(settings.blockAI && isAIArtist(u)) &&
+      !(settings.language === "foreign" && artistIsRu(u, "")) && !(discover && notForDiscover(u));
+    // вузький режим («Незнайоме» + жанр / мова / настрій) — нових мало, тож одразу глибше
+    const narrowDiscover = discover && (activeTags().length || settings.language);
+    const hops = discover ? (deep || narrowDiscover ? 5 : 4) : 2;
+    const seen = new Set(favs.map((a) => a.uri));
+    const levels = [];
+    // Корені дерева — не лише давні улюблені, а й те, що зайшло в самій хвилі: дослухане й лайкнуте в цій сесії
+    // та свіжі лайки з хвилі. Знайшла хвиля нового артиста, який сподобався, — наступні гілки ростуть уже від нього.
+    const liked = [];
+    for (let i = S.history.length - 1; i >= 0 && liked.length < 3; i--) {
+      const h = S.history[i];
+      if ((h.outcome === "finished" || h.outcome === "like") && h.artistUri && !liked.includes(h.artistUri) && !isArtistBanned(h.artistUri)) liked.push(h.artistUri);
+    }
+    for (const l of recentLikes(30)) if (liked.length < 4 && l.artistUri && !liked.includes(l.artistUri) && !isArtistBanned(l.artistUri)) liked.push(l.artistUri);
+    const fromWave = sampleArr(liked, 2);
+    let front = [...fromWave, ...weightedSample(favs.filter((a) => !fromWave.includes(a.uri)), 4 - fromWave.length, (a) => a.weight || 1).map((a) => a.uri)];
+    front.forEach((u) => seen.add(u));
+    for (let h = 0; h < hops && front.length; h++) {
+      const rels = await Promise.all(front.map(relatedArtists));
+      const next = [...new Set(rels.flatMap((rel) => sampleArr(rel.filter((u) => okArtist(u) && !seen.has(u)), h ? 3 : 5)))];
+      next.forEach((u) => seen.add(u));
+      levels.push(next);
+      front = sampleArr(next, 3); // далі йдемо лише від частини — дерево вшир не розростається
+    }
+    // треки: у «Незнайомому» більше з глибших рівнів (там нові імена), у жанрі — з ближчих (там жанр певніший)
+    const arts = [];
+    levels.forEach((lv, h) => arts.push(...sampleArr(lv, discover ? 2 + h : (h ? 4 : 8)).map((u) => [u, h])));
+    const lists = await Promise.all(arts.slice(0, 12).map(([u]) => artistTracksSample(u, 2)));
+    lists.forEach((list, i) => list.forEach((t) => {
+      // мова: для «Русский» беремо лише тих, про кого вже знаємо, що вони російськомовні (або дізнаємося з їхніх топ-треків)
+      if (settings.language === "ru" && !isRuTrack(t) && !artistIsRu(t.artistUri, t.artistName)) return;
+      const isNew = addCand(t, "walk", null, 0.3);
+      const c = S.pool.get(t.uri);
+      // від твого улюбленого артиста жанру за 1–2 кроки — рахуємо жанром; глибше жанр має довести сам
+      if (c && pool && arts[i][1] < 2) (c.genreChain || (c.genreChain = new Set())).add(pool.key);
+      if (isNew) stats.walk = (stats.walk || 0) + 1;
+    }));
+  }
+  // ---------------- Радіо Spotify ----------------
+  // Spotify сам будує «радіо» від будь-якого артиста чи треку (те, що відкривається через «Перейти до радіо»):
+  // ~50 треків під тебе, серед них багато нових імен поруч. Адресу радіо дає внутрішній запит seed_to_playlist.
+  // Тримаємо 12 год у пам'яті сесії; не вийшло — просто без радіо.
+  const radioCache = new Map();
+  function radioTracks(seedUri) {
+    const hit = radioCache.get(seedUri);
+    if (hit && Date.now() - hit.at < MIX_TTL) return hit.p;
+    const p = (async () => {
+      try {
+        const r = await net(() => Spicetify.CosmosAsync.get(`https://spclient.wg.spotify.com/inspiredby-mix/v2/seed_to_playlist/${seedUri}?response-format=json`), 1);
+        const pl = r?.mediaItems?.[0]?.uri;
+        return pl && pl.startsWith("spotify:playlist:") ? await playlistTracks(pl, 60) : [];
+      } catch (e) { logEvent("радио Spotify: ошибка", String(e)); return []; }
+    })();
+    radioCache.set(seedUri, { at: Date.now(), p });
+    return p;
+  }
+  // Радіо 2 артистів за раз: у жанрі — улюблених артистів жанру, інакше — улюблених і тих, хто зайшов у самій хвилі.
+  async function radioSelector(stats) {
+    if (waveSource) return;
+    const pool = hardPools().find((p) => p.key.startsWith("genre:"));
+    const langFit = (a) => !(settings.language === "ru" && !artistIsRu(a.uri, a.name)) && !(settings.language === "foreign" && artistIsRu(a.uri, a.name));
+    const favs = pool ? await genreFavorites(pool) : topArtistsNow().slice(0, 30).filter((a) => a.uri && !isArtistBanned(a.uri) && langFit(a));
+    const fromWave = [];
+    for (let i = S.history.length - 1; i >= 0 && fromWave.length < 3; i--) {
+      const h = S.history[i];
+      if ((h.outcome === "finished" || h.outcome === "like") && h.artistUri && !fromWave.includes(h.artistUri) && !isArtistBanned(h.artistUri)) fromWave.push(h.artistUri);
+    }
+    const seeds = [...sampleArr(fromWave, 1), ...weightedSample(favs, 2, (a) => a.weight || 1).map((a) => a.uri)].slice(0, 2);
+    const lists = await Promise.all(seeds.map(radioTracks));
+    lists.forEach((list) => sampleArr(list, 12).forEach((t) => {
+      const isNew = addCand(t, "radio", null, 0.3);
+      const c = S.pool.get(t.uri);
+      if (c && pool) (c.genreChain || (c.genreChain = new Set())).add(pool.key); // радіо улюбленого артиста жанру — жанр
+      if (isNew) stats.radio = (stats.radio || 0) + 1;
+    }));
+  }
+  // Лайк — радіо саме цієї пісні: хвиля йде в її звучання, а не лише до схожих артистів
+  function likeRadio(c) {
+    if (!c || !c.uri || waveSource) return;
+    radioTracks(c.uri).then((list) => {
+      let n = 0;
+      sampleArr(list, 15).forEach((t) => { if (t.uri !== c.uri && addCand(t, "likeRadio", c.uri, 0.6)) n++; });
+      if (n) { logEvent("Радио лайкнутой песни", { треков: n }); refreshPool(); }
+    }).catch(() => {});
+  }
+  // ---------------- Персональні добірки Spotify ----------------
+  // Discover Weekly, Release Radar і Daily Mix Spotify збирає саме під тебе: багато нових артистів, які влучають у смак.
+  // Свої знаходимо пошуком за назвою — у персональних особливі адреси (DW/RR — 37i9dQZEVX…, Daily Mix — 37i9dQZF1E…),
+  // чужі й редакторські з такою ж назвою відсіюються. Треки тримаємо 12 год; знайомі, повтори й дизлайки відсіє hardFilter.
+  const MIX_TTL = 12 * 3600000;
+  let mixCache = { at: 0, fresh: [], daily: [] };
+  async function loadSpotifyMixes() {
+    if (Date.now() - mixCache.at < MIX_TTL) return mixCache;
+    mixCache.at = Date.now();
+    const own = async (q, prefix, n) => (await searchPlaylistUris(q)).filter((u) => idOf(u).startsWith(prefix)).slice(0, n);
+    const [dw, rr, daily] = await Promise.all([own("Discover Weekly", "37i9dQZEVX", 1), own("Release Radar", "37i9dQZEVX", 1), own("Daily Mix", "37i9dQZF1E", 3)]);
+    const tracks = async (uris) => (await Promise.all(uris.map((u) => playlistTracks(u, 60)))).flat();
+    const [fresh, mixes] = await Promise.all([tracks([...new Set([...dw, ...rr])]), tracks(daily)]);
+    mixCache = { at: mixCache.at, fresh, daily: mixes };
+    logEvent("Добірки Spotify", { новинки: fresh.length, dailyMix: mixes.length });
+    return mixCache;
+  }
+  // нове (DW + RR) — у всіх режимах, крім «Улюбленого»; Daily Mix (здебільшого знайоме) — у «Улюбленому» і звичайній хвилі
+  async function mixSelector(stats) {
+    let m;
+    try { m = await loadSpotifyMixes(); } catch (e) { logEvent("добірки Spotify: помилка", String(e)); return; }
+    // recency 0.3: добірку Spotify уже підібрав під тебе — без штрафу «дрейфу» за межами околиці смаку
+    if (settings.character !== "favorite") sampleArr(m.fresh, 15).forEach((t) => { if (addCand(t, "mix", null, 0.3)) stats.mix++; });
+    if (!settings.character || settings.character === "favorite") sampleArr(m.daily, 10).forEach((t) => { if (addCand(t, "mix", null, 0.2)) stats.mix++; });
   }
   // 1–2 випадкові треки з топу артиста (а не всі його хіти поспіль)
   function artistTracksSample(uri, n) { return artistOverviewTracks(uri).then((list) => sampleArr(list, n)); }
@@ -1746,7 +1921,7 @@
   // quick — швидкий набір для старту: лише схоже на сіди, настрій і розмітка (без треків артистів)
   async function refreshPoolOnce(opts) {
     const quick = !!(opts && opts.quick);
-    const stats = { sim: 0, anchor: 0, fav: 0, rel: 0, tag: 0, liked: 0, mood: 0 };
+    const stats = { sim: 0, anchor: 0, fav: 0, rel: 0, tag: 0, liked: 0, mood: 0, mix: 0 };
     await Promise.all(oppositeKeys().map(loadTagPool)); // розмітка протилежного настрою — для відсікання
     const seeds = sessionSeeds();
     const pools = await Promise.all(activeTags().map(loadTagPool));
@@ -1797,10 +1972,21 @@
     }
     // 4) схожі артисти (вшир, два кроки за графом)
     jobs.push(relatedSelector(stats));
-    // 5) розмітка тегів: по одному треку на артиста + треки ще не почутих артистів розмітки
+    // 4б) жанр від твоїх улюблених: улюблені артисти жанру → схожі → схожі на схожих
+    jobs.push(tasteWalkSelector(stats).catch((e) => logEvent("жанр від улюблених: помилка", String(e))));
+    // 4в) радіо Spotify від улюблених артистів і тих, хто зайшов у хвилі
+    jobs.push(radioSelector(stats).catch((e) => logEvent("радио Spotify: ошибка", String(e))));
+    // 7) персональні добірки Spotify (Discover Weekly / Release Radar / Daily Mix) — лише у звичайній хвилі, не за джерелом
+    if (!waveSource) jobs.push(mixSelector(stats));
+    // 5) розмітка тегів: по одному треку на артиста + треки ще не почутих артистів розмітки.
+    // Навіть у жанрі тягнемося до смаку: що ближчий артист до твоїх улюблених, то частіше його трек у вибірці.
     pools.forEach((pool) => {
       const seenArt = new Set();
-      for (const t of samplePreferring(pool.tracks, 120, fits)) {
+      // у жанрі з редакторських плейлистів Spotify (там багато поп-репу) — спершу те, що поруч зі смаком
+      let fitting = pool.tracks.filter(fits);
+      const nearTaste = fitting.filter((t) => tasteOf(t) >= 0.5);
+      if (pool.key.startsWith("genre:") && nearTaste.length >= 15) fitting = nearTaste;
+      for (const t of weightedSample(fitting.length ? fitting : pool.tracks, 120, (x) => 0.3 + tasteOf(x))) {
         const a = t.artistUri || t.uri;
         if (seenArt.has(a)) continue;
         seenArt.add(a);
@@ -1808,9 +1994,17 @@
         if (seenArt.size >= 15) break;
       }
       const arts = pool.artists.filter((a) => !S.recentSet.has(a.uri) && artistPasses(a.uri, a.name));
-      samplePreferring(arts, 5, (a) => artistSince(a.uri) >= ARTIST_GAP * 2 && (a.core || !pool.key.startsWith("genre:"))).forEach((a) =>
+      const tasteA = (a) => (waveSource ? waveSource.taste : P.taste).get(a.uri) || 0;
+      const freshA = arts.filter((a) => artistSince(a.uri) >= ARTIST_GAP * 2 && (a.core || !pool.key.startsWith("genre:")));
+      weightedSample(freshA.length >= 5 ? freshA : arts, 5, (a) => 0.3 + Math.min(tasteA(a), 4)).forEach((a) =>
         jobs.push(artistTracksSample(a.uri, 2).then((list) =>
           list.forEach((t) => { if (addCand(t, "tag", null, 0)) stats.tag++; }))));
+      // артисти жанру, що вже поруч із твоїм смаком, — окремо й з невеликою перевагою («твій» реп, а не будь-який)
+      if (pool.key.startsWith("genre:") && settings.character !== "unfamiliar") {
+        const mine = arts.filter((a) => tasteA(a) > 0).sort((x, y) => tasteA(y) - tasteA(x)).slice(0, 12);
+        sampleArr(mine, 5).forEach((a) => jobs.push(artistTracksSample(a.uri, 2).then((list) =>
+          list.forEach((t) => { if (addCand(t, "tag", null, 0.2)) stats.tag++; }))));
+      }
     });
     // 6) «Улюблене»: самі улюблені треки, що підходять під налаштування
     if (settings.character === "favorite") {
@@ -1857,10 +2051,11 @@
         list.forEach((t) => { if (addCand(t, "walk", u, 0.5)) added++; }))));
       sampleArr([...new Set(passing.map((c) => c.artistUri).filter(Boolean))], 3).forEach((a) => jobs2.push(
         relatedArtists(a).then((rel) => {
-          const ok = rel.filter((r) => settings.character !== "unfamiliar" || !P.familiarIds.has(idOf(r)));
+          const ok = rel.filter((r) => settings.character !== "unfamiliar" || !notForDiscover(r));
           return Promise.all(sampleArr(ok, 2).map((u) => artistTracksSample(u, 2)));
         }).then((lists) => lists.flat().forEach((t) => { if (addCand(t, "walk", null, 0.3)) added++; }))));
       activePools().forEach((p) => sampleArr(p.tracks, 150).forEach((t) => { if (addCand(t, "tag", null, 0)) added++; }));
+      if (settings.character === "unfamiliar") jobs2.push(tasteWalkSelector(stats, true).catch(() => {})); // «Незнайоме»: ще глибше по дереву
       await Promise.all(jobs2);
       stats.расширение = added;
       logEvent("Мало подходящих (" + passing.length + ") — расширил", added);
@@ -1872,6 +2067,7 @@
   // Аварійний добір, коли кандидатів бракує: топ-артисти, рекомендації від лайків, уся розмітка
   async function emergencyFill() {
     const jobs = [];
+    if (settings.character === "unfamiliar") jobs.push(tasteWalkSelector({}, true).catch(() => {})); // нове — з глибини дерева, а не знайомі
     samplePreferring(topArtistsNow(), 6, (a) => artistPasses(a.uri, a.name)).forEach((a) =>
       jobs.push(artistOverviewTracks(a.uri).then((l) => l.forEach((t) => addCand(t, "fav", null, 0)))));
     sampleArr(P.likedItems, 6).forEach((t) =>
@@ -1884,7 +2080,11 @@
 
   // Пул на диск (~200 найкращих кандидатів) — наступний запуск почне грати одразу, не чекаючи мережі
   function saveLastPool() {
-    const items = [...S.pool.values()].sort((a, b) => (b.recency + b.sources.size * 0.3) - (a.recency + a.sources.size * 0.3))
+    // спершу ті, хто ще не звучав і пройде фільтри поточного режиму: інакше швидкий старт (особливо в «Незнайомому»)
+    // не знаходить жодного кандидата й чекає повного набору
+    const usable = (c) => { try { return !S.played.has(c.uri) && hardFilter(c, { cooldown: true, artistGap: true }); } catch { return false; } };
+    const all = [...S.pool.values()].sort((a, b) => (b.recency + b.sources.size * 0.3) - (a.recency + a.sources.size * 0.3));
+    const items = [...all.filter(usable), ...all.filter((c) => !usable(c))]
       .slice(0, 200).map((c) => [idOf(c.uri), c.name || "", (artistsOf(c)).map(idOf).join(","), c.artistName || "",
         c.explicit ? 1 : 0, c.playcount || 0, c.listeners || 0]);
     lsSet(K.lastPool, JSON.stringify({ t: Date.now(), items }));
@@ -1921,8 +2121,10 @@
     if (settings.character === "favorite") {
       if (!relax.character && !fam && !P.likedTracks.has(c.uri)) return false;
     } else if (!relax.liked && P.likedTracks.has(c.uri)) return false; // лайкнуте не крутимо (крім «Улюбленого»)
-    // «Незнайоме»: те, що хвиля тобі вже грала, — теж «почуте»
-    if (settings.character === "unfamiliar" && !relax.character && (fam || P.heard.has(c.uri) || histOf(c))) return false;
+    // «Незнайоме»: те, що хвиля тобі вже грала, — теж «почуте», як і артист, що прозвучав уже 3+ рази; знайомих перевіряємо
+    // за всіма артистами треку (bbno$ на фіті — теж знайомий). Знайомих не пускаємо й на поступках — замість цього пул
+    // розширюється вглиб (tasteWalkSelector); лише останній щабель «тиші не буде» їх допускає.
+    if (settings.character === "unfamiliar" && !relax.liked && (fam || P.heard.has(c.uri) || histOf(c) || artistsOf(c).some(notForDiscover))) return false;
     if (!relax.cooldown && isRecentArtist(c)) return false; // артист (включно з фітами) — не частіше ніж раз на 25 треків
     // і між запусками: не раніше ніж через ARTIST_GAP пісень після нього (перша поступка — лише якщо інакше бракує)
     if (!relax.cooldown && !relax.artistGap && artistsOf(c).some((a) => artistSince(a) < ARTIST_GAP && !isSourceArtist(a))) return false;
@@ -2036,13 +2238,20 @@
     else if (settings.character === "unfamiliar") {
       // нове, але поруч із твоїм смаком: не йдемо в чужі сцени
       s += taste * 1.0 + near * 0.3;
-      if (!taste && c.recency < 0.3) s -= 1.0;             // ні до смаку, ні до поточного прослуховування — дрейф
+      if (!taste && !near && c.recency < 0.3) s -= 1.0;    // ні до смаку, ні до графа від поточного прослуховування — дрейф
     } else s += taste * (settings.character === "popular" ? 0.5 : 0.7) + near * 0.3;
     if (!settings.character) { // звичайна хвиля: баланс знайомого й нового
       const famRecent = S.picksFamiliar.slice(-5).filter(Boolean).length;
       if (fam) s += famRecent >= 2 ? -2 : 0.6;
     }
-    for (const p of hardPools()) if (p.key.startsWith("genre:")) s += [0, 0.5, 1.0][genreLevel(p, c)]; // ближче до жанру — вище
+    const genrePools = hardPools().filter((p) => p.key.startsWith("genre:"));
+    for (const p of genrePools) s += [0, 0.4, 0.7][genreLevel(p, c)]; // ближче до жанру — вище
+    if (genrePools.length) {
+      s += taste * 0.8; // жанр — рамка, а в її межах — ближче до твого смаку
+      if (!taste && !near && !c.sources.has("walk")) s -= 1.0; // ні до смаку, ні від твоїх улюблених — мейнстрим жанру
+      // лише з редакторських плейлистів і не дуже близьке до смаку — найчастіше мейнстрим жанру: основа — дерево від улюблених
+      if (c.sources.size === 1 && c.sources.has("tag") && taste < 1.5) s -= 0.8;
+    }
     // Настрій/заняття — за ТРЕКОМ: сам із розмітки — значно вище («грустный рэп» — ще вище),
     // схожий на трек звідти — вище, просто артист звідти — трішки; артист із протилежного — нижче.
     for (const k of moodKeysSel()) {
@@ -2218,6 +2427,7 @@
     rememberLike(c); forgiveSkips(a, true); forgiveDislikes(a);
     P.heard.add(c.uri); if (a) P.familiarIds.add(idOf(a));
     learnTasteFromLike(a).catch(() => {}); // лайк розширює смак: цей артист і його схожі ближчі
+    likeRadio(c); // і радіо саме цієї пісні — у кандидати
   }
   // Лайк під час треку — хвиля змінюється одразу, як у Яндексі: схоже на лайкнутий — у кандидати,
   // наступні треки перезбираються від нього (поточний продовжує грати з тієї самої секунди).
@@ -2256,7 +2466,11 @@
       if (c.seed) S.seedPenalty.set(c.seed, (S.seedPenalty.get(c.seed) || 0) + w);
       bumpAffinity(a, -0.1 * w);
       noteSkip(a);
-      if (prog < 30000) noteQuickSkip(c); // скіпнув одразу — цей трек тиждень не ставимо
+      if (prog < 30000) { // скіпнув одразу — цей трек тиждень не ставимо
+        noteQuickSkip(c);
+        // і рахуємо його за пів пісні: інакше від частих скіпів «скільки пісень минуло» біжить швидше й артисти повертаються раніше
+        playNo = Math.max(0, playNo - 0.5); saveLater("trackHist", saveTrackHist);
+      }
       await penalizeDirection(c, w);
     } else if (outcome === "like") applyLike(c);
     else if (outcome === "dislike") {
@@ -2341,6 +2555,17 @@
   // попереду завжди рівно один наш. Скіп/лайк/дизлайк враховуються у виборі цього наступного треку.
   // Попередній список Spotify (зі старту) — запас на випадок, якщо перемкнув швидше, ніж трек устиг стати в чергу.
   const RESERVE_SIZE = 5; // невеликий — його видно в «Next up» у Spotify
+  // У жанровій хвилі старт і запасний список — лише те, що поруч зі смаком або прийшло від твоїх улюблених:
+  // запас грає на швидких «далі», і саме там найчастіше вилазив мейнстрим жанру.
+  function genreSafe(c) {
+    const gp = hardPools().filter((p) => p.key.startsWith("genre:"));
+    if (!gp.length) return true;
+    return tasteOf(c) >= 0.5 || (graphScore.get(c.artistUri) || 0) > 0 || !!(c.sources && c.sources.has("walk"));
+  }
+  const both = (f, g) => (f && g ? (c) => f(c) && g(c) : f || g || null);
+  // запас — до передостаннього щабля поступок (усе, крім «тиші не буде»): короткий запас у вузькому «Незнайомому»
+  // доводилося поповнювати посеред треку, а це мікропауза
+  const RESERVE_TIER = () => RELAX_TIERS.length - 2;
   // чи грає Spotify поточний трек хвилі (а не гортаєш історію «назад»)
   const atFrontier = () => !!S.ctx[S.head] && Spicetify.Player.data?.item?.uri === S.ctx[S.head].uri;
   // один підбір за раз; трек змінився посеред підбору — підбираємо знову вже для нового
@@ -2392,8 +2617,8 @@
     // перезапуск списку тоді зливається зі зміною пісні. Буває рідко.
     if (nextUp >= 0 && nextUp < 2 && (Spicetify.Player.getProgress?.() || 0) < 2500) {
       const ex = new Set([...reserve, ...picks.map((c) => c.uri)]);
-      const spare = pickNext(RESERVE_SIZE, ex, new Set([head, ...picks].flatMap(artistsOf)), 3,
-        settings.language === "instrumental" ? (c) => lyricsKnown.get(c.uri) === false && instrumentalOk(c, true) : null);
+      const spare = pickNext(RESERVE_SIZE, ex, new Set([head, ...picks].flatMap(artistsOf)), RESERVE_TIER(),
+        both(settings.language === "instrumental" ? (c) => lyricsKnown.get(c.uri) === false && instrumentalOk(c, true) : null, genreSafe));
       const t3 = S.ctx.slice(Math.max(0, S.head - 30), S.head);
       S.ctx = [...t3, head, ...picks, ...spare]; S.head = t3.length;
       S.lastPicks = picks.map(explainPick);
@@ -2488,6 +2713,14 @@
         if (exact.length >= 3) base = exact;
         const inLang = base.filter(langOk);
         if (inLang.length >= 3) base = inLang;
+        // спершу — твої найбільш слухані треки від улюблених артистів цього жанру: хвиля росте з твого смаку
+        const favIds = new Set((await genreFavorites(main)).map((a) => idOf(a.uri)));
+        const own = P.topTracks.filter((t) => t.artistUri && favIds.has(idOf(t.artistUri)) && langOk(t));
+        if (own.length >= 3) {
+          const pickedOwn = sampleArr(own, 5);
+          pickedOwn.forEach((t) => noteRecent(artistsOf(t)));
+          return pickedOwn.map((t) => t.uri);
+        }
         const mine = base.filter((t) => isFamiliar(t)); // за можливості — з твого «всесвіту»
         const picked = sampleArr(mine.length >= 3 && !shake ? mine : base, 5);
         picked.forEach((t) => noteRecent(artistsOf(t))); // самі сіди не граємо — і їхніх артистів одразу не повторюємо
@@ -2532,16 +2765,22 @@
       // етапи: швидкий набір → повний → аварійний; на кожному — звірка «Без слів»
       let picks = [], fast = true;
       const ALL = RELAX_TIERS.length - 1;
+      // дерево від улюблених (жанр / «Незнайоме») — одразу паралельно: здебільшого воно з кешу артистів і швидке,
+      // а без нього швидкий набір у цих режимах часто порожній і старт чекав повного набору
+      const warm = tasteWalkSelector({}).catch(() => {});
       const stages = [
         // швидкий набір: можна поступитися лише «характером» (знайомі в «Незнайомому»), жанром/настроєм/мовою — ні
         async () => { await refreshPoolOnce({ quick: true }); return 4; },
+        // швидкому набору не вистачило — до 1,5 с чекаємо дерево від улюблених (воно вже рахується), а не повний набір
+        async () => { await Promise.race([warm, new Promise((r) => setTimeout(r, 1500))]); return 4; },
         async () => { fast = false; await refreshPool(); return ALL; },
         async () => { await emergencyFill(); return ALL; },
       ];
       for (const stage of stages) {
         const maxTier = await stage();
         const taken = new Set(picks.map((c) => c.uri)), avoid = new Set(picks.flatMap(artistsOf));
-        const more = pickNext(3 - picks.length, taken, avoid, maxTier);
+        // швидкий набір у жанрі — лише «безпечне» (поруч зі смаком); не вистачило — чекаємо повний набір, а не граємо мейнстрим
+        const more = pickNext(3 - picks.length, taken, avoid, maxTier, fast ? genreSafe : null);
         picks = picks.concat(await verifyInstrumental(more, 3 - picks.length, taken, avoid));
         if (picks.length >= (fast ? 2 : 3)) break;
       }
@@ -2552,8 +2791,8 @@
       }
       // запас: стартовий список Spotify — підстраховка, якщо перемикаєш швидше, ніж наступний трек стає в чергу
       // (на подвійному натисканні «далі»). Список віддається один раз на старті — запас нічого не коштує
-      const spare = pickNext(RESERVE_SIZE, new Set(picks.map((c) => c.uri)), new Set(picks.flatMap(artistsOf)), 3,
-        settings.language === "instrumental" ? (c) => lyricsKnown.get(c.uri) === false && instrumentalOk(c, true) : null);
+      const spare = pickNext(RESERVE_SIZE, new Set(picks.map((c) => c.uri)), new Set(picks.flatMap(artistsOf)), RESERVE_TIER(),
+        both(settings.language === "instrumental" ? (c) => lyricsKnown.get(c.uri) === false && instrumentalOk(c, true) : null, genreSafe));
       S.ctx = [...picks, ...spare]; S.head = 0; S.headGen = (S.headGen || 0) + 1;
       S.lastPicks = picks.map(explainPick);
       // чужі треки в черзі Spotify грають раніше за контекст — прибираємо
@@ -2739,8 +2978,12 @@
   }
   function findShuffle() {
     const bar = playBar() || document;
+    const back = bar.querySelector('[data-testid="control-button-skip-back"]');
     return bar.querySelector('[data-testid="control-button-shuffle"]') ||
-      [...bar.querySelectorAll("button")].find((b) => /shuffl|перемеш/i.test(b.getAttribute("aria-label") || "")) || null;
+      // підпис залежить від мови Spotify: «Shuffle», «Перемешать», «Включить случайный порядок»…
+      [...bar.querySelectorAll("button")].find((b) => /shuffl|перемеш|случайн|випадков|aleator|zufall|zufäll|mélang|melang/i.test(b.getAttribute("aria-label") || "")) ||
+      // підписів не впізнали — перемішування стоїть першим у тому ж блоці, що й «Назад»
+      (back && back.parentElement && [...back.parentElement.children].find((b) => b.tagName === "BUTTON" && b !== back && !String(b.id).startsWith("volna-"))) || null;
   }
   // Лише нижня панель плеєра: на сторінці (артист, плейлист) і в правій панелі теж є кнопки «Add to…»,
   // раніше дизлайк іноді з'їжджав туди. Назву блоку Spotify змінює (now-playing-widget → -v2) — шукаємо за початком.
@@ -2755,9 +2998,12 @@
   }
   function ensureWaveBtn() {
     const cur = document.getElementById("volna-wave-btn"), bar = playBar();
-    if (cur && (!bar || bar.contains(cur))) return true;
-    if (cur) cur.remove();
     const shuffle = findShuffle();
+    // уже стоїть перед «Перемішати» (або його не знайшли, а запасна кнопка на місці) — нічого не робимо
+    if (cur && (!bar || bar.contains(cur)) && (!shuffle || cur.nextElementSibling === shuffle)) return true;
+    // запасна кнопка праворуч стала зайвою — місце біля «Перемішати» знайшлося
+    if (fallbackBtn) { try { fallbackBtn.deregister(); } catch {} fallbackBtn = null; }
+    if (cur && cur.isConnected) cur.remove();
     if (!shuffle || !shuffle.parentNode) return false;
     shuffle.parentNode.insertBefore(makeCtrlBtn("volna-wave-btn", WAVE_SVG, "Drift for Spotify", (e) => togglePanel(e.currentTarget)), shuffle);
     updateButton();
@@ -2819,13 +3065,13 @@
     }, 1000);
   }
   function injectButtons() { try { ensureWaveBtn(); ensureDislikeBtn(); ensureNpvDislikeBtn(); } catch (e) { logEvent("кнопки: ошибка", String(e)); } }
-  let fallbackTried = false;
+  let fallbackTried = false, fallbackBtn = null;
   function addPlaybarFallback() {
     if (fallbackTried) return; fallbackTried = true;
     try {
       if (!document.getElementById("volna-wave-btn") && Spicetify.Playbar && Spicetify.Playbar.Button) {
         const wb = new Spicetify.Playbar.Button("Drift for Spotify", WAVE_SVG, () => togglePanel(wb.element), false, false);
-        wb.element.id = "volna-wave-btn"; wb.element.classList.add("volna-ctrl-btn");
+        wb.element.id = "volna-wave-btn"; wb.element.classList.add("volna-ctrl-btn"); fallbackBtn = wb;
         updateButton();
       }
     } catch (e) { logEvent("запасная кнопка: ошибка", String(e)); }
